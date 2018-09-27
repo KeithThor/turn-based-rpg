@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7B6E2045-05BC-49CE-B9B9-15CBF56855A3}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>TurnBasedRPG</RootNamespace>
+    <AssemblyName>TurnBasedRPG</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Core\Controllers\CombatController.cs" />
+    <Compile Include="Core\EventArgs\EndOfTurnEventArgs.cs" />
+    <Compile Include="Core\Game.cs" />
+    <Compile Include="Core\GameUIController.cs" />
+    <Compile Include="Core\Interfaces\IAction.cs" />
+    <Compile Include="Core\Interfaces\ICategorizable.cs" />
+    <Compile Include="Core\Interfaces\IDisplayable.cs" />
+    <Compile Include="Core\Interfaces\IDisplayCharacter.cs" />
+    <Compile Include="Core\UI\ActionPanelUI.cs" />
+    <Compile Include="Core\UI\CombatFormationUI.cs" />
+    <Compile Include="Core\UI\CombatUI.cs" />
+    <Compile Include="Core\UI\Enums\Actions.cs" />
+    <Compile Include="Core\UI\SubActionPanelUI.cs" />
+    <Compile Include="Core\UI\TargetUI.cs" />
+    <Compile Include="Core\UI\TurnOrderUI.cs" />
+    <Compile Include="Entities\ActionBase.cs" />
+    <Compile Include="Entities\Skill.cs" />
+    <Compile Include="Entities\Character.cs" />
+    <Compile Include="Entities\Spell.cs" />
+    <Compile Include="Entities\StatusEffect.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
