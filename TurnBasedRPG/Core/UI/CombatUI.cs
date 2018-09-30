@@ -136,6 +136,7 @@ namespace TurnBasedRPG.Core.UI
         private ActionPanelUI _actionPanel;
         private SubActionPanelUI _subActionPanel;
         private TurnOrderUI _turnOrder;
+        private InformationPanelUI _informationPanel;
 
         public CombatUI(CombatController combatInstance)
         {
@@ -152,6 +153,7 @@ namespace TurnBasedRPG.Core.UI
             _turnOrder = new TurnOrderUI();
             _actionPanel = new ActionPanelUI();
             _subActionPanel = new SubActionPanelUI();
+            _informationPanel = new InformationPanelUI();
         }
 
         private void EndOfTurnTriggered(object sender, EndOfTurnEventArgs args)
@@ -177,7 +179,7 @@ namespace TurnBasedRPG.Core.UI
             Console.Clear();
             PrintTargetAndTurnOrder();
             PrintCombatFormations();
-            PrintActionPanels();
+            PrintUserPanels();
         }
 
         // Handles actions selected by the player
@@ -581,10 +583,10 @@ namespace TurnBasedRPG.Core.UI
         }
 
         // Renders the action and sub action panels, then prints them out
-        private void PrintActionPanels()
+        private void PrintUserPanels()
         {
             var actionPanel = _actionPanel.Render(FocusNumber);
-
+            var informationPanel = StartRenderInformationPanel();
             List<string> offsetModifiedList;
             int offsetModifiedFocus = 0;
             if (IsInSubPanel)
