@@ -9,13 +9,37 @@ namespace TurnBasedRPG.Core.UI
 {
     public class ActionPanelUI
     {
-        private const int _maxNumOfActions = 6;
-        private const int _maxItemsInSubPanel = 12;
-        private const int _maxSizeOfActionPanel = 18;
-        private const int _maxActionNameLength = 12;
+        private int _maxNumOfActions = 7;
+        private int _maxWidth = 18;
+        public int MaxWidth
+        {
+            get { return _maxWidth; }
+            set { _maxWidth = value; }
+        }
+        private int _maxHeight = 16;
+        public int MaxHeight
+        {
+            get { return _maxHeight; }
+            set
+            {
+                _maxHeight = value;
+                _maxNumOfActions = value - 2 / 2;
+            }
+        }
+        private int _maxActionNameLength = 12;
+        public int MaxActionNameLength
+        {
+            get { return _maxActionNameLength; }
+            set
+            {
+                _maxActionNameLength = value;
+                if (MaxWidth < value + 6) MaxWidth += 6;
+            }
+        }
+
 
         // Renders the action panel with the names of the actions as well as a focus triangle if an action is focused by the player
-        public List<string> Render(int focusNumber)
+        public IReadOnlyList<string> Render(int focusNumber)
         {
             return RenderActionPanel(focusNumber);
         }
@@ -25,7 +49,7 @@ namespace TurnBasedRPG.Core.UI
             var actionPanel = new List<string>();
             string actionName = "";
             
-            actionPanel.Add("╔" + new string('═', _maxSizeOfActionPanel - 2));
+            actionPanel.Add("╔" + new string('═', MaxWidth - 2));
             for(int i = 1; i <= _maxNumOfActions; i++)
             {
                 string focus = focusNumber == i ? "► " : "  ";
@@ -44,6 +68,9 @@ namespace TurnBasedRPG.Core.UI
                     case Actions.Items:
                         actionName = "Items";
                         break;
+                    case Actions.Status:
+                        actionName = "Status";
+                        break;
                     case Actions.Pass:
                         actionName = "Pass";
                         break;
@@ -56,9 +83,9 @@ namespace TurnBasedRPG.Core.UI
                 }
                 int spaces = _maxActionNameLength - actionName.Length;
                 actionPanel.Add("║ " + focus + actionName + new string(' ', spaces) + "│");
-                actionPanel.Add("║ " + new string(' ', _maxSizeOfActionPanel - 4) + "│");
+                actionPanel.Add("║ " + new string(' ', MaxWidth - 4) + "│");
             }
-            actionPanel.Add("╚" + new string('═', _maxSizeOfActionPanel - 2));
+            actionPanel.Add("╚" + new string('═', MaxWidth - 2));
             return actionPanel;
         }
     }

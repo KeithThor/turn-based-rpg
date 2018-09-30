@@ -13,16 +13,16 @@ namespace TurnBasedRPG.Core.UI
         private const int _paddingLeft = 12;
         private const int _paddingMiddle = 18;
         private const int _numberInRow = 3;
-        private List<IDisplayCharacter> _characters;
+        private IReadOnlyList<IDisplayCharacter> _characters;
         public bool IsInFormationPanel = false;
-        public List<int> TargetPositions;
+        public IReadOnlyList<int> TargetPositions;
         public CombatFormationUI()
         {
             TargetPositions = new List<int>();
             _characters = new List<IDisplayCharacter>();
         }
 
-        public List<string> Render(List<IDisplayCharacter> characters, int activeCharacterId)
+        public IReadOnlyList<string> Render(IReadOnlyList<IDisplayCharacter> characters, int activeCharacterId)
         {
             _characters = characters;
             var completeCombatFormations = new List<string>();
@@ -81,7 +81,7 @@ namespace TurnBasedRPG.Core.UI
         }
 
         // Render one row of formation boxes
-        private List<string> RenderFormations(List<IDisplayCharacter> charactersToRender, int activeCharacterId)
+        private List<string> RenderFormations(IReadOnlyList<IDisplayCharacter> charactersToRender, int activeCharacterId)
         {
             var rowOfFormationBoxes = new List<string>
             {
@@ -127,7 +127,7 @@ namespace TurnBasedRPG.Core.UI
         }
 
         // Render bottom part of formation boxes
-        private string RenderBottomPanel(List<IDisplayCharacter> charactersToRender, int activeCharacterID)
+        private string RenderBottomPanel(IReadOnlyList<IDisplayCharacter> charactersToRender, int activeCharacterID)
         {
             var bottomPanelSB = new StringBuilder();
             
@@ -155,7 +155,7 @@ namespace TurnBasedRPG.Core.UI
         }
 
         // Render healthbars under characters depending on their current health percentage
-        private string RenderHealthBars(List<IDisplayCharacter> charactersToRender)
+        private string RenderHealthBars(IReadOnlyList<IDisplayCharacter> charactersToRender)
         {
             var healthBarSB = new StringBuilder();
             
@@ -195,7 +195,7 @@ namespace TurnBasedRPG.Core.UI
         }
 
         // Render middle part of formation boxes along with the symbols for each character
-        private string RenderMiddlePanel(List<IDisplayCharacter> charactersToRender, int activeCharacterId)
+        private string RenderMiddlePanel(IReadOnlyList<IDisplayCharacter> charactersToRender, int activeCharacterId)
         {
             var middlePanelSB = new StringBuilder();
             for (int i = 0; i < 6; i++)
@@ -224,7 +224,7 @@ namespace TurnBasedRPG.Core.UI
         }
 
         // Render top part of formation boxes
-        private string RenderTopPanel(List<IDisplayCharacter> charactersToRender, int activeCharacterId)
+        private string RenderTopPanel(IReadOnlyList<IDisplayCharacter> charactersToRender, int activeCharacterId)
         {
             var topPanelSB = new StringBuilder();
             
@@ -252,7 +252,7 @@ namespace TurnBasedRPG.Core.UI
         }
         
         // Render the names of up to 6 characters on one line in the formation, 3 from player's side and 3 from enemy's side
-        private string RenderFormationNames(List<IDisplayCharacter> charactersToRender)
+        private string RenderFormationNames(IReadOnlyList<IDisplayCharacter> charactersToRender)
         {
             int maxNameLength = 14;
             int paddingLeft = 6;

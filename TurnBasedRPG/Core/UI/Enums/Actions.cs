@@ -12,6 +12,7 @@ namespace TurnBasedRPG.Core.UI.Enums
         Spells,
         Skills,
         Items,
+        Status,
         Pass,
         Run
     }

@@ -36,7 +36,7 @@ namespace TurnBasedRPG.Core.UI
         }
 
         // Renders the current target's details and health bar
-        public List<string> RenderTargetDetails(IDisplayCharacter target)
+        public IReadOnlyList<string> RenderTargetDetails(IDisplayCharacter target)
         {
             var targetDetails = new List<string>();
             // Calculate healthbar string

@@ -10,8 +10,5 @@ namespace TurnBasedRPG.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public List<int> TargetPositions { get; set; }
-        public bool CanSwitchTargetPosition { get; set; }
-        public bool CanTargetThroughUnits { get; set; }
     }
 }

@@ -13,11 +13,11 @@ namespace TurnBasedRPG.Core.Controllers
     public class CombatController
     {
         private List<Character> AllCharacters;
-        public List<Character> PlayerCharacters;
-        public List<Character> EnemyCharacters;
+        private List<Character> PlayerCharacters;
+        private List<Character> EnemyCharacters;
 
-        public List<Character> CurrentTurnOrder;
-        public List<Character> NextTurnOrder;
+        private List<Character> CurrentTurnOrder;
+        private List<Character> NextTurnOrder;
         public int TurnCounter = 1;
 
         public event EventHandler<EndOfTurnEventArgs> EndOfTurn;
@@ -78,7 +78,7 @@ namespace TurnBasedRPG.Core.Controllers
             return CurrentTurnOrder[0].Id;
         }
 
-        public List<Character> GetAllLivingCharacters()
+        private List<Character> GetAllLivingCharacters()
         {
             var livingCharacters = new List<Character>(PlayerCharacters);
             livingCharacters.AddRange(EnemyCharacters);
@@ -103,60 +103,43 @@ namespace TurnBasedRPG.Core.Controllers
         }
         
         // Returns a List of characters ordered by which characters perform first to last
-        public List<Character> DetermineTurnOrder()
+        private List<Character> DetermineTurnOrder()
         {
             var turnOrderList = GetAllLivingCharacters();
             turnOrderList.Sort((character1, character2) => character1.CurrentSpeed.CompareTo(character2.CurrentSpeed));
             return turnOrderList;
         }
 
-        public void StartAction(int actorId, string category, int actionId, List<int> actionTargetPositions)
+        // Performs an action
+        public void StartAction(string category, int actionId, Actions actionType, IReadOnlyList<int> actionTargetPositions)
         {
-            var targetCharacters = new List<Character>();
-            foreach (var position in actionTargetPositions)
-            {
-                for (int i = 0; i < AllCharacters.Count; i++)
-                {
-                    if (AllCharacters[i].Position == position)
-                        targetCharacters.Add(AllCharacters[i]);
-                }
-            }
-
-            foreach (var character in targetCharacters)
-            {
-                character.CurrentHealth -= 40;
-            }
-            EndTurn();
-        }
-
-        public List<ActionBase> GetActiveActionList(int activeCharacterId, Actions actionType, string category)
-        {
-            var activeCharacter = AllCharacters.Find(character => character.Id == activeCharacterId);
             switch(actionType)
             {
                 case Actions.Attack:
-                    return activeCharacter.GetAttackAction();
                 case Actions.Spells:
-                    return new List<ActionBase>(activeCharacter.SpellList.Where(spell => spell.Category == category));
                 case Actions.Skills:
-                    return new List<ActionBase>(activeCharacter.SkillList.Where(skill => skill.Category == category));
-                default:
-                    return new List<ActionBase>();
-            }
-        }
+                case Actions.Items:
+                    var targetCharacters = new List<Character>();
+                    foreach (var position in actionTargetPositions)
+                    {
+                        for (int i = 0; i < AllCharacters.Count; i++)
+                        {
+                            if (AllCharacters[i].Position == position)
+                                targetCharacters.Add(AllCharacters[i]);
+                        }
+                    }
 
-        public List<IDisplayable> GetDisplayableActionList(int activeCharacterId, Actions actionType, string category)
-        {
-            var activeCharacter = AllCharacters.Find(character => character.Id == activeCharacterId);
-            switch (actionType)
-            {
-                case Actions.Spells:
-                    return new List<IDisplayable>(activeCharacter.SpellList.Where(spell => spell.Category == category));
-                case Actions.Skills:
-                    return new List<IDisplayable>(activeCharacter.SkillList.Where(skill => skill.Category == category));
-                default:
-                    return new List<IDisplayable>();
+                    foreach (var character in targetCharacters)
+                    {
+                        character.CurrentHealth -= 40;
+                    }
+                    break;
+                case Actions.Pass:
+                    CurrentTurnOrder.Add(CurrentTurnOrder[0]);
+                    break;
             }
+            
+            EndTurn();
         }
 
         public bool IsPositionOccupied(int position, bool includeDeadCharacters = true)
@@ -172,12 +155,12 @@ namespace TurnBasedRPG.Core.Controllers
                 return true;
         }
 
-        public List<int> GetPlayerCharacterIds()
+        public IEnumerable<int> GetPlayerCharacterIds()
         {
-            return PlayerCharacters.Select(character => character.Id).ToList();
+            return PlayerCharacters.Select(character => character.Id);
         }
 
-        public IDisplayCharacter GetTargetDetailsFromPosition(int targetPosition)
+        public IDisplayCharacter GetDisplayCharacterFromPosition(int targetPosition)
         {
             var target = AllCharacters.Find(character => character.Position == targetPosition);
             if (target == null)
@@ -185,7 +168,7 @@ namespace TurnBasedRPG.Core.Controllers
             return target;
         }
 
-        public IDisplayCharacter GetTargetDetailsFromId(int targetId)
+        public IDisplayCharacter GetDisplayCharacterFromId(int targetId)
         {
             var target = AllCharacters.Find(character => character.Id == targetId);
             if (target == null)
@@ -193,7 +176,7 @@ namespace TurnBasedRPG.Core.Controllers
             return target;
         }
 
-        public List<IDisplayCharacter>[] GetTurnOrderDisplayCharacters()
+        public IReadOnlyList<IDisplayCharacter>[] GetTurnOrderAsDisplayCharacters()
         {
             var displayCharacters = new List<IDisplayCharacter>[2];
             displayCharacters[0] = new List<IDisplayCharacter>(CurrentTurnOrder);
@@ -201,16 +184,16 @@ namespace TurnBasedRPG.Core.Controllers
             return displayCharacters;
         }
 
-        public List<IDisplayCharacter> GetAllDisplayableCharacters()
+        public IReadOnlyList<IDisplayCharacter> GetAllDisplayableCharacters()
         {
             return new List<IDisplayCharacter>(AllCharacters);
         }
 
-        public List<string[]> GetCategories(int activeCharacterId, Actions categoryType)
+        public IReadOnlyList<string[]> GetCategories(Actions actionType)
         {
             var categories = new List<string[]>();
-            var activeCharacter = PlayerCharacters.FirstOrDefault(character => character.Id == activeCharacterId);
-            switch(categoryType)
+            var activeCharacter = CurrentTurnOrder[0];
+            switch(actionType)
             {
                 case Actions.Spells:
                     foreach (var spell in activeCharacter.SpellList)
@@ -230,6 +213,66 @@ namespace TurnBasedRPG.Core.Controllers
                     break;
             }
             return categories;
+        }
+
+        public IDisplayAction GetActionFromCategory(Actions actionType, string category, int index)
+        {
+            // Todo: finish returning IDisplayable for each action type that can return an IDisplayable
+            switch (actionType)
+            {
+                case Actions.Attack:
+                    return GetActionsFromCategory<Attack>(actionType, category).ElementAt(index);
+                case Actions.Spells:
+                    return GetActionsFromCategory<Spell>(actionType, category).ElementAt(index);
+                case Actions.Skills:
+                    return GetActionsFromCategory<Skill>(actionType, category).ElementAt(index);
+                default:
+                    return null;
+            }
+        }
+
+        public IReadOnlyList<IDisplayAction> GetActionListFromCategory(Actions actionType, string category)
+        {
+            switch (actionType)
+            {
+                case Actions.Attack:
+                    return new List<IDisplayAction>(GetActionsFromCategory<Attack>(actionType, category));
+                case Actions.Spells:
+                    return new List<IDisplayAction>(GetActionsFromCategory<Spell>(actionType, category));
+                case Actions.Skills:
+                    return new List<IDisplayAction>(GetActionsFromCategory<Skill>(actionType, category));
+                default:
+                    return new List<IDisplayAction>();
+            }
+        }
+
+        private List<T> GetActionsFromCategory<T>(Actions actionType, string category) where T : ActionBase
+        {
+            // Todo: Finish returning all actions that have a category
+            var actions = new List<T>();
+            switch (actionType)
+            {
+                case Actions.Attack:
+                    foreach (var attack in CurrentTurnOrder[0].Attacks)
+                    {
+                        actions.Add(attack as T);
+                    }
+                    return actions;
+                case Actions.Spells:
+                    foreach (var spell in CurrentTurnOrder[0].SpellList.Where(spell => spell.Category == category))
+                    {
+                        actions.Add(spell as T);
+                    }
+                    return actions;
+                case Actions.Skills:
+                    foreach (var skill in CurrentTurnOrder[0].SkillList.Where(skill => skill.Category == category))
+                    {
+                        actions.Add(skill as T);
+                    }
+                    return actions;
+                default:
+                    return actions;
+            }
         }
     }
 }

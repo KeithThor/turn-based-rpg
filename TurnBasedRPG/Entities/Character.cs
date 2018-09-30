@@ -100,13 +100,7 @@ namespace TurnBasedRPG.Entities
         // 7  8  9
         public int Position { get; set; }
 
-        public List<int> GetAttackPattern()
-        {
-            // todo: implement item checking to see which attack pattern this character has
-            return new List<int>() { 5 };
-        }
-        public bool CanTargetThroughUnits { get; set; } = false;
-        public bool CanSwitchTargetPosition { get; set; } = true;
+        public List<Attack> Attacks { get; set; }
 
         public bool IsAttackAffectedByFormation()
         {
@@ -124,21 +118,6 @@ namespace TurnBasedRPG.Entities
             SkillList = new List<Skill>();
             Buffs = new List<StatusEffect>();
             Debuffs = new List<StatusEffect>();
-        }
-
-        public List<ActionBase> GetAttackAction()
-        {
-            return new List<ActionBase>()
-            {
-                new ActionBase()
-                {
-                    Id = 1,
-                    Name = "Basic Attack",
-                    TargetPositions = new List<int>(){ 5 },
-                    CanSwitchTargetPosition = true,
-                    CanTargetThroughUnits = false
-                }
-            };
         }
 
         public int GetCurrenthealth() => CurrentHealth;

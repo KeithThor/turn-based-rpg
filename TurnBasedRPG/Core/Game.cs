@@ -57,184 +57,152 @@ namespace TurnBasedRPG.Core
                     CurrentHealth = 232,
                     SpellList = new List<Spell>()
                     {
-                        new Spell()
+                        new Spell(true, true)
                         {
                             Id = 1,
                             Name = "Frostbolt",
                             TargetPositions = new List<int>(){ 2, 4, 5, 6, 8 },
-                            CanSwitchTargetPosition = true,
-                            CanTargetThroughUnits = true,
                             Category = "Frost Spells",
-                            CategoryDescription = ""
+                            CategoryDescription = "Frost spells fall under the category of the Ice god. This message repeats on for 5 more times.Frost spells fall under the category of the Ice god. This message repeats on for 5 more times.Frost spells fall under the category of the Ice god. This message repeats on for 5 more times.Frost spells fall under the category of the Ice god. This message repeats on for 5 more times.Frost spells fall under the category of the Ice god. This message repeats on for 5 more times."
                         },
-                        new Spell()
+                        new Spell(true, true)
                         {
                             Id = 2,
                             Name = "Fireball",
                             TargetPositions = new List<int>(){ 1, 3, 7, 9 },
-                            CanSwitchTargetPosition = true,
-                            CanTargetThroughUnits = true,
                             Category = "Fire Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, true)
                         {
                             Id = 3,
                             Name = "Shadow Nova",
                             TargetPositions = new List<int>(){ 4, 5, 6 },
-                            CanSwitchTargetPosition = true,
-                            CanTargetThroughUnits = true,
                             Category = "Shadow Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, false)
                         {
                             Id = 4,
                             Name = "Lightning Bolt",
                             TargetPositions = new List<int>(){ 5, 10, 11, 12, 13, 14, 15, 16, 17, 18 },
-                            CanSwitchTargetPosition = false,
-                            CanTargetThroughUnits = true,
                             Category = "Lightning Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, true)
                         {
                             Id = 1,
                             Name = "Frostbolt",
                             TargetPositions = new List<int>(){ 2, 4, 5, 6, 8 },
-                            CanSwitchTargetPosition = true,
-                            CanTargetThroughUnits = true,
                             Category = "Frost Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, true)
                         {
                             Id = 2,
                             Name = "Fireball",
                             TargetPositions = new List<int>(){ 1, 3, 7, 9 },
-                            CanSwitchTargetPosition = true,
-                            CanTargetThroughUnits = true,
                             Category = "Fire Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, true)
                         {
                             Id = 3,
                             Name = "Shadow Nova",
                             TargetPositions = new List<int>(){ 4, 5, 6 },
-                            CanSwitchTargetPosition = true,
-                            CanTargetThroughUnits = true,
                             Category = "Shadow Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, false)
                         {
                             Id = 4,
                             Name = "Lightning Bolt",
                             TargetPositions = new List<int>(){ 5, 10, 11, 12, 13, 14, 15, 16, 17, 18 },
-                            CanSwitchTargetPosition = false,
-                            CanTargetThroughUnits = true,
                             Category = "Lightning Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, true)
                         {
                             Id = 1,
                             Name = "Boulder Lob",
                             TargetPositions = new List<int>(){ 2, 4, 5, 6, 8 },
-                            CanSwitchTargetPosition = true,
-                            CanTargetThroughUnits = true,
                             Category = "Earth Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, true)
                         {
                             Id = 2,
                             Name = "Shriek",
                             TargetPositions = new List<int>(){ 1, 3, 7, 9 },
-                            CanSwitchTargetPosition = true,
-                            CanTargetThroughUnits = true,
                             Category = "Shadow Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, true)
                         {
                             Id = 3,
                             Name = "Shadow Nova",
                             TargetPositions = new List<int>(){ 4, 5, 6 },
-                            CanSwitchTargetPosition = true,
-                            CanTargetThroughUnits = true,
                             Category = "Shadow Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, false)
                         {
                             Id = 4,
                             Name = "Lightning Bolt",
                             TargetPositions = new List<int>(){ 5, 10, 11, 12, 13, 14, 15, 16, 17, 18 },
-                            CanSwitchTargetPosition = false,
-                            CanTargetThroughUnits = true,
                             Category = "Lightning Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, true)
                         {
                             Id = 1,
                             Name = "Frostbolt",
                             TargetPositions = new List<int>(){ 2, 4, 5, 6, 8 },
-                            CanSwitchTargetPosition = true,
-                            CanTargetThroughUnits = true,
                             Category = "Frost Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, true)
                         {
                             Id = 2,
                             Name = "Lightning Slash",
                             TargetPositions = new List<int>(){ 1, 3, 7, 9 },
-                            CanSwitchTargetPosition = true,
-                            CanTargetThroughUnits = true,
                             Category = "Lightning Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, true)
                         {
                             Id = 3,
                             Name = "Death Nova",
                             TargetPositions = new List<int>(){ 4, 5, 6 },
-                            CanSwitchTargetPosition = true,
-                            CanTargetThroughUnits = true,
                             Category = "Shadow Spells",
                             CategoryDescription = ""
                         },
-                        new Spell()
+                        new Spell(true, false)
                         {
                             Id = 4,
                             Name = "Prisma Bolt",
                             TargetPositions = new List<int>(){ 5, 10, 11, 12, 13, 14, 15, 16, 17, 18 },
-                            CanSwitchTargetPosition = false,
-                            CanTargetThroughUnits = true,
                             Category = "Arcane Spells",
                             CategoryDescription = ""
                         }
                     },
                     SkillList = new List<Skill>()
                     {
-                        new Skill()
+                        new Skill(true, true)
                         {
                             Id = 1,
                             Name = "Roundhouse Kick",
                             Category = "Martial Arts",
                             CategoryDescription = ""
                         },
-                        new Skill()
+                        new Skill(true, true)
                         {
                             Id = 2,
                             Name = "Quick Stab",
                             Category = "Martial Arts",
                             CategoryDescription = ""
                         },
-                        new Skill()
+                        new Skill(true, true)
                         {
                             Id = 3,
                             Name = "Mark for Death",

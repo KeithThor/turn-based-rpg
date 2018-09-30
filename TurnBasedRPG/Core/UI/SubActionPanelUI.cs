@@ -26,13 +26,24 @@ namespace TurnBasedRPG.Core.UI
             }
         }
         public int MaxActionNameLength { get; set; } = 20;
-        public int MaxSubPanelItems { get; set; } = 12;
+        private int _maxHeight = 16;
+
+        public int MaxHeight
+        {
+            get { return _maxHeight; }
+            set { _maxHeight = value; }
+        }
+
+        public int MaxSubPanelItems
+        {
+            get { return _maxHeight - 2; }
+        }
         public int MaxActionsPerLine { get; set; } = 2;
 
         public SubActionPanelUI() { }
 
         // Renders a sub action panel along with sub action names
-        public List<string> Render(List<string> subActionNames, bool isSubPanelFocused, int focusNumber)
+        public IReadOnlyList<string> Render(IReadOnlyList<string> subActionNames, bool isSubPanelFocused, int focusNumber)
         {
             var subActionPanel = new List<string>();
             
@@ -44,7 +55,7 @@ namespace TurnBasedRPG.Core.UI
         }
 
         // Renders the max sub actions per line along with a focus triangle if an action is focused by the player
-        private List<string> RenderAllSubActions(List<string> subActionNames, bool isSubPanelFocused, int focusNumber)
+        private List<string> RenderAllSubActions(IReadOnlyList<string> subActionNames, bool isSubPanelFocused, int focusNumber)
         {
             var subActions = new List<string>();
             string subActionLine = "";
