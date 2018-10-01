@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7B6E2045-05BC-49CE-B9B9-15CBF56855A3}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>TurnBasedRPG</RootNamespace>
-    <AssemblyName>TurnBasedRPG</AssemblyName>
+    <ProjectGuid>{236F8F2A-2313-46A0-B8C0-A7FD63872AE1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>TurnBasedRPG.Shared</RootNamespace>
+    <AssemblyName>TurnBasedRPG.Shared</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -31,6 +31,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -42,30 +45,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\Game.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Enums\Actions.cs" />
+    <Compile Include="EventArgs\EndOfTurnEventArgs.cs" />
+    <Compile Include="Interfaces\ICategorizable.cs" />
+    <Compile Include="Interfaces\IDisplayAction.cs" />
+    <Compile Include="Interfaces\IDisplayCharacter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TurnBasedRPG.Controller\TurnBasedRPG.Controller.csproj">
-      <Project>{c2d22dcc-c372-486b-8093-e6159060e229}</Project>
-      <Name>TurnBasedRPG.Controller</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TurnBasedRPG.Model\TurnBasedRPG.Model.csproj">
-      <Project>{c37345f5-842f-470f-8be1-122881944e76}</Project>
-      <Name>TurnBasedRPG.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TurnBasedRPG.Shared\TurnBasedRPG.Shared.csproj">
-      <Project>{236f8f2a-2313-46a0-b8c0-a7fd63872ae1}</Project>
-      <Name>TurnBasedRPG.Shared</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TurnBasedRPG.UI\TurnBasedRPG.UI.csproj">
-      <Project>{7887180b-0237-4c1a-96e1-1901995f61c6}</Project>
-      <Name>TurnBasedRPG.UI</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
