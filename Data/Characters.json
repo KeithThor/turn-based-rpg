@@ -1,0 +1,42 @@
+[
+    {
+        "id": 1,
+        "name": "Syla",
+        "symbol": "S",
+        "bonusHealth": 25,
+        "stats": {
+            "strength": 20,
+            "speed": 24,
+            "stamina": 18,
+            "intellect": 25,
+            "agility": 30
+        },
+        "spellIdList": [3, 6, 7, 9, 11],
+        "itemIdList": [2]
+    },
+    {
+        "id": 2,
+        "name": "Marcus",
+        "symbol": "M",
+        "stats": {
+            "strength": 20,
+            "speed": 30,
+            "stamina": 18,
+            "intellect": 25,
+            "agility": 30
+        },
+        "spellIdList": [1, 2, 3, 4, 5, 6, 9]
+    },
+    {
+        "id": 3,
+        "name": "Skeleton",
+        "symbol": "K",
+        "stats": {
+            "strength": 30,
+            "speed": 10,
+            "stamina": 18,
+            "intellect": 25,
+            "agility": 30
+        }
+    }
+]

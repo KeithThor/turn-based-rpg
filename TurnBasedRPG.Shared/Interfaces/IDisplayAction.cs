@@ -10,8 +10,9 @@ namespace TurnBasedRPG.Shared.Interfaces
     {
         string GetDisplayName();
         string GetDescription();
-        List<int> GetActionTargets();
-        bool CanTargetThroughUnits();
-        bool CanSwitchTargetPosition();
+        IReadOnlyList<int> GetActionTargets();
+        int GetCenterOfTargetsPosition();
+        bool CanTargetThroughUnits { get; set; }
+        bool CanSwitchTargetPosition { get; set; }
     }
 }

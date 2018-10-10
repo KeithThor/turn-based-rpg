@@ -45,12 +45,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DamageTypes.cs" />
     <Compile Include="Enums\Actions.cs" />
+    <Compile Include="Enums\EquipmentSlot.cs" />
     <Compile Include="EventArgs\EndOfTurnEventArgs.cs" />
     <Compile Include="Interfaces\ICategorizable.cs" />
     <Compile Include="Interfaces\IDisplayAction.cs" />
     <Compile Include="Interfaces\IDisplayCharacter.cs" />
+    <Compile Include="PrimaryStat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StatDefinition.cs" />
+    <Compile Include="StringExtension.cs" />
+    <Compile Include="Viewmodel\SubActionData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

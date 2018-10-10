@@ -1,0 +1,143 @@
+[
+    {
+        "name": "Frostbolt",
+        "id": 1,
+        "description": "Hurls a bolt of ice at the target.",
+        "categoryId": 1,
+        "targetPositions": [2, 4, 5, 6, 8],
+        "damage": {"frost": 25},
+        "damageIntellectModifier": {"frost": 2},
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": true
+    },
+    {
+        "name": "Fireball",
+        "id": 2,
+        "description": "Hurls a large ball of fire that explodes at an area.",
+        "categoryId": 2,
+        "targetPositions": [1, 3, 7, 9],
+        "statusIds": [1],
+        "damage": {"fire": 45},
+        "damageIntellectModifier": {"fire": 2},
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": true
+    },
+    {
+        "name": "Shadow Nova",
+        "id": 3,
+        "description": "Erupts in dark power, causing a wave of darkness to ripple outwards.",
+        "categoryId": 3,
+        "targetPositions": [4, 5, 6],
+        "damage": {"shadow": 30},
+        "damageIntellectModifier": {"shadow": 2},
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": true
+    },
+    {
+        "name": "Lightning Bolt",
+        "id": 4,
+        "description": "Calls down a bolt of lightning from the sky, striking your target.",
+        "categoryId": 4,
+        "targetPositions": [5, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+        "damage": {"lightning": 45},
+        "damageIntellectModifier": {"lightning": 3},
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": false
+    },
+    {
+        "name": "Boulder Lob",
+        "id": 5,
+        "description": "Hurls a massive boulder at your enemies.",
+        "categoryId": 5,
+        "targetPositions": [1, 3, 7, 9],
+        "damage": {"physical": 45},
+        "damageIntellectModifier": {"physical": 2},
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": true
+    },
+    {
+        "name": "Shriek",
+        "id": 6,
+        "description": "Lets loose a deafening cry, striking terror into your enemies.",
+        "categoryId": 3,
+        "targetPositions": [1, 3, 7, 9],
+        "damage": {"shadow": 20},
+        "damageIntellectModifier": {"shadow": 1},
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": true
+    },
+    {
+        "name": "Death Nova",
+        "id": 7,
+        "description": "Radiates an aura of concentrated dark power.",
+        "categoryId": 3,
+        "targetPositions": [4, 5, 6],
+        "damage": { "shadow": 45 },
+        "damageIntellectModifier": { "shadow": 3 },
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": true
+    },
+    {
+        "name": "Prisma Bolt",
+        "id": 8,
+        "description": "Lobs a bolt of arcane energy.",
+        "categoryId": 6,
+        "targetPositions": [5, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+        "damage": {
+            "fire": 5,
+            "frost": 5,
+            "lightning": 5
+        },
+        "damageIntellectModifier": {
+            "fire": 1,
+            "frost": 1,
+            "lightning": 1
+        },
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": false
+    },
+    {
+        "name": "Disrupting Wave",
+        "id": 9,
+        "description": "Emits a wave of disrupting arcane power.",
+        "categoryId": 6,
+        "targetPositions": [1, 5, 9],
+        "centerOfTargetsPosition": 5,
+        "damage": {
+            "fire": 2,
+            "frost": 2,
+            "lightning": 2
+        },
+        "damageIntellectModifier": {
+            "fire": 1,
+            "frost": 1,
+            "lightning": 1
+        },
+        "canTargetThroughUnits": false,
+        "canSwitchTargetPosition": true
+    },
+    {
+        "name": "Potion",
+        "id": 10,
+        "description": "Heals a target.",
+        "categoryId": 7,
+        "targetPositions": [5],
+        "centerOfTargetsPosition": 5,
+        "healAmount": 50,
+        "canTargetThroughUnits": false,
+        "canSwitchTargetPosition": true
+    },
+    {
+        "name": "Meteor",
+        "id": 11,
+        "description": "Conjures a massive ball of fire to rain down from the sky.",
+        "categoryId": 2,
+        "targetPositions": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        "statusIds": [1],
+        "damage": {"fire": 100},
+        "damageIntellectModifier": {"fire": 4},
+        "delay": 1,
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": true
+    }
+]

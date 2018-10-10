@@ -1,0 +1,37 @@
+[
+    {
+        "id" : 1,
+        "name" : "Frost Spells",
+        "description" : "Frost spells do less damage than other more destructive types of spells, but can slow down enemies or increase your armor."
+    },
+    {
+        "id" : 2,
+        "name" : "Fire Spells",
+        "description" : "Fire spells do a great deal of damage and strike many opponents at once."
+    },
+    {
+        "id" : 3,
+        "name" : "Shadow Spells",
+        "description" : "Shadow spells have the potential to do a massive amount of damage, but their strength lies in debilitating opponents and buffing dark allies."
+    },
+    {
+        "id" : 4,
+        "name" : "Lightning Spells",
+        "description" : "Lightning spells do a lot of damage to single target enemies, or less damage split across more enemies."
+    },
+    {
+        "id" : 5,
+        "name" : "Earth Spells",
+        "description" : "Earth spells do physical damage instead of the usual magic damage."
+    },
+    {
+        "id" : 6,
+        "name" : "Arcane Spells",
+        "description" : "Arcane spells are much stronger than their elemental archetypes, but cost more mana as a result."
+    },
+    {
+        "id" : 7,
+        "name" : "Potions",
+        "description" : "Consumable potions which have restorative or enhancement properties."
+    }
+]

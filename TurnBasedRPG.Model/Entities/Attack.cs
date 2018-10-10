@@ -3,47 +3,46 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TurnBasedRPG.Shared;
 using TurnBasedRPG.Shared.Interfaces;
 
 namespace TurnBasedRPG.Model.Entities
 {
     public class Attack : ActionBase, IDisplayAction
     {
-        private string _name;
-        public List<int> TargetPositions { get; set; }
-        private bool _canTargetThroughUnits;
-        private bool _canSwitchTargetPosition;
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public IReadOnlyList<int> TargetPositions { get; set; } = new List<int>();
+        public int CenterOfTargetsPosition { get; set; } = 5;
+        public bool CanTargetThroughUnits { get; set; }
+        public bool CanSwitchTargetPosition { get; set; }
+        public int DamageModifier { get; set; }
+        public int DamagePercentageModifier { get; set; }
 
-        public Attack(bool canTargetThroughUnits, bool canSwitchTargetPosition)
+        public Attack()
         {
-            _canTargetThroughUnits = canTargetThroughUnits;
-            _canSwitchTargetPosition = canSwitchTargetPosition;
         }
 
-        public List<int> GetActionTargets()
+        public IReadOnlyList<int> GetActionTargets()
         {
             return TargetPositions;
-        }
-
-        public bool CanTargetThroughUnits()
-        {
-            return _canTargetThroughUnits;
-        }
-
-        public bool CanSwitchTargetPosition()
-        {
-            return _canSwitchTargetPosition;
         }
 
         public string GetDisplayName()
         {
             // return _name;
-            return "Basic Attack";
+            return Name;
         }
 
         public string GetDescription()
         {
-            return "This is a basic attack";
+            return Description;
+        }
+
+        public int GetCenterOfTargetsPosition()
+        {
+            return CenterOfTargetsPosition;
         }
     }
 }

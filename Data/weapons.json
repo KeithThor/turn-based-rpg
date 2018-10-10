@@ -1,0 +1,12 @@
+[
+    {
+        "id": 3,
+        "name": "Bronze Sword",
+        "description": "Standard issue sword for the army.",
+        "cost": 150,
+        "damageModifier": {
+            "physical": 20
+        },
+        "attackIds": [1]
+    }
+]

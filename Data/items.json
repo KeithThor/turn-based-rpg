@@ -1,0 +1,18 @@
+[
+    {
+        "id": "1",
+        "name": "Rice",
+        "description": "A staple food for most of the region.",
+        "cost": 100
+    },
+    {
+        "id": "2",
+        "name": "Potion",
+        "description": "A blood-red vial of magical substance that restores the imbiber's health.",
+        "cost": 500,
+        "isConsumable": true,
+        "categoryId": 7,
+        "charges": 1,
+        "spellId": 10
+    }
+]

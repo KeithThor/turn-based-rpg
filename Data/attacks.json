@@ -1,0 +1,11 @@
+[
+    {
+        "id": 1,
+        "name": "Slash",
+        "description": "Slashes at one target with your sword.",
+        "targetPositions": [5],
+        "canTargetThroughUnits": false,
+        "canSwitchTargetPosition": true,
+        "damagePercentageModifier": -20
+    }
+]

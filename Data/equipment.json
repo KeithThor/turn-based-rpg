@@ -1,0 +1,11 @@
+[
+    {
+        "id": 2,
+        "name": "Bronze Platemail",
+        "description": "Standard issue platemail for the army.",
+        "cost": 150,
+        "armor": {
+            "physical": 20
+        }
+    }
+]

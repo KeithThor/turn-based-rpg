@@ -1,0 +1,12 @@
+[
+    {
+        "id": 1,
+        "name": "Burning",
+        "symbol": "B",
+        "damage": { "fire": 25},
+        "damageIntellectModifier": { "fire": 2 },
+        "armorPercentage": { "fire": -20 },
+        "duration": 2,
+        "isDebuff": true
+    }
+]
