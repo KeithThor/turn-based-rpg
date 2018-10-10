@@ -3,10 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TurnBasedRPG.Shared;
 using TurnBasedRPG.Shared.Interfaces;
+using TurnBasedRPG.Shared.Viewmodel;
 
 namespace TurnBasedRPG.UI
 {
+    /// <summary>
+    /// A UI component responsible for rendering more information about a selected action, character, or category.
+    /// </summary>
     public class InformationPanelUI
     {
         private int _maxWidth;
@@ -29,7 +34,11 @@ namespace TurnBasedRPG.UI
             MaxHeight = 16;
         }
 
-        // Called to display the character details panel inside the information panel
+        /// <summary>
+        /// Returns an information panel injected with the data from a character.
+        /// </summary>
+        /// <param name="character">The character whose data will be used to fill the information panel.</param>
+        /// <returns>A read-only list of string that contains the information panel.</returns>
         public IReadOnlyList<string> RenderCharacterDetails(IDisplayCharacter character)
         {
             if (character == null) return RenderBlankPanel();
@@ -53,7 +62,11 @@ namespace TurnBasedRPG.UI
             return informationPanel;
         }
 
-        // Called whenever the information panel should display categories and category details
+        /// <summary>
+        /// Returns an information panel injected with a category name and it's description.
+        /// </summary>
+        /// <param name="category">A string array of 2 indeces, containing the category name and description.</param>
+        /// <returns>A read-only list of string containing the information panel.</returns>
         public IReadOnlyList<string> RenderCategoryDetails(string[] category)
         {
             if (category == null) return RenderBlankPanel();
@@ -72,8 +85,14 @@ namespace TurnBasedRPG.UI
             return informationPanel;
         }
 
-        // Called whenever the information panel should display an action and it's details
-        public IReadOnlyList<string> RenderActionDetails(IDisplayAction action)
+        /// <summary>
+        /// Returns a read-only list containing the information panel injected with data from the a
+        /// provided action.
+        /// </summary>
+        /// <param name="action">The action to display in the information panel.</param>
+        /// <param name="data">The data of the action to display.</param>
+        /// <returns>A read-only list containing the information panel.</returns>
+        public IReadOnlyList<string> RenderActionDetails(IDisplayAction action, SubActionData data)
         {
             if (action == null) return RenderBlankPanel();
 
@@ -83,7 +102,7 @@ namespace TurnBasedRPG.UI
             informationPanel.Add("║ " + action.GetDisplayName() + new string(' ', spaces - 1) + "║");
             informationPanel.Add("║" + new string('─', MaxWidth - 2) + "║");
             var actionTargetBoxes = RenderActionTargets(action);
-            var actionDescription = RenderActionDescription(action);
+            var actionDescription = RenderActionDescription(action, data);
             for (int i = 0; i < actionTargetBoxes.Count(); i++)
             {
                 informationPanel.Add(actionDescription.ElementAt(i) + actionTargetBoxes.ElementAt(i));
@@ -96,7 +115,11 @@ namespace TurnBasedRPG.UI
             informationPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
             return informationPanel;
         }
-        // In case of a null object, renders a blank panel
+        
+        /// <summary>
+        /// In case of null objects, renders a panel with no data.
+        /// </summary>
+        /// <returns>A panel with no data.</returns>
         private List<string> RenderBlankPanel()
         {
             var informationPanel = new List<string>();
@@ -109,7 +132,11 @@ namespace TurnBasedRPG.UI
             return informationPanel;
         }
 
-        // Renders a small diagram that shows which positions an action targets
+        /// <summary>
+        /// Renders a small diagram detailing the targets a currently selected action can hit.
+        /// </summary>
+        /// <param name="action">The action to detail the targets for.</param>
+        /// <returns>A list of string containing the action targets panel.</returns>
         private List<string> RenderActionTargets(IDisplayAction action)
         {
             int maxWidth = 25;
@@ -122,14 +149,14 @@ namespace TurnBasedRPG.UI
                 for (int j = 1; j <= 6; j++)
                 {
                     // If the action can't switch targets and one of its targets is in one of the player's positions, then render a focused square.
-                    if (j <= 3 && action.GetActionTargets().Contains(j + i / 2 * 3) && !action.CanSwitchTargetPosition())
+                    if (j <= 3 && action.GetActionTargets().Contains(j + i / 2 * 3) && !action.CanSwitchTargetPosition)
                     {
                         if (i % 2 == 1) line += "╚╝";
                         else line += "╔╗";
                     }
                     // If the action can't switch targets and one of its targets is in one of the enemy's positions, then render a focused square.
                     // Or if the action can switch targets, render a focused square if this is one of the target positions
-                    else if ((j > 3 && action.GetActionTargets().Contains(j + 6 + i / 2 * 3) && !action.CanSwitchTargetPosition()) ||
+                    else if ((j > 3 && action.GetActionTargets().Contains(j + 6 + i / 2 * 3) && !action.CanSwitchTargetPosition) ||
                         (j > 3 && action.GetActionTargets().Contains(j - 3 + i / 2 * 3)))
                     {
                         if (i % 2 == 1) line += "╚╝";
@@ -148,15 +175,36 @@ namespace TurnBasedRPG.UI
                 line += line.Count() == maxWidth - 1 ? "║" : " ║";
                 actionTargets.Add(line);
             }
+            actionTargets.Add("│" + new string(' ', maxWidth - 2) + "║");
+            string str1 = "";
+            string str2 = "";
+            if (action.CanSwitchTargetPosition) str1 = " - Can switch target position";
+            else str1 = " - Can't switch target position";
+            if (action.CanTargetThroughUnits) str2 = " - Position not affected by formation";
+            else str2 = " - Position is affected by formation";
+            var arr1 = str1.GetStringAsList(maxWidth - 4);
+            var arr2 = str2.GetStringAsList(maxWidth - 4);
+            foreach (var item in arr1)
+            {
+                actionTargets.Add("│ " + item + new string(' ', maxWidth - item.Count() - 4) + " ║");
+            }
+            foreach (var item in arr2)
+            {
+                actionTargets.Add("│ " + item + new string(' ', maxWidth - item.Count() - 4) + " ║");
+            }
             return actionTargets;
         }
 
-        // Renders the category description under the category name
+        /// <summary>
+        /// Returns a list of string containing the description of an action's category.
+        /// </summary>
+        /// <param name="category">A string array containing the category name and the category description.</param>
+        /// <returns>Contains the description of an action's category.</returns>
         private List<string> RenderCategoryDescription(string[] category)
         {
             List<string> descriptionFull = new List<string>();
             int maxLineWidth = MaxWidth - 3;
-            var descriptionAsArr = GetReducedLengthString(category[1], maxLineWidth);
+            var descriptionAsArr = category[1].GetStringAsList(maxLineWidth);
             for (int i = 0; i < MaxHeight - 4; i++)
             {
                 if(i < descriptionAsArr.Count())
@@ -173,7 +221,13 @@ namespace TurnBasedRPG.UI
             return descriptionFull;
         }
 
-        // Gets the display string for a single stat
+        /// <summary>
+        /// Returns a string containing the display information for a single stat.
+        /// </summary>
+        /// <param name="statName">The name of the stat to display.</param>
+        /// <param name="statAmount1">The amount of the stat.</param>
+        /// <param name="statAmount2">If the stat is modified, this is the modified stat amount.</param>
+        /// <returns>Contains the display information for a single stat.</returns>
         private string GetStatDisplay(string statName, string statAmount1, string statAmount2 = "")
         {
             int length = statName.Count() + statAmount1.Count() + statAmount2.Count() + 6;
@@ -183,62 +237,52 @@ namespace TurnBasedRPG.UI
                 return "║ " + statName + ": " + statAmount1 + "/" + statAmount2 + new string(' ', MaxWidth - length) + "║";
         }
 
-        // Returns an IEnumerable of string split from another string along spaces and periods
-        private List<string> GetReducedLengthString(string str, int maxLength)
+        /// <summary>
+        /// Renders the combat stats and description of an action.
+        /// </summary>
+        /// <param name="action">The action to display.</param>
+        /// <param name="data">The data corresponding to the action to display.</param>
+        /// <returns>A list of string that contains the action description.</returns>
+        private List<string> RenderActionDescription(IDisplayAction action, SubActionData data)
         {
-            var reducedLengthList = new List<string>();
-            int iterations = 0;
-            int startIndex = 0;
-            for (int i = 0; i <= str.Count() / maxLength; i++)
+            int maxLength = 30;
+            int maxHeight = 12;
+            var description = new List<string>();
+            var reducedStr = action.GetDescription().GetStringAsList(maxLength - 2);
+
+            for (int i = 0; i < reducedStr.Count(); i++)
             {
-                string reducedStr = "";
-                // If the unrendered parts of the category description has more characters than fits in the next line
-                if (str.Count() > (i + 1) * maxLength)
+                string st = "";
+                st = reducedStr.ElementAt(i);
+                description.Add("║ " + st + new string(' ', maxLength - st.Count() - 2));
+            }
+            description.Add("║ " + new string(' ', maxLength - 2));
+            string str = "";
+            // Display all values that are not 0 or null in the view model
+            foreach (var item in data.GetDisplayableValues())
+            {
+                if (item.Value != null)
                 {
-                    reducedStr = str.Substring(startIndex, maxLength);
-                    int tempIndex = 0;
-                    // If the line ends in a letter, find the space or . character closest to the end of the array and make it
-                    // the start index for the next iteration and the end point for this line
-                    if (reducedStr.Last() == '.' || reducedStr.Last() == ' '
-                        || str[startIndex + maxLength] == '.' || str[startIndex + maxLength] == ' ')
+                    if (item.Value is IEnumerable<string>)
                     {
-                        tempIndex = maxLength + startIndex;
+                        foreach (var stringVal in item.Value as IEnumerable<string>)
+                        {
+                            str = $"Applies {stringVal}";
+                            description.Add("║ " + str + new string(' ', maxLength - str.Count() - 2));
+                        }
                     }
                     else
                     {
-                        tempIndex = reducedStr.LastIndexOfAny(new char[] { '.', ' ' }) + startIndex + 1;
+                        str = $"{item.Key} : {item.Value}";
+                        description.Add("║ " + str + new string(' ', maxLength - str.Count() - 2));
                     }
-                    reducedStr = str.Substring(startIndex, tempIndex - startIndex);
-                    startIndex = tempIndex;
                 }
-                // Unrendered parts of the category description less than the maximum width of 1 line
-                else
-                {
-                    reducedStr = str.Substring(startIndex);
-                }
-                // Remove spaces at the beginning of the new line
-                if (reducedStr.Count() > 0 && reducedStr[0] == ' ') reducedStr = reducedStr.Remove(0, 1);
-                // Add spaces to the end of the description line if there are extra spaces left
-                reducedLengthList.Add(reducedStr);
-                iterations++;
             }
-            return reducedLengthList;
-        }
-
-        private List<string> RenderActionDescription(IDisplayAction action)
-        {
-            int maxLength = 30;
-            int maxHeight = 7;
-            var description = new List<string>();
-            var reducedStr = GetReducedLengthString(action.GetDescription(), maxLength);
-            for (int i = 0; i < maxHeight; i++)
+            int currentCount = description.Count();
+            // Adds empty lines if the description count is less than the max height.
+            for (int i = 0; i < maxHeight - currentCount; i++)
             {
-                string str = "";
-                if (reducedStr.Count() > i)
-                {
-                    str = reducedStr.ElementAt(i);
-                }
-                description.Add("║ " + str + new string(' ', maxLength - str.Count() - 2));
+                description.Add("║ " + new string(' ', maxLength - 2));
             }
             return description;
         }

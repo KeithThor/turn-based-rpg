@@ -7,9 +7,17 @@ using TurnBasedRPG.Shared.Interfaces;
 
 namespace TurnBasedRPG.UI
 {
+    /// <summary>
+    /// UI component that is responsible for rendering a target's name and
+    /// a health bar that shows a target's current health.
+    /// </summary>
     public class TargetUI
     {
-        private int _maxWidth;
+        private int _maxWidth = 42;
+        /// <summary>
+        /// Gets or sets the max width of the component. MaxWidth will always be 2 units larger than
+        /// the width of the healthbar.
+        /// </summary>
         public int MaxWidth
         {
             get { return _maxWidth; }
@@ -19,6 +27,10 @@ namespace TurnBasedRPG.UI
             }
         }
         private int _widthOfHealthBar;
+        /// <summary>
+        /// Gets or sets the max width of the healthbar. MaxWidth will always be 2 units smaller than
+        /// the max width of the component.
+        /// </summary>
         public int WidthOfHealthBar
         {
             get { return _widthOfHealthBar; }
@@ -30,12 +42,17 @@ namespace TurnBasedRPG.UI
         }
         public int MaxDetailsLength { get; set; } = 32;
 
-        public TargetUI(int maxWidth)
+        public TargetUI()
         {
-            MaxWidth = maxWidth;
+            _widthOfHealthBar = _maxWidth - 2;
         }
 
-        // Renders the current target's details and health bar
+        /// <summary>
+        /// Creates and returns a list of string that represents the targetUI component with a target's
+        /// details and a healthbar.
+        /// </summary>
+        /// <param name="target">The character whose details should be displayed.</param>
+        /// <returns>A read-only list of string that represents the targetUI component.</returns>
         public IReadOnlyList<string> RenderTargetDetails(IDisplayCharacter target)
         {
             var targetDetails = new List<string>();

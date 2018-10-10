@@ -1,9 +1,15 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Ninject;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Core;
+using TurnBasedRPG.Model.Repository;
 
 namespace TurnBasedRPG
 {
@@ -11,11 +17,18 @@ namespace TurnBasedRPG
     {
         static void Main(string[] args)
         {
-            bool shutdownTriggered = false;
+            var kernel = new StandardKernel();
+            kernel.Load(Assembly.GetExecutingAssembly());
 
-            Game game = new Game();
+            Game game = kernel.Get<Game>();
 
             game.Start();
+
+            //var spells = kernel.Get<SpellRepository>();
+            //foreach (var spell in spells.GetAll())
+            //{
+            //    Console.WriteLine($"{spell.Name} : {spell.Category} - {spell.Damage.Shadow} Shadow Damage");
+            //}
         }
     }
 }

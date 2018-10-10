@@ -4,16 +4,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TurnBasedRPG.Controllers;
 using TurnBasedRPG.Shared.EventArgs;
 using TurnBasedRPG.Shared.Interfaces;
 using TurnBasedRPG.Shared.Enums;
+using TurnBasedRPG.Controller;
 
 namespace TurnBasedRPG.UI
 {
-
+    /// <summary>
+    /// UI controller responsible for handling UI rendering logic.
+    /// </summary>
     public class CombatUI
     {
+        /// <summary>
+        /// Contains default values for each player character, allowing the game to remember each action
+        /// and target positions the player previously selected per character.
+        /// </summary>
         private class PlayerCharacterDefaults
         {
             public int FocusNumber;
@@ -35,7 +41,6 @@ namespace TurnBasedRPG.UI
                 FocusNumber = 1;
                 DefaultTargetPosition = 13;
                 ActiveCategories = new List<string[]>();
-                ActiveSubPanelList = new List<IDisplayAction>();
                 _subPanelDefaults = new Dictionary<int, SubPanelDefaults>();
             }
             public SubPanelDefaults GetSubPanelDefaults()
@@ -105,7 +110,11 @@ namespace TurnBasedRPG.UI
         }
         private string ActiveCategory
         {
-            get { return ActionCategories[CategoryFocusNumber - 1][0]; }
+            get
+            {
+                if (ActionCategories.Count() == 0) return "";
+                return ActionCategories[CategoryFocusNumber - 1][0];
+            }
         }
         private IReadOnlyList<IDisplayAction> ActiveSubPanelList
         {
@@ -127,6 +136,7 @@ namespace TurnBasedRPG.UI
         }
         // Contains the default target positions for an action
         private IReadOnlyList<int> _tempTargetPositions;
+        private int _centerOfTargetsPosition;
         private bool _canSwitchTargetPosition;
         private bool _canTargetThroughUnits;
         
@@ -138,7 +148,13 @@ namespace TurnBasedRPG.UI
         private TurnOrderUI _turnOrder;
         private InformationPanelUI _informationPanel;
 
-        public CombatUI(CombatController combatInstance)
+        public CombatUI(CombatController combatInstance,
+                        CombatFormationUI formationUI,
+                        TargetUI targetUI,
+                        ActionPanelUI actionPanel,
+                        SubActionPanelUI subActionPanelUI,
+                        TurnOrderUI turnOrder,
+                        InformationPanelUI informationPanel)
         {
             _combatInstance = combatInstance;
             _characterDefaults = new Dictionary<int, PlayerCharacterDefaults>();
@@ -148,12 +164,13 @@ namespace TurnBasedRPG.UI
             }
             _activeCharacterId = _combatInstance.GetNextActivePlayerId();
             _combatInstance.EndOfTurn += EndOfTurnTriggered;
-            _formationUI = new CombatFormationUI();
-            _targetUI = new TargetUI(42);
-            _turnOrder = new TurnOrderUI();
-            _actionPanel = new ActionPanelUI();
-            _subActionPanel = new SubActionPanelUI();
-            _informationPanel = new InformationPanelUI();
+            _formationUI = formationUI;
+            _targetUI = targetUI;
+            _turnOrder = turnOrder;
+            _actionPanel = actionPanel;
+            _subActionPanel = subActionPanelUI;
+            _informationPanel = informationPanel;
+            GetActiveSubPanelList();
         }
 
         private void EndOfTurnTriggered(object sender, EndOfTurnEventArgs args)
@@ -161,10 +178,13 @@ namespace TurnBasedRPG.UI
             _activeCharacterId = _combatInstance.GetNextActivePlayerId();
             IsInSubPanel = false;
             IsInFormationPanel = false;
+            GetActiveSubPanelList();
             RefreshUI();
         }
 
-        // Start the combat UI
+        /// <summary>
+        /// Begins the combat UI.
+        /// </summary>
         public void StartRender()
         {
             // First render
@@ -173,7 +193,9 @@ namespace TurnBasedRPG.UI
             ListenForKeyPress();
         }
 
-        // Called on updates to refresh the UI
+        /// <summary>
+        /// Called on updates to refresh the UI.
+        /// </summary>
         private void RefreshUI()
         {
             Console.Clear();
@@ -182,7 +204,9 @@ namespace TurnBasedRPG.UI
             PrintUserPanels();
         }
 
-        // Handles actions selected by the player
+        /// <summary>
+        /// Handles actions selected by the player depending on which panels are currently active.
+        /// </summary>
         private void HandleAction()
         {
             if (!IsInSubPanel && !IsInFormationPanel && !IsInCategory)
@@ -190,36 +214,35 @@ namespace TurnBasedRPG.UI
                 switch ((Actions)FocusNumber)
                 {
                     case Actions.Attack:
-                        var attackDetail = _combatInstance.GetActionFromCategory(Actions.Attack, "", 0);
-                        _tempTargetPositions = attackDetail.GetActionTargets();
-                        _canSwitchTargetPosition = attackDetail.CanSwitchTargetPosition();
-                        _canTargetThroughUnits = attackDetail.CanTargetThroughUnits();
-                        DefaultTargetPosition = 13;
-                        _formationUI.TargetPositions = GetCorrectedTargets();
-                        IsInFormationPanel = true;
+                        IsInSubPanel = true;
+                        GetActiveSubPanelList();
                         break;
                     case Actions.Spells:
                     case Actions.Skills:
+                    case Actions.Items:
                         if (CategoryItemCount > 0)
                             IsInCategory = true;
                         break;
                     case Actions.Pass:
-                        _combatInstance.StartAction("", -1, Actions.Pass, null);
+                        _combatInstance.StartAction(Actions.Pass, "", -1 , null);
                         break;
                 }
             }
             else if (IsInFormationPanel)
             {
+
                 if (GetCorrectedTargets().Any(position => _combatInstance.IsPositionOccupied(position)))
-                    _combatInstance.StartAction("spell", 1, (Actions)FocusNumber, _formationUI.TargetPositions);
+                    _combatInstance.StartAction((Actions)FocusNumber, ActiveCategory, SubFocusNumber - 1, _formationUI.TargetPositions);
             }
             else if (IsInSubPanel)
             {
                 switch ((Actions)FocusNumber)
                 {
+                    case Actions.Attack:
                     case Actions.Spells:
                     case Actions.Skills:
-                        HandleSubPanelSelection();
+                    case Actions.Items:
+                        SelectSubAction();
                         break;
                     default:
                         break;
@@ -228,7 +251,7 @@ namespace TurnBasedRPG.UI
             else if (IsInCategory)
             {
                 // Get all spells or skills in category
-                ActiveSubPanelList = GetActiveSubPanelList();
+                GetActiveSubPanelList();
                 IsInSubPanel = true;
                 IsInCategory = false;
             }
@@ -236,20 +259,27 @@ namespace TurnBasedRPG.UI
             RefreshUI();
         }
 
-        // Gets and handles the sub panel action selected by the player
-        private void HandleSubPanelSelection()
+        /// <summary>
+        /// Gets and handles the selection of a subaction from the subpanel menu.
+        /// </summary>
+        private void SelectSubAction()
         {
-            var category = ActiveCategory;
-            var selectedAction = _combatInstance.GetActionFromCategory((Actions)FocusNumber, category, SubFocusNumber - 1);
+            IDisplayAction selectedAction;
+            selectedAction = _combatInstance.GetSubActionFromCategory((Actions)FocusNumber, ActiveCategory, SubFocusNumber - 1);
             _tempTargetPositions = selectedAction.GetActionTargets();
-            _canSwitchTargetPosition = selectedAction.CanSwitchTargetPosition();
-            _canTargetThroughUnits = selectedAction.CanTargetThroughUnits();
+            _centerOfTargetsPosition = selectedAction.GetCenterOfTargetsPosition();
+            _canSwitchTargetPosition = selectedAction.CanSwitchTargetPosition;
+            _canTargetThroughUnits = selectedAction.CanTargetThroughUnits;
+            if (!_canTargetThroughUnits) DefaultTargetPosition = 13;
             _formationUI.TargetPositions = GetCorrectedTargets();
             IsInFormationPanel = true;
         }
 
-        // Determines which targets an action will hit, depending on the displacement from the target position and where the action's
-        // default target is
+        /// <summary>
+        /// Determines which targets an action will hit, depending on the displacement from the target position and where the action's
+        /// center of target is.
+        /// </summary>
+        /// <returns>A readonly list of the corrected targets.</returns>
         private IReadOnlyList<int> GetCorrectedTargets()
         {
             // In case of static targeting actions, change the default position to a static one
@@ -263,9 +293,9 @@ namespace TurnBasedRPG.UI
                 var correctedTargets = new List<int>(_tempTargetPositions);
                 if (DefaultTargetPosition > 18 || DefaultTargetPosition <= 0)
                     DefaultTargetPosition = 13;
-
-                int targetOffset = DefaultTargetPosition - 5;
-                int additionalOffset = 9;
+                
+                int targetOffset = DefaultTargetPosition - _centerOfTargetsPosition;
+                int invertedOffset = 9;
 
                 // If the target is the enemy's side of the field, offset the positions to account for it
                 if (DefaultTargetPosition > 9)
@@ -275,21 +305,51 @@ namespace TurnBasedRPG.UI
                         correctedTargets[i] += 9;
                     }
                     targetOffset -= 9;
-                    additionalOffset = 0;
+                    invertedOffset = 0;
                 }
 
-                // Target position is in the right column so all targets in the right column must be culled
-                if (DefaultTargetPosition % 3 == 0)
+                // Remove positions depending on where the center of targets position and default target positions are at.
+                // Grid system is 3 x 3 and starts at position 1, so to check if a position is in the right column, you can
+                // do position % 3 == 0.
+
+                // If the player's center of target is in the right column and the center of target for an action is not the 
+                // right column, remove all targets in the right column
+                if (DefaultTargetPosition % 3 == 0 && _centerOfTargetsPosition % 3 != 0)
                     correctedTargets.RemoveAll(val => val % 3 == 0);
                 // Target position is in the left column so all targets in the left column must be culled
-                if (DefaultTargetPosition % 3 == 1)
+                if (DefaultTargetPosition % 3 == 1 && _centerOfTargetsPosition % 3 != 1)
                     correctedTargets.RemoveAll(val => val % 3 == 1);
                 // Target position is in the top row
-                if (DefaultTargetPosition < 13 - additionalOffset)
-                    correctedTargets.RemoveAll(val => val < 13 - additionalOffset);
+                if (DefaultTargetPosition < 13 - invertedOffset && _centerOfTargetsPosition >= 4)
+                    correctedTargets.RemoveAll(val => val < 13 - invertedOffset);
                 // Target position is in the bottom row
-                if (DefaultTargetPosition > 15 - additionalOffset)
-                    correctedTargets.RemoveAll(val => val > 15 - additionalOffset);
+                if (DefaultTargetPosition > 15 - invertedOffset && _centerOfTargetsPosition <= 6)
+                    correctedTargets.RemoveAll(val => val > 15 - invertedOffset);
+
+                // If action's CoT is in left column and the player's CoT is right column, remove center column
+                if (_centerOfTargetsPosition % 3 == 1 && DefaultTargetPosition % 3 == 0)
+                    correctedTargets.RemoveAll(val => val % 3 == 2);
+                // If action's CoT is in left column and the player's CoT is middle column, remove right column
+                if (_centerOfTargetsPosition % 3 == 1 && DefaultTargetPosition % 3 == 2)
+                    correctedTargets.RemoveAll(val => val % 3 == 0);
+                // If action's CoT is in right column and the player's CoT is middle column, remove left column
+                if (_centerOfTargetsPosition % 3 == 0 && DefaultTargetPosition % 3 == 2)
+                    correctedTargets.RemoveAll(val => val % 3 == 1);
+                // If action's CoT is in right column and the player's CoT is left column, remove center column
+                if (_centerOfTargetsPosition % 3 == 0 && DefaultTargetPosition % 3 == 1)
+                    correctedTargets.RemoveAll(val => val % 3 == 2);
+                // If action's CoT is in bottom row and player's CoT is in top row on enemy's side, remove middle row
+                if (_centerOfTargetsPosition >= 7 && DefaultTargetPosition <= 12 && DefaultTargetPosition >= 10)
+                    correctedTargets.RemoveAll(val => val > 12 && val <= 15);
+                // If action's CoT is in bottom row and player's CoT is in middle row on enemy's side, remove top row
+                if (_centerOfTargetsPosition >= 7 && DefaultTargetPosition <= 15 && DefaultTargetPosition >= 13)
+                    correctedTargets.RemoveAll(val => val >= 10 && val < 13);
+                // If action's CoT is in top row and player's CoT is in middle row on enemy's side, remove bottom row
+                if (_centerOfTargetsPosition <= 3 && DefaultTargetPosition <= 15 && DefaultTargetPosition >= 13)
+                    correctedTargets.RemoveAll(val => val >= 16);
+                // If action's CoT is in top row and player's CoT is in bottom row on enemy's side, remove middle row
+                if (_centerOfTargetsPosition <= 3 && DefaultTargetPosition >= 16)
+                    correctedTargets.RemoveAll(val => val >= 13 && val < 16);
 
                 for (int i = 0; i < correctedTargets.Count; i++)
                 {
@@ -300,7 +360,9 @@ namespace TurnBasedRPG.UI
             }
         }
 
-        // Loops to listen for a key press event
+        /// <summary>
+        /// Starts an infinite loop to listen for key presses.
+        /// </summary>
         private void ListenForKeyPress()
         {
             while (true)
@@ -334,22 +396,22 @@ namespace TurnBasedRPG.UI
                 }
             }
         }
-
+        
         private void EscapeKeyPressed()
         {
-            if (IsInFormationPanel && FocusNumber != (int)Actions.Attack)
+            if (IsInFormationPanel)
             {
                 IsInFormationPanel = false;
                 IsInSubPanel = true;
             }
-            else if (IsInFormationPanel && FocusNumber == (int)Actions.Attack)
-            {
-                IsInFormationPanel = false;
-            }
-            else if (IsInSubPanel)
+            else if (IsInSubPanel && (Actions)FocusNumber != Actions.Attack)
             {
                 IsInSubPanel = false;
                 IsInCategory = true;
+            }
+            else if (IsInSubPanel && (Actions)FocusNumber == Actions.Attack)
+            {
+                IsInSubPanel = false;
             }
             else
                 IsInCategory = false;
@@ -381,8 +443,11 @@ namespace TurnBasedRPG.UI
                 ChangeActionFocus(1);
             }
         }
-
-        // Returns true if an action cannot bypass a character blocking it's path downwards
+        
+        /// <summary>
+        /// Returns true if an action cannot bypass a character blocking it's path downwards.
+        /// </summary>
+        /// <returns></returns>
         private bool IsDownArrowBlocked()
         {
             bool isBlocked = !_canTargetThroughUnits;
@@ -438,8 +503,11 @@ namespace TurnBasedRPG.UI
             else if (IsInCategory && CategoryFocusNumber % 2 == 1 && CategoryFocusNumber + 1 <= CategoryItemCount)
                 ChangeCategoryFocus(1, false);
         }
-
-        // Returns true if an action cannot bypass a character blocking its path to the right
+        
+        /// <summary>
+        /// Returns true if an action cannot bypass a character blocking its path to the right
+        /// </summary>
+        /// <returns></returns>
         private bool IsRightArrowBlocked()
         {
             bool isBlocked = !_canTargetThroughUnits;
@@ -469,6 +537,11 @@ namespace TurnBasedRPG.UI
                 ChangeActionFocus(-1);
         }
 
+        /// <summary>
+        /// Checks to see if movement upward in the formation panel should be blocked based on the current position of the
+        /// player's target.
+        /// </summary>
+        /// <returns>Returns true if movement should be blocked.</returns>
         private bool IsUpArrowBlocked()
         {
             bool isBlocked = !_canTargetThroughUnits;
@@ -484,6 +557,10 @@ namespace TurnBasedRPG.UI
             return isBlocked;
         }
 
+        /// <summary>
+        /// Changes the focus target in the formation panel.
+        /// </summary>
+        /// <param name="changeAmount">The amount to change the focus target by.</param>
         private void ChangeFormationPanelFocus(int changeAmount)
         {
             if (IsInFormationPanel && changeAmount != 0)
@@ -496,8 +573,12 @@ namespace TurnBasedRPG.UI
             }
         }
 
-        // Changes the category focus if change amount is not 0. If mayChangeOffset is true, also checks to see if movement will change
-        // the line offset
+        /// <summary>
+        /// Changes the category focus if change amount is not 0. If mayChangeOffset is true, also checks to see if movement excedes the
+        /// maximum number of items in a panel.
+        /// </summary>
+        /// <param name="changeAmount">The amount to change the focus by.</param>
+        /// <param name="mayChangeOffset">Whether or not the change in focus may go pass the maximum items in the category panel.</param>
         private void ChangeCategoryFocus(int changeAmount, bool mayChangeOffset)
         {
             if (IsInCategory && changeAmount != 0)
@@ -520,7 +601,12 @@ namespace TurnBasedRPG.UI
             }
         }
 
-        // Similiar to ChangeCategoryFocus
+        /// <summary>
+        /// Changes the subpanel focus if change amount is not 0. If mayChangeOffset is true, also checks to see if movement excedes the
+        /// maximum number of items in a panel.
+        /// </summary>
+        /// <param name="changeAmount">The amount to change the focus by.</param>
+        /// <param name="mayChangeOffset">Whether or not the change in focus may go pass the maximum items in the subpanel.</param>
         private void ChangeSubPanelFocus(int changeAmount, bool mayChangeOffset)
         {
             if (IsInSubPanel && changeAmount != 0)
@@ -541,6 +627,10 @@ namespace TurnBasedRPG.UI
             }
         }
 
+        /// <summary>
+        /// Changes the focus of the main action by an amount.
+        /// </summary>
+        /// <param name="changeAmount">The amount to change the focus by.</param>
         private void ChangeActionFocus(int changeAmount)
         {
             if (!IsInFormationPanel && !IsInSubPanel && changeAmount != 0)
@@ -549,23 +639,32 @@ namespace TurnBasedRPG.UI
                 FocusNumber += changeAmount;
                 if (FocusNumber <= 0) FocusNumber = maxFocusNumber;
                 if (FocusNumber > maxFocusNumber) FocusNumber = 1;
-                // ActiveSubPanelList = GetActiveSubPanelList();
+                GetActiveSubPanelList();
                 ActionCategories = _combatInstance.GetCategories((Actions)FocusNumber);
                 CategoryItemCount = ActionCategories.Count();
                 RefreshUI();
             }
         }
 
+        /// <summary>
+        /// Renders and prints the battlefield, containing all the characters in combat as well as their healthbars.
+        /// </summary>
         private void PrintCombatFormations()
         {
-            var formations = _formationUI.Render(_combatInstance.GetAllDisplayableCharacters(), _activeCharacterId);
+            // If its the enemy's turn, display focus on the enemy, else display focus on the currently active
+            // player character.
+            int id = (_combatInstance.GetNextActivePlayerId() != _combatInstance.GetActiveCharacterID())
+                        ? _combatInstance.GetActiveCharacterID() : _combatInstance.GetNextActivePlayerId();
+            var formations = _formationUI.Render(_combatInstance.GetAllDisplayableCharacters(), id);
             foreach (var item in formations)
             {
                 Console.WriteLine(item);
             }
         }
 
-        // Renders the target and turn order UIs as well as the turn order target triangles, then print them with a space between
+        /// <summary>
+        /// Renders and prints the target UI component and the turn order UI component.
+        /// </summary>
         private void PrintTargetAndTurnOrder()
         {
             // Must have 2 spaces extra to correctly print out boxes to console
@@ -582,7 +681,9 @@ namespace TurnBasedRPG.UI
             Console.WriteLine(new string(' ', spaces + _targetUI.MaxWidth) + turnOrderUI[turnOrderUI.Count - 1]);
         }
 
-        // Renders the action and sub action panels, then prints them out
+        /// <summary>
+        /// Renders and then prints the action panel, subpanel, and information panel.
+        /// </summary>
         private void PrintUserPanels()
         {
             var actionPanel = _actionPanel.Render(FocusNumber);
@@ -590,6 +691,12 @@ namespace TurnBasedRPG.UI
             List<string> offsetModifiedList;
             int offsetModifiedFocus = 0;
             if (IsInSubPanel)
+            {
+                offsetModifiedList = new List<string>(ActiveSubPanelList.Select(item => item.GetDisplayName()));
+                offsetModifiedFocus = SubFocusNumber - SubPanelLineOffset * 2;
+            }
+            // If the focus is on the attack action, show the available attacks
+            else if ((Actions)FocusNumber == Actions.Attack)
             {
                 offsetModifiedList = new List<string>(ActiveSubPanelList.Select(item => item.GetDisplayName()));
                 offsetModifiedFocus = SubFocusNumber - SubPanelLineOffset * 2;
@@ -612,6 +719,11 @@ namespace TurnBasedRPG.UI
             }
         }
 
+        /// <summary>
+        /// Starts the process of rendering the information panel. Displays different data in the information panel
+        /// depending on which panel is currently in focus.
+        /// </summary>
+        /// <returns>A read-only list containing the information panel.</returns>
         private IReadOnlyList<string> StartRenderInformationPanel()
         {
             IReadOnlyList<string> informationPanel;
@@ -637,23 +749,36 @@ namespace TurnBasedRPG.UI
                         (_combatInstance.GetCategories((Actions)FocusNumber)[CategoryFocusNumber - 1]);
             // Display action details if the current selection is an action
             else if (IsInSubPanel)
+            {
+                var data = _combatInstance.GetSubActionViewData((Actions)FocusNumber, ActiveCategory, SubFocusNumber - 1);
                 informationPanel = _informationPanel.RenderActionDetails(
-                                                    _combatInstance.GetActionFromCategory((Actions)FocusNumber, ActiveCategory, SubFocusNumber - 1));
+                                                    _combatInstance.GetSubActionFromCategory(
+                                                    (Actions)FocusNumber, ActiveCategory, SubFocusNumber - 1),
+                                                    data);
+            }
+                
             else
                 informationPanel = _informationPanel.RenderCharacterDetails(_combatInstance.GetDisplayCharacterFromId(_activeCharacterId));
             return informationPanel;
         }
 
-        // Calls functions to render the current target on the top left of console
+        /// <summary>
+        /// Returns a read-only list of string containing the target UI component.
+        /// </summary>
+        /// <returns>A read-only list of string containing the target UI component.</returns>
         private IReadOnlyList<string> StartRenderTarget()
         {
             if (IsInFormationPanel)
             {
-                dynamic renderTarget = null;
-                if (_formationUI.TargetPositions.Contains(DefaultTargetPosition))
+                IDisplayCharacter renderTarget = null;
+                // If there is a character in the player's default target position, render that target's details
+                if (_combatInstance.GetAllDisplayableCharacters().Any(chr => chr.GetPosition() == DefaultTargetPosition))
                     renderTarget = _combatInstance.GetDisplayCharacterFromPosition(DefaultTargetPosition);
+                // Finds any character that is in the player's target list and render that target's details
                 else
-                    renderTarget = _combatInstance.GetDisplayCharacterFromPosition(_formationUI.TargetPositions[0]);
+                    renderTarget = _combatInstance.GetAllDisplayableCharacters()
+                        .FirstOrDefault(chr => GetCorrectedTargets().Contains(chr.GetPosition()));
+                // If there are no characters that occupy the positions the player is targeting, render the active character's details
                 if (renderTarget == null) renderTarget = _combatInstance.GetDisplayCharacterFromId(_activeCharacterId);
 
                 return _targetUI.RenderTargetDetails(renderTarget);
@@ -662,23 +787,26 @@ namespace TurnBasedRPG.UI
                 return _targetUI.RenderTargetDetails(_combatInstance.GetDisplayCharacterFromId(_activeCharacterId));
         }
 
-        // Gets data to populate the sub panel, depending on which action was focused
-        private IReadOnlyList<IDisplayAction> GetActiveSubPanelList()
+        /// <summary>
+        /// Sets the active sub panel list to a new list depending on the currently active category
+        /// and the current action focus.
+        /// </summary>
+        private void GetActiveSubPanelList()
         {
-            IReadOnlyList<IDisplayAction> subPanelList;
             switch ((Actions)FocusNumber)
             {
+                case Actions.Attack:
                 case Actions.Spells:
                 case Actions.Skills:
-                    subPanelList = _combatInstance.GetActionListFromCategory(
+                case Actions.Items:
+                    ActiveSubPanelList = _combatInstance.GetActionListFromCategory(
                                     (Actions)FocusNumber, ActiveCategory);
                     break;
                 default:
-                    subPanelList = new List<IDisplayAction>();
+                    ActiveSubPanelList = new List<IDisplayAction>();
                     break;
             }
-            SubPanelItemCount = subPanelList.Count;
-            return subPanelList;
+            SubPanelItemCount = ActiveSubPanelList.Count;
         }
     }
 }

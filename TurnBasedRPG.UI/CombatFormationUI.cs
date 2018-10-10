@@ -96,7 +96,7 @@ namespace TurnBasedRPG.UI
         // Renders one row of formation target triangles below the formation boxes
         private string RenderFormationTargets(int iterations)
         {
-            if(TargetPositions.Count == 0)
+            if (TargetPositions.Count == 0)
             {
                 return "";
             }
