@@ -14,17 +14,10 @@ namespace TurnBasedRPG.Controller
     /// </summary>
     public class ViewModelController
     {
-        private ActionController _actionController;
-
-        public ViewModelController(ActionController actionController)
-        {
-            _actionController = actionController;
-        }
-
         public SubActionData GetActionData(Character character, ActionBase action)
         {
             var data = new SubActionData();
-            var damage = _actionController.GetDamage(character, action);
+            var damage = DamageCalculator.GetDamage(character, action);
             data.Damage = action.Damage;
             data.ModifiedDamage = damage;
             data.Heal = action.HealAmount;

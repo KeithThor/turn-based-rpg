@@ -70,9 +70,9 @@ namespace TurnBasedRPG.Controller.Combat
                 if (status.Stackable && matchingStatus.StackCount < status.StackSize)
                 {
                     matchingStatus.TurnsRemaining = status.Duration;
-                    matchingStatus.TotalDamage += GetModifiedDamage(applicator, status);
-                    matchingStatus.HealAmount += GetHealing(applicator, status);
-                    matchingStatus.HealPercentage += GetHealingPercentage(applicator, status);
+                    matchingStatus.TotalDamage += DamageCalculator.GetDamage(applicator, status);
+                    matchingStatus.HealAmount += DamageCalculator.GetHealing(applicator, status);
+                    matchingStatus.HealPercentage += DamageCalculator.GetHealingPercentage(applicator, status);
                     matchingStatus.CritChance = status.CritChance + character.CritChance;
                     matchingStatus.CritMultiplier = status.CritMultiplier + character.CritMultiplier;
                     ApplyStatusEffects(status, character);
@@ -87,9 +87,9 @@ namespace TurnBasedRPG.Controller.Combat
                 else
                 {
                     matchingStatus.TurnsRemaining = status.Duration;
-                    matchingStatus.TotalDamage = GetModifiedDamage(applicator, status);
-                    matchingStatus.HealAmount = GetHealing(applicator, status);
-                    matchingStatus.HealPercentage = GetHealingPercentage(applicator, status);
+                    matchingStatus.TotalDamage = DamageCalculator.GetDamage(applicator, status);
+                    matchingStatus.HealAmount = DamageCalculator.GetHealing(applicator, status);
+                    matchingStatus.HealPercentage = DamageCalculator.GetHealingPercentage(applicator, status);
                     matchingStatus.CritChance = status.CritChance + character.CritChance;
                     matchingStatus.CritMultiplier = status.CritMultiplier + character.CritMultiplier;
                 }
@@ -205,9 +205,9 @@ namespace TurnBasedRPG.Controller.Combat
             var delayedStatus = new DelayedStatus()
             {
                 BaseStatus = statusBase,
-                TotalDamage = GetModifiedDamage(applicator, statusBase),
-                HealAmount = GetHealing(applicator, statusBase),
-                HealPercentage = GetHealingPercentage(applicator, statusBase),
+                TotalDamage = DamageCalculator.GetDamage(applicator, statusBase),
+                HealAmount = DamageCalculator.GetHealing(applicator, statusBase),
+                HealPercentage = DamageCalculator.GetHealingPercentage(applicator, statusBase),
                 SpellDelay = spellDelay,
                 CritChance = applicator.CritChance + statusBase.CritChance,
                 CritMultiplier = applicator.CritMultiplier + statusBase.CritMultiplier,
@@ -255,7 +255,7 @@ namespace TurnBasedRPG.Controller.Combat
             // Calculate damage and apply healing from each status effect
             foreach (var status in _appliedStatuses[character])
             {
-                totalDamage += CalculateTotalDamage(status.TotalDamage, character);
+                totalDamage += DamageCalculator.GetTotalDamage(status.TotalDamage, character);
                 int healAmount = status.HealAmount;
 
                 if (_random.Next(1, 101) <= status.CritChance)
@@ -322,9 +322,9 @@ namespace TurnBasedRPG.Controller.Combat
             return new AppliedStatus()
             {
                 BaseStatus = statusBase,
-                TotalDamage = GetModifiedDamage(applicator, statusBase),
-                HealAmount = GetHealing(applicator, statusBase),
-                HealPercentage = GetHealingPercentage(applicator, statusBase),
+                TotalDamage = DamageCalculator.GetDamage(applicator, statusBase),
+                HealAmount = DamageCalculator.GetHealing(applicator, statusBase),
+                HealPercentage = DamageCalculator.GetHealingPercentage(applicator, statusBase),
                 TurnsRemaining = statusBase.Duration,
                 CritChance = applicator.CritChance + statusBase.CritChance,
                 CritMultiplier = applicator.CritMultiplier + statusBase.CritMultiplier,
@@ -350,84 +350,6 @@ namespace TurnBasedRPG.Controller.Combat
                 CritMultiplier = status.CritMultiplier,
                 StackCount = 1
             };
-        }
-        
-        /// <summary>
-        /// Returns the amount of damage caused by a status effect, modified by a character's stats.
-        /// </summary>
-        /// <param name="applicator">The character applying the status effect.</param>
-        /// <param name="status">The status effect to get the damage of.</param>
-        /// <returns></returns>
-        private DamageTypes GetModifiedDamage(Character applicator, StatusEffect status)
-        {
-            int[] damage = new int[6];
-            var statusDamage = status.Damage.AsArray();
-            // For each different damage type
-            for (int i = 0; i < statusDamage.Count(); i++)
-            {
-                damage[i] = 0;
-                bool doAnyStatsModifyDamage = false;
-                // Check the status to see if it modifies damage based on a stat
-                foreach (var stat in status.DamageStatModifier.ToArray())
-                {
-                    if (!doAnyStatsModifyDamage && stat.AsArray()[i] > 0) doAnyStatsModifyDamage = true;
-                }
-                // If the status does more than 0 damage or if the status deals damage based on the applicator's stats
-                if (status.Damage.AsArray()[i] > 0 || doAnyStatsModifyDamage)
-                {
-                    damage[i] = status.Damage.AsArray()[i] + applicator.DamageModifier.AsArray()[i];
-                    // For each damage type bonus provided per stat, multiply it with the applicator's current stat
-                    for (int j = 0; j < applicator.CurrentStats.GetStatTypesAsArray().Count(); j++)
-                    {
-                        damage[i] += status.DamageStatModifier.ToArray()[j].AsArray()[i]
-                                        * applicator.CurrentStats.GetStatTypesAsArray()[j];
-                    }
-
-                    damage[i] *= (applicator.DamagePercentageModifier.AsArray()[i] + 100) / 100;
-                    if (status.IsMagical) damage[i] *= (applicator.SpellDamagePercentageModifier + 100) / 100;
-                }
-            }
-            return new DamageTypes(damage);
-        }
-
-        /// <summary>
-        /// Gets the amount of healing caused by a status effect, modified by a character's stats.
-        /// </summary>
-        /// <param name="applicator">The character applying the buff.</param>
-        /// <param name="status">The status effect to get the healing from.</param>
-        /// <returns>The amount of healing from the buff.</returns>
-        private int GetHealing(Character applicator, StatusEffect status)
-        {
-            int totalHealing = status.HealAmount;
-
-            for (int i = 0; i < applicator.CurrentStats.GetStatTypesAsArray().Count(); i++)
-            {
-                totalHealing += status.HealStatModifier.GetStatTypesAsArray()[i]
-                                * applicator.CurrentStats.GetStatTypesAsArray()[i];
-            }
-            
-            if (status.IsMagical)
-                totalHealing = (totalHealing + applicator.SpellDamageModifier) * (applicator.SpellDamagePercentageModifier + 100) / 100;
-
-            return totalHealing;
-        }
-
-        /// <summary>
-        /// Gets the percentage of max health a status effect heals, modified by a character's stats.
-        /// </summary>
-        /// <param name="applicator">The character applying the status effect.</param>
-        /// <param name="status">The status effect to get the healing from.</param>
-        /// <returns>The percentage of max health this status effect heals.</returns>
-        private int GetHealingPercentage(Character applicator, StatusEffect status)
-        {
-            var stats = status.StatsPerHealPercentage.GetStatTypesAsArray();
-            var charStats = applicator.CurrentStats.GetStatTypesAsArray();
-            int totalPercentage = status.HealPercentage;
-            for (int i = 0; i < stats.Count(); i++)
-            {
-                if (stats[i] > 0) totalPercentage += charStats[i] / stats[i];
-            }
-            return totalPercentage;
         }
 
         /// <summary>
@@ -476,35 +398,6 @@ namespace TurnBasedRPG.Controller.Combat
             character.ResistAllPercentage -= baseStatus.ResistAllPercentage * status.StackCount;
             character.SpellDamageModifier -= baseStatus.SpellDamageModifier * status.StackCount;
             character.SpellDamagePercentageModifier -= baseStatus.SpellDamagePercentageModifier * status.StackCount;
-        }
-
-        /// <summary>
-        /// Calculates the total amount of damage a status effect will do to a character modified by
-        /// the character's stats.
-        /// </summary>
-        /// <param name="statusDamage">The amount of damage a status effect will do.</param>
-        /// <param name="character">The character whose stats are being calculated against.</param>
-        /// <returns>An integer representing the total damage that will be dealt to the character.</returns>
-        private int CalculateTotalDamage(DamageTypes statusDamage, Character character)
-        {
-            int totalDamage = 0;
-            int[] damage = statusDamage.AsArray();
-            for (int j = 0; j < damage.Count(); j++)
-            {
-                // If a specific type of armor is over 100% (meaning heals instead of damages) then target heals for any percentage of the damage
-                // over 100%
-                if (character.ArmorPercentage.AsArray()[j] > 100 && damage[j] > 0)
-                    totalDamage += damage[j] * (100 - character.ArmorPercentage.AsArray()[j]) / 100;
-                // If resist all percentage is over 100%, target heals for any percentage of damage over 100%
-                else if (character.ResistAllPercentage > 100 && damage[j] > 0)
-                    totalDamage += damage[j] * (100 - character.ResistAllPercentage) / 100;
-                // If damage is greater than the target's armor, calculate total damage by deducting target's armor values from damage
-                else if (damage[j] > character.Armor.AsArray()[j])
-                    totalDamage -= (damage[j] - character.Armor.AsArray()[j])
-                                    * (100 + character.ArmorPercentage.AsArray()[j]) / 100
-                                    * (100 + character.ResistAllPercentage) / 100;
-            }
-            return totalDamage;
         }
     }
 }
