@@ -20,6 +20,7 @@ namespace TurnBasedRPG.Controller.Combat
         /// </summary>
         private class AppliedStatus
         {
+            public Character Applicator { get; set; }
             public StatusEffect BaseStatus { get; set; }
             public DamageTypes TotalDamage { get; set; }
             public int HealAmount { get; set; }
@@ -36,6 +37,7 @@ namespace TurnBasedRPG.Controller.Combat
         /// </summary>
         private class DelayedStatus
         {
+            public Character Applicator { get; set; }
             public IReadOnlyList<int> Targets { get; set; }
             public StatusEffect BaseStatus { get; set; }
             public DamageTypes TotalDamage { get; set; }
@@ -48,10 +50,16 @@ namespace TurnBasedRPG.Controller.Combat
 
         private Dictionary<Character, List<AppliedStatus>> _appliedStatuses = new Dictionary<Character, List<AppliedStatus>>();
         private Dictionary<Character, List<DelayedStatus>> _delayedStatuses = new Dictionary<Character, List<DelayedStatus>>();
+        private ThreatController _threatController;
         private Random _random = new Random();
         public IReadOnlyList<Character> AllCharacters { get; set; }
 
         public event EventHandler<CharactersDiedEventArgs> CharactersDied;
+
+        public StatusController(ThreatController threatController)
+        {
+            _threatController = threatController;
+        }
 
         /// <summary>
         /// Applies a status effect on a character.
@@ -141,6 +149,7 @@ namespace TurnBasedRPG.Controller.Combat
                     // If the status is stackable, refresh the duration and apply another layer of effects
                     if (status.BaseStatus.Stackable && matchingStatus.StackCount < status.BaseStatus.StackSize)
                     {
+                        matchingStatus.Applicator = status.Applicator;
                         matchingStatus.TurnsRemaining = status.BaseStatus.Duration;
                         matchingStatus.TotalDamage += status.TotalDamage;
                         matchingStatus.HealAmount += status.HealAmount;
@@ -151,11 +160,13 @@ namespace TurnBasedRPG.Controller.Combat
                     // If the status is stackable but has reached its stack limit, refresh the duration only
                     else if (status.BaseStatus.Stackable)
                     {
+                        matchingStatus.Applicator = status.Applicator;
                         matchingStatus.TurnsRemaining = status.BaseStatus.Duration;
                     }
                     // If the status isn't stackable, refresh the duration and reset the damage
                     else
                     {
+                        matchingStatus.Applicator = status.Applicator;
                         matchingStatus.TurnsRemaining = status.BaseStatus.Duration;
                         matchingStatus.TotalDamage = status.TotalDamage;
                         matchingStatus.HealAmount = status.HealAmount;
@@ -204,6 +215,7 @@ namespace TurnBasedRPG.Controller.Combat
         {
             var delayedStatus = new DelayedStatus()
             {
+                Applicator = applicator,
                 BaseStatus = statusBase,
                 TotalDamage = DamageCalculator.GetDamage(applicator, statusBase),
                 HealAmount = DamageCalculator.GetHealing(applicator, statusBase),
@@ -255,17 +267,25 @@ namespace TurnBasedRPG.Controller.Combat
             // Calculate damage and apply healing from each status effect
             foreach (var status in _appliedStatuses[character])
             {
-                totalDamage += DamageCalculator.GetTotalDamage(status.TotalDamage, character);
+                int damage = DamageCalculator.GetTotalDamage(status.TotalDamage, character);
+                totalDamage += damage;
                 int healAmount = status.HealAmount;
-
+                int percentHeal = character.CurrentMaxHealth * status.HealPercentage / 100;
                 if (_random.Next(1, 101) <= status.CritChance)
                 {
                     totalDamage = totalDamage * status.CritMultiplier / 100;
                     healAmount = healAmount * status.CritMultiplier / 100;
                 }
 
+                character.CurrentHealth += percentHeal;
                 character.CurrentHealth += healAmount;
-                character.CurrentHealth += character.CurrentMaxHealth * status.HealPercentage / 100;
+
+                _threatController.ApplyThreat(status.Applicator,
+                                              character,
+                                              damage + healAmount + percentHeal,
+                                              status.BaseStatus.Threat,
+                                              status.BaseStatus.ThreatMultiplier);
+
                 if (character.CurrentHealth > character.CurrentMaxHealth) character.CurrentHealth = character.CurrentMaxHealth;
                 status.TurnsRemaining--;
                 if (status.TurnsRemaining == 0)
@@ -321,6 +341,7 @@ namespace TurnBasedRPG.Controller.Combat
         {
             return new AppliedStatus()
             {
+                Applicator = applicator,
                 BaseStatus = statusBase,
                 TotalDamage = DamageCalculator.GetDamage(applicator, statusBase),
                 HealAmount = DamageCalculator.GetHealing(applicator, statusBase),

@@ -25,6 +25,10 @@ namespace TurnBasedRPG.Model.Entities
         public int CurrentMaxMana { get; set; }
         public int CurrentMana { get; set; }
 
+        public int Threat { get; set; }
+        public int ThreatMultiplier { get; set; }
+        public int InitialThreat { get; set; }
+
         public int CritChance { get; set; }
         public int CritMultiplier { get; set; }
 

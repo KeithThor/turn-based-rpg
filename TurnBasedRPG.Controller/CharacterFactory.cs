@@ -63,6 +63,7 @@ namespace TurnBasedRPG.Controller
             character.DamagePercentageModifier = new DamageTypes(cBase.DamagePercentageModifier);
             character.Armor = new DamageTypes(cBase.Armor);
             character.ArmorPercentage = new DamageTypes(cBase.ArmorPercentage);
+            character.ThreatMultiplier = cBase.ThreatMultiplier;
             // Add spell references based on spell ids contained in the character base
             character.SpellList = _spellRepo.GetAll().Where(spell => cBase.SpellIdList.Contains(spell.Id)).ToList();
             character.Inventory = _itemRepo.GetAll().Where(item => cBase.ItemIdList.Contains(item.Id)).ToList();

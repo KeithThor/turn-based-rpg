@@ -20,6 +20,7 @@ namespace TurnBasedRPG.Controller.Combat
         /// </summary>
         private class DelayedAction
         {
+            public Character Actor { get; set; }
             public ActionBase BaseAction { get; set; }
             public DamageTypes TotalDamage { get; set; }
             public int HealAmount { get; set; }
@@ -32,6 +33,7 @@ namespace TurnBasedRPG.Controller.Combat
 
         private CharacterController _characterController;
         private StatusController _statusController;
+        private ThreatController _threatController;
         private IReadOnlyList<Character> _allCharacters;
         private Random _random;
         public IReadOnlyList<Character> AllCharacters
@@ -46,10 +48,12 @@ namespace TurnBasedRPG.Controller.Combat
         public event EventHandler<CharactersDiedEventArgs> CharactersDied;
 
         public ActionController(CharacterController characterController,
-                                StatusController statusController)
+                                StatusController statusController,
+                                ThreatController threatController)
         {
             _characterController = characterController;
             _statusController = statusController;
+            _threatController = threatController;
             _statusController.CharactersDied += OnCharactersDying;
             _random = new Random();
         }
@@ -145,6 +149,7 @@ namespace TurnBasedRPG.Controller.Combat
 
             _delayedActions[actor].Add(new DelayedAction()
             {
+                Actor = actor,
                 BaseAction = action,
                 TotalDamage = totalDamage,
                 HealAmount = totalHeal,
@@ -196,6 +201,11 @@ namespace TurnBasedRPG.Controller.Combat
                 _characterController.ModifyCurrentHealth(targets[i], percentHealAmount);
                 _characterController.ModifyCurrentHealth(targets[i], modifiedHealAmount);
                 _characterController.ModifyCurrentHealth(targets[i], totalDamage);
+                _threatController.ApplyThreat(actor,
+                                              targets[i],
+                                              percentHealAmount + modifiedHealAmount + totalDamage,
+                                              action.Threat,
+                                              action.ThreatMultiplier);
             }
         }
 
@@ -216,8 +226,12 @@ namespace TurnBasedRPG.Controller.Combat
 
                 _characterController.ModifyCurrentHealth(targets[i], percentHealAmount);
                 _characterController.ModifyCurrentHealth(targets[i], action.HealAmount);
-
                 _characterController.ModifyCurrentHealth(targets[i], totalDamage);
+                _threatController.ApplyThreat(action.Actor,
+                                              targets[i],
+                                              percentHealAmount + action.HealAmount + totalDamage,
+                                              action.BaseAction.Threat,
+                                              action.BaseAction.ThreatMultiplier);
             }
 
             CheckForDeadTargets(targets);

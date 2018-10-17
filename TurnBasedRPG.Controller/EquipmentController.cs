@@ -62,6 +62,8 @@ namespace TurnBasedRPG.Controller
             character.SpellDamagePercentageModifier -= equipment.SpellDamagePercentageModifier;
             character.ResistAll -= equipment.ResistAll;
             character.ResistAllPercentage -= equipment.ResistAllPercentage;
+            character.ThreatMultiplier -= equipment.ThreatMultiplier;
+            character.InitialThreat -= equipment.Threat;
 
             // Remove any skills, spells, and status effects given from the equipment from the character
             foreach (var spell in equipment.SpellList)
@@ -105,6 +107,8 @@ namespace TurnBasedRPG.Controller
             character.SpellDamagePercentageModifier += equipment.SpellDamagePercentageModifier;
             character.ResistAll += equipment.ResistAll;
             character.ResistAllPercentage += equipment.ResistAllPercentage;
+            character.ThreatMultiplier += equipment.ThreatMultiplier;
+            character.InitialThreat += equipment.Threat;
 
             // Adds any skills, spells, and status effects from the equipment to the character
             foreach (var spell in equipment.SpellList)

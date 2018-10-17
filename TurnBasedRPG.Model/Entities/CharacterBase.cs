@@ -33,6 +33,8 @@ namespace TurnBasedRPG.Model.Entities
         public int SpellDamageModifier { get; set; }
         public int SpellDamagePercentageModifier { get; set; }
 
+        public int ThreatMultiplier { get; set; }
+
         // Armor modifiers
         public DamageTypes Armor { get; } = new DamageTypes();
         public DamageTypes ArmorPercentage { get; } = new DamageTypes();

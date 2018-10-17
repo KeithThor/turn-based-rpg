@@ -38,7 +38,8 @@ namespace TurnBasedRPG.Model.Entities
         public DamageTypes ArmorPercentage { get; } = new DamageTypes();
         public int ResistAll { get; }
         public int ResistAllPercentage { get; }
-
+        public int ThreatMultiplier { get; set; }
+        public int Threat { get; set; }
         public int Duration { get; }
         public bool Stackable { get; }
         public int StackSize { get; }

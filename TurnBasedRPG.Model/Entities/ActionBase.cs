@@ -32,6 +32,8 @@ namespace TurnBasedRPG.Model.Entities
         public DamageStatModifier DamageStatModifier { get; } = new DamageStatModifier();
         public int Cooldown { get; set; }
         public int Delay { get; set; }
+        public int Threat { get; set; }
+        public int ThreatMultiplier { get; set; }
 
         public List<StatusEffect> BuffsToApply { get; set; } = new List<StatusEffect>();
     }
