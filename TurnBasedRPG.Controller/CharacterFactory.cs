@@ -58,6 +58,8 @@ namespace TurnBasedRPG.Controller
             character.CurrentStats = new PrimaryStat(character.Stats);
             character.DamageModifier = new DamageTypes(cBase.DamageModifier);
             character.DamageModifier.Physical += StatDefinition.GetDamageFromStrength(character.CurrentStats.Strength);
+            character.CritChance = cBase.CritChance;
+            character.CritMultiplier = cBase.CritMultiplier;
             character.DamagePercentageModifier = new DamageTypes(cBase.DamagePercentageModifier);
             character.Armor = new DamageTypes(cBase.Armor);
             character.ArmorPercentage = new DamageTypes(cBase.ArmorPercentage);

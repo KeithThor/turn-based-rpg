@@ -20,15 +20,19 @@ namespace TurnBasedRPG.Model.Entities
         public int ModifyMaxMana { get; }
         public PrimaryStat ModifyStats { get; } = new PrimaryStat();
         public DamageTypes Damage { get; } = new DamageTypes();
-        public DamageTypes DamageIntellectModifier { get; } = new DamageTypes();
+        public DamageStatModifier DamageStatModifier { get; } = new DamageStatModifier();
         public DamageTypes DamageModifier { get; } = new DamageTypes();
         public DamageTypes DamagePercentageModifier { get; } = new DamageTypes();
+        public int DamageCritChance { get; set; }
+        public int DamageCritMultiplier { get; set; }
+        public int CritChance { get; set; }
+        public int CritMultiplier { get; set; }
         public int SpellDamageModifier { get; set; }
         public int SpellDamagePercentageModifier { get; set; }
         public int HealAmount { get; set; }
-        public int HealIntellectModifier { get; set; }
+        public PrimaryStat HealStatModifier { get; set; } = new PrimaryStat();
         public int HealPercentage { get; set; }
-        public int IntellectPerHealPercentage { get; set; }
+        public PrimaryStat StatsPerHealPercentage { get; set; } = new PrimaryStat();
 
         public DamageTypes Armor { get; } = new DamageTypes();
         public DamageTypes ArmorPercentage { get; } = new DamageTypes();
@@ -39,5 +43,7 @@ namespace TurnBasedRPG.Model.Entities
         public bool Stackable { get; }
         public int StackSize { get; }
         public bool IsDebuff { get; } = false;
+        public bool IsPermanent { get; set; } = false;
+        public bool IsMagical { get; set; }
     }
 }

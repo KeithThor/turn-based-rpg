@@ -23,12 +23,17 @@ namespace TurnBasedRPG.Shared
         }
         public DamageTypes(int[] values)
         {
-            Physical = values[0];
-            Fire = values[1];
-            Frost = values[2];
-            Lightning = values[3];
-            Shadow = values[4];
-            Light = values[5];
+            if (values.Count() != 6)
+                throw new Exception("Can only initialize DamageTypes with an int array of size 6.");
+            else
+            {
+                Physical = values[0];
+                Fire = values[1];
+                Frost = values[2];
+                Lightning = values[3];
+                Shadow = values[4];
+                Light = values[5];
+            }
         }
 
         public int Physical { get; set; } = 0;
@@ -42,7 +47,7 @@ namespace TurnBasedRPG.Shared
         /// Returns all the possible damage types as one int array.
         /// </summary>
         /// <returns>An array containing all the possible damage types.</returns>
-        public int[] GetDamageTypesAsArray()
+        public int[] AsArray()
         {
             return new int[] { Physical, Fire, Frost, Lightning, Shadow, Light };
         }
@@ -85,6 +90,19 @@ namespace TurnBasedRPG.Shared
                 Lightning = a.Lightning * b,
                 Shadow = a.Shadow * b,
                 Light = a.Light * b
+            };
+        }
+
+        public static DamageTypes operator /(DamageTypes a, int b)
+        {
+            return new DamageTypes
+            {
+                Physical = a.Physical / b,
+                Fire = a.Fire / b,
+                Frost = a.Frost / b,
+                Lightning = a.Lightning / b,
+                Shadow = a.Shadow / b,
+                Light = a.Light / b
             };
         }
     }

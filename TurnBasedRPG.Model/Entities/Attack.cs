@@ -10,16 +10,6 @@ namespace TurnBasedRPG.Model.Entities
 {
     public class Attack : ActionBase, IDisplayAction
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public IReadOnlyList<int> TargetPositions { get; set; } = new List<int>();
-        public int CenterOfTargetsPosition { get; set; } = 5;
-        public bool CanTargetThroughUnits { get; set; }
-        public bool CanSwitchTargetPosition { get; set; }
-        public int DamageModifier { get; set; }
-        public int DamagePercentageModifier { get; set; }
-
         public Attack()
         {
         }

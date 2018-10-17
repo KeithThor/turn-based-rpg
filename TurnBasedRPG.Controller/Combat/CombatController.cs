@@ -10,7 +10,7 @@ using TurnBasedRPG.Shared.Viewmodel;
 using TurnBasedRPG.Controller.EventArgs;
 using TurnBasedRPG.Shared.EventArgs;
 
-namespace TurnBasedRPG.Controller
+namespace TurnBasedRPG.Controller.Combat
 {
     /// <summary>
     /// Controller responsible for handling combat interactions.
@@ -65,6 +65,7 @@ namespace TurnBasedRPG.Controller
             AllCharacters.AddRange(EnemyCharacters);
             CurrentTurnOrder = DetermineTurnOrder();
             NextTurnOrder = new List<Character>(CurrentTurnOrder);
+            _actionController.AllCharacters = AllCharacters;
         }
 
         private void OnCharactersDying(object sender, CharactersDiedEventArgs args)
@@ -186,33 +187,22 @@ namespace TurnBasedRPG.Controller
         /// <param name="actionTargetPositions">The list of positions the action is targeting.</param>
         public void StartAction(Actions actionType, string category, int index, IReadOnlyList<int> actionTargetPositions)
         {
-            var targetCharacters = new List<Character>();
-            if (actionTargetPositions != null)
-            {
-                foreach (var position in actionTargetPositions)
-                {
-                    for (int i = 0; i < AllCharacters.Count; i++)
-                    {
-                        if (AllCharacters[i].Position == position)
-                            targetCharacters.Add(AllCharacters[i]);
-                    }
-                }
-            }
+            
 
             switch (actionType)
             {
                 case Actions.Attack:
                     var attack = GetActionsFromCategory<Attack>(actionType, category)[index];
-                    _actionController.StartAttack(CurrentTurnOrder[0], attack, targetCharacters);
+                    _actionController.StartAction(CurrentTurnOrder[0], attack, actionTargetPositions);
                     break;
                 case Actions.Spells:
                     var spell = GetActionsFromCategory<Spell>(actionType, category)[index];
-                    _actionController.StartSpell(CurrentTurnOrder[0], spell, targetCharacters);
+                    _actionController.StartAction(CurrentTurnOrder[0], spell, actionTargetPositions);
                     break;
                 case Actions.Items:
                     var item = GetConsumablesFromCategory(category)[index];
                     item.Charges--;
-                    _actionController.StartSpell(CurrentTurnOrder[0], item.ItemSpell, targetCharacters);
+                    _actionController.StartAction(CurrentTurnOrder[0], item.ItemSpell, actionTargetPositions);
                     break;
                 case Actions.Pass:
                     CurrentTurnOrder.Add(CurrentTurnOrder[0]);
@@ -409,13 +399,13 @@ namespace TurnBasedRPG.Controller
             {
                 case Actions.Attack:
                     var attack = GetActionsFromCategory<Attack>(actionType, category)[index];
-                    return _viewModelController.GetAttackData(CurrentTurnOrder[0], attack);
+                    return _viewModelController.GetActionData(CurrentTurnOrder[0], attack);
                 case Actions.Spells:
                     var spell = GetActionsFromCategory<Spell>(actionType, category)[index];
-                    return _viewModelController.GetSpellData(CurrentTurnOrder[0], spell);
+                    return _viewModelController.GetActionData(CurrentTurnOrder[0], spell);
                 case Actions.Items:
                     var item = GetConsumablesFromCategory(category)[index];
-                    return _viewModelController.GetSpellData(CurrentTurnOrder[0], item.ItemSpell);
+                    return _viewModelController.GetActionData(CurrentTurnOrder[0], item.ItemSpell);
                 default:
                     return null;
             }

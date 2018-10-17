@@ -40,15 +40,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActionController.cs" />
+    <Compile Include="Combat\ActionController.cs" />
     <Compile Include="CharacterController.cs" />
     <Compile Include="CharacterFactory.cs" />
-    <Compile Include="CombatController.cs" />
+    <Compile Include="Combat\CombatController.cs" />
     <Compile Include="EquipmentController.cs" />
     <Compile Include="EventArgs\CharactersDiedEventArgs.cs" />
     <Compile Include="EventArgs\StartOfTurnEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StatusController.cs" />
+    <Compile Include="Combat\StatusController.cs" />
     <Compile Include="ViewModelController.cs" />
   </ItemGroup>
   <ItemGroup>

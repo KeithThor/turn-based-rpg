@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TurnBasedRPG.Controller.Combat;
 using TurnBasedRPG.Model.Entities;
 using TurnBasedRPG.Shared.Viewmodel;
 
@@ -20,24 +21,14 @@ namespace TurnBasedRPG.Controller
             _actionController = actionController;
         }
 
-        public SubActionData GetSpellData(Character character, Spell spell)
+        public SubActionData GetActionData(Character character, ActionBase action)
         {
             var data = new SubActionData();
-            var damage = _actionController.GetSpellDamage(character, spell);
-            data.Damage = spell.Damage;
+            var damage = _actionController.GetDamage(character, action);
+            data.Damage = action.Damage;
             data.ModifiedDamage = damage;
-            data.Heal = spell.HealAmount;
-            data.StatusEffects = new List<string>(spell.BuffsToApply.Select(status => status.Name));
-            return data;
-        }
-
-        public SubActionData GetAttackData(Character character, Attack attack)
-        {
-            var data = new SubActionData();
-            var damage = _actionController.GetAttackDamage(character, attack);
-            data.Damage = character.DamageModifier;
-            data.ModifiedDamage = damage;
-            data.Heal = 0;
+            data.Heal = action.HealAmount;
+            data.StatusEffects = new List<string>(action.BuffsToApply.Select(status => status.Name));
             return data;
         }
     }

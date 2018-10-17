@@ -22,6 +22,8 @@ namespace TurnBasedRPG.Model.Entities
         // Damage modifiers
         public DamageTypes DamageModifier { get; } = new DamageTypes();
         public DamageTypes DamagePercentageModifier { get; } = new DamageTypes();
+        public int CritChance { get; set; }
+        public int CritMultiplier { get; set; }
         public int SpellDamageModifier { get; set; }
         public int SpellDamagePercentageModifier { get; set; }
 

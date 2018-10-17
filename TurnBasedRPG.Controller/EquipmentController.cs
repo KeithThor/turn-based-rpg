@@ -99,6 +99,8 @@ namespace TurnBasedRPG.Controller
             character.ArmorPercentage += equipment.ArmorPercentage;
             character.DamageModifier += equipment.DamageModifier;
             character.DamagePercentageModifier += equipment.DamagePercentageModifier;
+            character.CritChance += equipment.CritChance;
+            character.CritMultiplier += equipment.CritMultiplier;
             character.SpellDamageModifier += equipment.SpellDamageModifier;
             character.SpellDamagePercentageModifier += equipment.SpellDamagePercentageModifier;
             character.ResistAll += equipment.ResistAll;

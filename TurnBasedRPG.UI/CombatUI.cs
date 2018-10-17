@@ -8,6 +8,7 @@ using TurnBasedRPG.Shared.EventArgs;
 using TurnBasedRPG.Shared.Interfaces;
 using TurnBasedRPG.Shared.Enums;
 using TurnBasedRPG.Controller;
+using TurnBasedRPG.Controller.Combat;
 
 namespace TurnBasedRPG.UI
 {

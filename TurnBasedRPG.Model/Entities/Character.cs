@@ -25,6 +25,9 @@ namespace TurnBasedRPG.Model.Entities
         public int CurrentMaxMana { get; set; }
         public int CurrentMana { get; set; }
 
+        public int CritChance { get; set; }
+        public int CritMultiplier { get; set; }
+
         // Primary Stats
         public PrimaryStat Stats { get; set; }
         public PrimaryStat CurrentStats { get; set; }
