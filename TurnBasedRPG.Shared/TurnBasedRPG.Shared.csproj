@@ -53,6 +53,8 @@
     <Compile Include="Interfaces\ICategorizable.cs" />
     <Compile Include="Interfaces\IDisplayAction.cs" />
     <Compile Include="Interfaces\IDisplayCharacter.cs" />
+    <Compile Include="ListExtensions.cs" />
+    <Compile Include="PercentageCalculator.cs" />
     <Compile Include="PrimaryStat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StatDefinition.cs" />

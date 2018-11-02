@@ -40,10 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AI\AIController.cs" />
+    <Compile Include="AI\Interfaces\ICombatAI.cs" />
     <Compile Include="Combat\ActionController.cs" />
     <Compile Include="CharacterController.cs" />
     <Compile Include="CharacterFactory.cs" />
     <Compile Include="Combat\CombatController.cs" />
+    <Compile Include="Combat\DamageCalculator.cs" />
+    <Compile Include="Combat\ThreatController.cs" />
     <Compile Include="EquipmentController.cs" />
     <Compile Include="EventArgs\CharactersDiedEventArgs.cs" />
     <Compile Include="EventArgs\StartOfTurnEventArgs.cs" />

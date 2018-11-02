@@ -14,6 +14,7 @@ namespace TurnBasedRPG.Model.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public int AiWeight { get; set; }
 
         public bool CanTargetThroughUnits { get; set; }
         public bool CanSwitchTargetPosition { get; set; }

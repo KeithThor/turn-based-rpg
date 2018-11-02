@@ -92,6 +92,23 @@ namespace TurnBasedRPG.Controller.Combat
         }
 
         /// <summary>
+        /// Gets the maximum non-critical damage an action can do as a flat integer.
+        /// </summary>
+        /// <param name="actor">The actor causing damage.</param>
+        /// <param name="action">The action the actor is using to cause damage.</param>
+        /// <returns>The amount of damage an action can do.</returns>
+        public static int GetDamageAsInt(Character actor, ActionBase action)
+        {
+            int totalDamage = 0;
+            var damage = GetDamage(actor, action).AsArray();
+            foreach (var amount in damage)
+            {
+                totalDamage += amount;
+            }
+            return totalDamage;
+        }
+
+        /// <summary>
         /// Given an actor and an action, returns the amount of healing that action will do.
         /// </summary>
         /// <param name="actor">The character that will perform the action.</param>
