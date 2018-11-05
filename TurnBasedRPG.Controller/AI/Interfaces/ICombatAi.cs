@@ -9,14 +9,18 @@ namespace TurnBasedRPG.Controller.AI.Interfaces
 {
     public struct AIDecision
     {
-
+        public ActionBase ActionChoice;
+        public int TargetPosition;
+        public Consumable ConsumableUsed;
     }
 
     public interface ICombatAI
     {
-        IReadOnlyList<Character> MyCharacters { get; set; }
+        IReadOnlyList<Character> AICharacters { get; set; }
         IReadOnlyList<Character> PlayerCharacters { get; set; }
 
-        AIDecision GetAIDecision(Character character);
+        AIDecision GetAIDecision(Character character,
+                                 IReadOnlyList<Character> aiCharacters,
+                                 IReadOnlyList<Character> playerCharacters);
     }
 }

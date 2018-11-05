@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TurnBasedRPG.Controller.AI;
+using TurnBasedRPG.Controller.AI.Interfaces;
 using TurnBasedRPG.Model.Entities;
 using TurnBasedRPG.Model.Repository;
 using TurnBasedRPG.Model.Repository.Interfaces;
@@ -22,6 +24,7 @@ namespace TurnBasedRPG
             Bind<IRepository<Spell>>().To<SpellRepository>();
             Bind<IRepository<StatusEffect>>().To<StatusEffectRepository>();
             Bind<IRepository<Weapon>>().To<WeaponRepository>();
+            Bind<ICombatAI>().To<BasicCombatAI>();
         }
     }
 }

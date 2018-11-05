@@ -14,7 +14,10 @@ namespace TurnBasedRPG.Model.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; }
+
+        // AI Data
         public int AiWeight { get; set; }
+        public bool IsOffensive { get; set; } = true;
 
         public bool CanTargetThroughUnits { get; set; }
         public bool CanSwitchTargetPosition { get; set; }

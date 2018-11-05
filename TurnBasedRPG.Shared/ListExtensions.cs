@@ -16,6 +16,7 @@ namespace TurnBasedRPG.Shared
         /// <returns>Returns the median value.</returns>
         public static T GetMedian<T>(this IList<T> list) where T: IComparable<T>
         {
+            if (list.Count == 0) return default(T);
             var copy = new List<T>(list);
             copy.Sort((item1, item2) => item2.CompareTo(item1));
 

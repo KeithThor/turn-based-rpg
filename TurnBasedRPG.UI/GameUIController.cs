@@ -8,12 +8,12 @@ namespace TurnBasedRPG.UI
 {
     public class GameUIController
     {
-        public const int ScreenWidth = 120;
-        public const int ScreenHeight = 53;
-        
+        private readonly int _screenWidth = (120 > Console.LargestWindowWidth) ? Console.LargestWindowWidth : 120;
+        private readonly int _screenHeight = (53 > Console.LargestWindowHeight) ? Console.LargestWindowHeight : 53;
+
         public GameUIController()
         {
-            Console.SetWindowSize(ScreenWidth, ScreenHeight);
+            Console.SetWindowSize(_screenWidth, _screenHeight);
             Console.OutputEncoding = System.Text.Encoding.Unicode;
             Console.CursorVisible = false;
             Console.Title = "Turn Based RPG";

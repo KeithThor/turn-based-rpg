@@ -9,6 +9,8 @@ using TurnBasedRPG.Shared.Interfaces;
 using TurnBasedRPG.Shared.Viewmodel;
 using TurnBasedRPG.Controller.EventArgs;
 using TurnBasedRPG.Shared.EventArgs;
+using TurnBasedRPG.Controller.AI.Interfaces;
+using TurnBasedRPG.Controller.AI;
 
 namespace TurnBasedRPG.Controller.Combat
 {
@@ -20,6 +22,7 @@ namespace TurnBasedRPG.Controller.Combat
         private CharacterFactory _characterFactory;
         private ActionController _actionController;
         private ViewModelController _viewModelController;
+        private ICombatAI _combatAI;
         private List<Character> AllCharacters;
         private List<Character> PlayerCharacters;
         private List<Character> EnemyCharacters;
@@ -35,12 +38,14 @@ namespace TurnBasedRPG.Controller.Combat
 
         public CombatController(CharacterFactory characterFactory, 
                                 ActionController actionController,
-                                ViewModelController viewModelController)
+                                ViewModelController viewModelController,
+                                ICombatAI combatAI)
         {
             _characterFactory = characterFactory;
             _actionController = actionController;
             _actionController.CharactersDied += OnCharactersDying;
             _viewModelController = viewModelController;
+            _combatAI = combatAI;
             PlayerCharacters = new List<Character>()
             {
                 _characterFactory.Create(1),
@@ -121,6 +126,29 @@ namespace TurnBasedRPG.Controller.Combat
         private void StartTurn()
         {
             _actionController.StartTurn(CurrentTurnOrder[0]);
+            // Currently Ai's turn
+            if (EnemyCharacters.Contains(CurrentTurnOrder[0]))
+                StartAITurn();
+        }
+
+        /// <summary>
+        /// Called to start an AI's turn.
+        /// <para>Throws an exception if the AI returns a null ActionBase.</para>
+        /// </summary>
+        private void StartAITurn()
+        {
+            var aiDecision = _combatAI.GetAIDecision(CurrentTurnOrder[0], EnemyCharacters, PlayerCharacters);
+            if (aiDecision.ActionChoice == null) throw new Exception("AI action choice cannot be null.");
+            StartAIAction(aiDecision.ActionChoice, aiDecision.TargetPosition);
+
+            // todo: Create class to handle consumables
+            if (aiDecision.ConsumableUsed != null)
+            {
+                var consumable = CurrentTurnOrder[0].Inventory.First(item => item == aiDecision.ConsumableUsed) as Consumable;
+                consumable.Charges--;
+                if (consumable.Charges == 0)
+                    CurrentTurnOrder[0].Inventory.Remove(consumable);
+            }
         }
 
         /// <summary>
@@ -179,6 +207,18 @@ namespace TurnBasedRPG.Controller.Combat
         }
 
         /// <summary>
+        /// Performs a character action given an ActionBase and a target position.
+        /// </summary>
+        /// <param name="action">The action being performed.</param>
+        /// <param name="targetPosition">The position the action will target.</param>
+        private void StartAIAction(ActionBase action, int targetPosition)
+        {
+            var targetPositions = AITargets.GetModifiedSelection(action, targetPosition);
+            _actionController.StartAction(CurrentTurnOrder[0], action, targetPositions);
+            EndTurn();
+        }
+
+        /// <summary>
         /// Performs a character action.
         /// </summary>
         /// <param name="actionType">The type of action that is being performed, such as Attack or Spells.</param>
@@ -187,8 +227,6 @@ namespace TurnBasedRPG.Controller.Combat
         /// <param name="actionTargetPositions">The list of positions the action is targeting.</param>
         public void StartAction(Actions actionType, string category, int index, IReadOnlyList<int> actionTargetPositions)
         {
-            
-
             switch (actionType)
             {
                 case Actions.Attack:

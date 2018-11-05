@@ -40,7 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AI\AIController.cs" />
+    <Compile Include="AI\BasicCombatAI.cs" />
+    <Compile Include="AI\AITargets.cs" />
     <Compile Include="AI\Interfaces\ICombatAI.cs" />
     <Compile Include="Combat\ActionController.cs" />
     <Compile Include="CharacterController.cs" />
