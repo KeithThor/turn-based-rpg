@@ -17,7 +17,7 @@ namespace TurnBasedRPG.Controller.AI.Interfaces
     public interface ICombatAI
     {
         IReadOnlyList<Character> AICharacters { get; set; }
-        IReadOnlyList<Character> PlayerCharacters { get; set; }
+        IReadOnlyList<Character> LivingPlayerCharacters { get; set; }
 
         AIDecision GetAIDecision(Character character,
                                  IReadOnlyList<Character> aiCharacters,

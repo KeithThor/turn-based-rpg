@@ -38,5 +38,18 @@
             "intellect": 25,
             "agility": 30
         }
+    },
+    {
+        "id": 4,
+        "name": "Skeleton Priest",
+        "symbol": "P",
+        "stats": {
+            "strength": 15,
+            "speed": 8,
+            "stamina": 15,
+            "intellect": 30,
+            "agility": 15
+        },
+        "spellIdList": [12]
     }
 ]

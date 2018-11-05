@@ -33,5 +33,10 @@
         "id" : 7,
         "name" : "Potions",
         "description" : "Consumable potions which have restorative or enhancement properties."
+    },
+    {
+        "id" : 8,
+        "name" : "Healing Spells",
+        "description": "Healing spells are a non-offensive category of spell that heals all targets regardless of resistances."
     }
 ]

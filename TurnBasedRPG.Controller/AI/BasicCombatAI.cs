@@ -45,7 +45,7 @@ namespace TurnBasedRPG.Controller.AI
         protected Character _activeCharacter;
 
         public IReadOnlyList<Character> AICharacters { get; set; }
-        public IReadOnlyList<Character> PlayerCharacters { get; set; }
+        public IReadOnlyList<Character> LivingPlayerCharacters { get; set; }
         private Random _rand;
 
         public BasicCombatAI()
@@ -65,7 +65,7 @@ namespace TurnBasedRPG.Controller.AI
         {
             _activeCharacter = character;
             AICharacters = aiCharacters;
-            PlayerCharacters = playerCharacters;
+            LivingPlayerCharacters = playerCharacters.Where(chara => chara.CurrentHealth > 0).ToList();
 
             return MakeDecision();
         }
@@ -135,8 +135,8 @@ namespace TurnBasedRPG.Controller.AI
             var characterPriorities = new Dictionary<Character, int>();
             foreach (var character in AICharacters)
             {
-                float percentHealthLost = 1 - (character.CurrentHealth / character.CurrentMaxHealth);
-                int priority = (int)percentHealthLost * 100 / 20;
+                float percentHealthLost = 1.0f - (((float)character.CurrentHealth) / character.CurrentMaxHealth);
+                int priority = (int)(percentHealthLost * 100) / 20;
 
                 // Only dead characters and the active character, if it is severely wounded, can be priority 5
                 if (priority == 5 && !includeDead) priority = 0;
@@ -154,26 +154,49 @@ namespace TurnBasedRPG.Controller.AI
         /// <returns></returns>
         protected virtual Dictionary<Character,int> EvaluateEnemies()
         {
-            var enemies = new List<Character>(PlayerCharacters);
+            var enemies = new List<Character>(LivingPlayerCharacters);
             var characterPriorities = new Dictionary<Character, int>();
 
             int median = enemies.Select(enemy => enemy.Threat).ToList().GetMedian();
-
-            foreach (var enemy in enemies)
+            
+            if (enemies.Count() == 2)
             {
-                int threatAsMedianPercentage = (int)(((float)enemy.Threat) / median * 100);
+                if (enemies[0].Threat > enemies[1].Threat)
+                {
+                    characterPriorities[enemies[0]] = 2;
+                    characterPriorities[enemies[1]] = 1;
+                }
+                else
+                {
+                    characterPriorities[enemies[1]] = 2;
+                    characterPriorities[enemies[0]] = 1;
+                }
+                foreach (var enemy in enemies)
+                {
+                    int percentHealth = (int)(((float)enemy.CurrentHealth) / enemy.CurrentMaxHealth * 100);
+                    // If percentage of health is less than 25%, increase threat level by 2
+                    if (percentHealth <= 25) characterPriorities[enemy] += 2;
+                    else if (percentHealth <= 50) characterPriorities[enemy] += 1;
+                }
+            }
+            else
+            {
+                foreach (var enemy in enemies)
+                {
+                    int threatAsMedianPercentage = (int)(((float)enemy.Threat) / median * 100);
 
-                // If threat is 50% higher than the median, threat level is 3
-                if (threatAsMedianPercentage >= 150) characterPriorities[enemy] = 3;
-                // If threat is 20% higher than the median, threat level is 2
-                else if (threatAsMedianPercentage >= 120) characterPriorities[enemy] = 2;
-                else characterPriorities[enemy] = 1;
+                    // If threat is 50% higher than the median, threat level is 3
+                    if (threatAsMedianPercentage >= 150) characterPriorities[enemy] = 3;
+                    // If threat is 20% higher than the median, threat level is 2
+                    else if (threatAsMedianPercentage >= 120) characterPriorities[enemy] = 2;
+                    else characterPriorities[enemy] = 1;
 
-                int percentHealth = (int)(((float)enemy.CurrentHealth) / enemy.CurrentMaxHealth * 100);
+                    int percentHealth = (int)(((float)enemy.CurrentHealth) / enemy.CurrentMaxHealth * 100);
 
-                // If percentage of health is less than 25%, increase threat level by 2
-                if (percentHealth <= 25) characterPriorities[enemy] += 2;
-                else if (percentHealth <= 50) characterPriorities[enemy] += 1;
+                    // If percentage of health is less than 25%, increase threat level by 2
+                    if (percentHealth <= 25) characterPriorities[enemy] += 2;
+                    else if (percentHealth <= 50) characterPriorities[enemy] += 1;
+                }
             }
             return characterPriorities;
         }
@@ -328,14 +351,14 @@ namespace TurnBasedRPG.Controller.AI
 
             // If selection is in left column and something is in the middle or right column on the same row, can't select this position
             bool leftColumnBlocked = selectionPosition % 3 == 1 &&
-                    PlayerCharacters.Where(
+                    LivingPlayerCharacters.Where(
                         character =>
                         (selectionPosition + 1 == character.Position || selectionPosition + 2 == character.Position)
                         && character.CurrentHealth > 0).Any();
 
             // If selection is in middle column and something is in the right column on the same row, can't select this position
             bool middleColumnBlocked = selectionPosition % 3 == 2 &&
-                    PlayerCharacters.Where(
+                    LivingPlayerCharacters.Where(
                         character =>
                         (selectionPosition + 1 == character.Position && character.CurrentHealth > 0)).Any();
 
@@ -343,7 +366,7 @@ namespace TurnBasedRPG.Controller.AI
             {
                 var targets = AITargets.GetModifiedTargets(action);
                 myCharacters.AddRange(AICharacters.Where(character => targets.Contains(character.Position)));
-                playerCharacters.AddRange(PlayerCharacters.Where(character => targets.Contains(character.Position)));
+                playerCharacters.AddRange(LivingPlayerCharacters.Where(character => targets.Contains(character.Position)));
                 return new SelectionCharacters()
                 {
                     MyCharacters = myCharacters,
@@ -376,7 +399,7 @@ namespace TurnBasedRPG.Controller.AI
                     }
                     else if (position <= 9)
                     {
-                        Character selectedCharacter = PlayerCharacters.FirstOrDefault(character => character.Position == position);
+                        Character selectedCharacter = LivingPlayerCharacters.FirstOrDefault(character => character.Position == position);
                         if (selectedCharacter != null)
                             playerCharacters.Add(selectedCharacter);
                     }

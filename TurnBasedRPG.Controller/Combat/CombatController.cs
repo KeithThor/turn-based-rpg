@@ -58,7 +58,7 @@ namespace TurnBasedRPG.Controller.Combat
                 _characterFactory.Create(3),
                 _characterFactory.Create(3),
                 _characterFactory.Create(3),
-                _characterFactory.Create(3),
+                _characterFactory.Create(4),
                 _characterFactory.Create(3)
             };
             EnemyCharacters[0].Position = 14;

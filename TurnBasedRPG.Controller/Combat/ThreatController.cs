@@ -21,9 +21,13 @@ namespace TurnBasedRPG.Controller.Combat
         /// <param name="modifiedHealth">The amount of health modified from a threatening action.</param>
         /// <param name="actionThreat">The amount of threat caused by an action or status effect.</param>
         /// <param name="actionThreatModifier">The threat multiplier caused by an action or status effect.</param>
-        public void ApplyThreat(Character character, Character target, int modifiedHealth, int actionThreat, int actionThreatModifier)
+        public void ApplyThreat(Character character, 
+                                Character target, 
+                                int modifiedHealth, 
+                                int actionThreat, 
+                                int actionThreatModifier)
         {
-            int flatThreat = modifiedHealth * 100 / target.CurrentMaxHealth + actionThreat;
+            int flatThreat = Math.Abs(modifiedHealth * 100 / target.CurrentMaxHealth) + actionThreat;
             int totalMultiplier = actionThreatModifier + character.ThreatMultiplier + 100;
 
             foreach (var buff in character.Buffs)
