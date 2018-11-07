@@ -157,7 +157,7 @@ namespace TurnBasedRPG.Controller.AI
             var enemies = new List<Character>(LivingPlayerCharacters);
             var characterPriorities = new Dictionary<Character, int>();
 
-            int median = enemies.Select(enemy => enemy.Threat).ToList().GetMedian();
+            int median = MathExtensions.GetMedian(enemies.Select(enemy => enemy.Threat).ToList());
             
             if (enemies.Count() == 2)
             {
@@ -252,8 +252,8 @@ namespace TurnBasedRPG.Controller.AI
                 }
             }
 
-            int medianHealing = defensiveActionsPoints.Values.ToList().GetMedian();
-            int medianDamage = offensiveActionsPoints.Values.ToList().GetMedian();
+            int medianHealing = MathExtensions.GetMedian(defensiveActionsPoints.Values.ToList());
+            int medianDamage = MathExtensions.GetMedian(offensiveActionsPoints.Values.ToList());
 
             // Assign action priorities based on how an action performs on par with other actions
 

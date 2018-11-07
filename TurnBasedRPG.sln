@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurnBasedRPG.Model", "TurnB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurnBasedRPG.Controller", "TurnBasedRPG.Controller\TurnBasedRPG.Controller.csproj", "{C2D22DCC-C372-486B-8093-E6159060E229}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurnBasedRPG.Controller.Test", "TurnBasedRPG.Controller.Test\TurnBasedRPG.Controller.Test.csproj", "{E51C5BE3-54E7-4673-A458-03DBD0E3A2B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{C2D22DCC-C372-486B-8093-E6159060E229}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2D22DCC-C372-486B-8093-E6159060E229}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2D22DCC-C372-486B-8093-E6159060E229}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E51C5BE3-54E7-4673-A458-03DBD0E3A2B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E51C5BE3-54E7-4673-A458-03DBD0E3A2B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E51C5BE3-54E7-4673-A458-03DBD0E3A2B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E51C5BE3-54E7-4673-A458-03DBD0E3A2B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

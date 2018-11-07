@@ -54,6 +54,7 @@
     <Compile Include="Interfaces\IDisplayAction.cs" />
     <Compile Include="Interfaces\IDisplayCharacter.cs" />
     <Compile Include="ListExtensions.cs" />
+    <Compile Include="MathExtensions.cs" />
     <Compile Include="PercentageCalculator.cs" />
     <Compile Include="PrimaryStat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

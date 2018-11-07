@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "targetPositions": [1, 2, 3, 6],
+        "centerOfTargetsPosition": 1,
+        "canTargetThroughUnits": false,
+        "canSwitchTargetPosition": true,
+        "damage": {"physical": 50}
+    },
+    {
+        "id": 2,
+        "targetPositions": [5],
+        "centerOfTargetsPosition": 5,
+        "canTargetThroughUnits": false,
+        "canSwitchTargetPosition": true,
+        "damage": {"physical": 50}
+    },
+    {
+        "id": 3,
+        "targetPositions": [5],
+        "centerOfTargetsPosition": 5,
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": true,
+        "healAmount": 50
+    }
+]
