@@ -22,5 +22,13 @@
         "canTargetThroughUnits": true,
         "canSwitchTargetPosition": true,
         "healAmount": 50
+    },
+    {
+        "id": 4,
+        "targetPositions": [1, 4, 7],
+        "centerOfTargetsPosition": 4,
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": false,
+        "damage": {"physical": 50}
     }
 ]

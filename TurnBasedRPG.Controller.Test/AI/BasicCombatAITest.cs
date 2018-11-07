@@ -236,5 +236,36 @@ namespace TurnBasedRPG.Controller.Test.AI
 
             Assert.AreEqual(expectedTargetPosition, actualTargetPosition);
         }
+
+        /// <summary>
+        /// AI should attack the center of targets position for an action that can't move it's target position.
+        /// </summary>
+        [TestMethod]
+        public void GetAIDecision_WithUnmovableTarget_AttacksDefaultTarget()
+        {
+            var attack = _actions.Find(action => action.Id == 4);
+            var playerCharacters = new List<Character>()
+            {
+                GetBlankCharacter(),
+                GetBlankCharacter(),
+                GetBlankCharacter()
+            };
+            playerCharacters[0].Position = 4;
+            playerCharacters[0].Threat = 25;
+            playerCharacters[1].Position = 8;
+            playerCharacters[1].Threat = 25;
+            playerCharacters[2].Position = 6;
+            playerCharacters[2].Threat = 25;
+            var aiC1 = GetBlankCharacter();
+            aiC1.Attacks.Add(attack);
+            aiC1.Position = 14;
+            var aiCharacters = new List<Character>() { aiC1 };
+            var ai = new BasicCombatAI();
+            int expectedTargetPosition = 4;
+            var aiDecisionData = ai.GetAIDecision(aiC1, aiCharacters, playerCharacters);
+            int actualTargetPosition = aiDecisionData.TargetPosition;
+
+            Assert.AreEqual(expectedTargetPosition, actualTargetPosition);
+        }
     }
 }

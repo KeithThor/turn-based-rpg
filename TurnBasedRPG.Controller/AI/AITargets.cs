@@ -50,6 +50,8 @@ namespace TurnBasedRPG.Controller.AI
             var centerOfTargets = GetModifiedCenter(action.CenterOfTargetsPosition);
             var selectedPositions = new List<int>(targets);
 
+            if (!action.CanSwitchTargetPosition) return selectedPositions;
+
             int offset = (selectionPosition > 9) ? 9 : 0;
 
             // If the center of target for the action is in a different column than the current selection's column

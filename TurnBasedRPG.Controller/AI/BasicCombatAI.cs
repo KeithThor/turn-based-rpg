@@ -302,31 +302,47 @@ namespace TurnBasedRPG.Controller.AI
         /// <returns>A struct containing the max priority and it's target position.</returns>
         protected virtual MaxPriorityTarget GetMaxPriorityTarget(ActionBase action, Dictionary<Character, int> priorities, bool isOffensive = false)
         {
-            var modifiedTargets = AITargets.GetModifiedTargets(action);
-            var modifiedCenter = AITargets.GetModifiedCenter(action.CenterOfTargetsPosition);
             int maxPriority = 0;
             int maxPotentialTarget = 0;
-            // Loops through all possible target positions and find the highest priority for this action
-            for (int i = 0; i <= 18; i++)
+
+            if (!action.CanSwitchTargetPosition)
             {
-                int totalPriority = 0;
-                var characterTargets = GetSelectionTargets(action, i);
+                var characterTargets = GetSelectionTargets(action, action.CenterOfTargetsPosition);
+                maxPotentialTarget = action.CenterOfTargetsPosition;
 
                 foreach (var character in characterTargets.MyCharacters)
                 {
-                    totalPriority += isOffensive ? -priorities[character] : priorities[character];
+                    maxPriority += isOffensive ? -priorities[character] : priorities[character];
                 }
                 foreach (var character in characterTargets.PlayerCharacters)
                 {
-                    totalPriority += isOffensive ? priorities[character] : -priorities[character];
+                    maxPriority += isOffensive ? priorities[character] : -priorities[character];
                 }
-
-                // If the current target's total priority is greater than the previous highest priority, or if equal,
-                // change highest priority with 50% chance
-                if (totalPriority > maxPriority || (totalPriority == maxPriority && _rand.Next(0, 2) == 1))
+            }
+            else
+            {
+                // Loops through all possible target positions and find the highest priority for this action
+                for (int i = 0; i <= 18; i++)
                 {
-                    maxPriority = totalPriority;
-                    maxPotentialTarget = i;
+                    int totalPriority = 0;
+                    var characterTargets = GetSelectionTargets(action, i);
+
+                    foreach (var character in characterTargets.MyCharacters)
+                    {
+                        totalPriority += isOffensive ? -priorities[character] : priorities[character];
+                    }
+                    foreach (var character in characterTargets.PlayerCharacters)
+                    {
+                        totalPriority += isOffensive ? priorities[character] : -priorities[character];
+                    }
+
+                    // If the current target's total priority is greater than the previous highest priority, or if equal,
+                    // change highest priority with 50% chance
+                    if (totalPriority > maxPriority || (totalPriority == maxPriority && _rand.Next(0, 2) == 1))
+                    {
+                        maxPriority = totalPriority;
+                        maxPotentialTarget = i;
+                    }
                 }
             }
 
