@@ -13,11 +13,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurnBasedRPG.Model", "TurnB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurnBasedRPG.Controller", "TurnBasedRPG.Controller\TurnBasedRPG.Controller.csproj", "{C2D22DCC-C372-486B-8093-E6159060E229}"
 EndProject
-<<<<<<< HEAD
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurnBasedRPG.Controller.Test", "TurnBasedRPG.Controller.Test\TurnBasedRPG.Controller.Test.csproj", "{E51C5BE3-54E7-4673-A458-03DBD0E3A2B9}"
-=======
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurnBasedRPG.UI.Test", "TurnBasedRPG.UI.Test\TurnBasedRPG.UI.Test.csproj", "{F74FAF96-775F-4C6D-AE2F-BDA788105BAE}"
->>>>>>> 54c6abc8bf8ce83648b7f0aa63a613aa08f8f7d3
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,17 +43,14 @@ Global
 		{C2D22DCC-C372-486B-8093-E6159060E229}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2D22DCC-C372-486B-8093-E6159060E229}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2D22DCC-C372-486B-8093-E6159060E229}.Release|Any CPU.Build.0 = Release|Any CPU
-<<<<<<< HEAD
 		{E51C5BE3-54E7-4673-A458-03DBD0E3A2B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E51C5BE3-54E7-4673-A458-03DBD0E3A2B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E51C5BE3-54E7-4673-A458-03DBD0E3A2B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E51C5BE3-54E7-4673-A458-03DBD0E3A2B9}.Release|Any CPU.Build.0 = Release|Any CPU
-=======
 		{F74FAF96-775F-4C6D-AE2F-BDA788105BAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F74FAF96-775F-4C6D-AE2F-BDA788105BAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F74FAF96-775F-4C6D-AE2F-BDA788105BAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F74FAF96-775F-4C6D-AE2F-BDA788105BAE}.Release|Any CPU.Build.0 = Release|Any CPU
->>>>>>> 54c6abc8bf8ce83648b7f0aa63a613aa08f8f7d3
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

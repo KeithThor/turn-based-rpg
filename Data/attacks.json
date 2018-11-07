@@ -1,8 +1,8 @@
 [
     {
         "id": 1,
-        "name": "Slash",
-        "description": "Slashes at one target with your sword.",
+        "name": "Bash",
+        "description": "Smacks at one target with your fists.",
         "targetPositions": [5],
         "centerOfTargetsPosition": 5,
         "canTargetThroughUnits": false,
