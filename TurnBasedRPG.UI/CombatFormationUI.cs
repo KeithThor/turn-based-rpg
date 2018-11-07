@@ -26,7 +26,7 @@ namespace TurnBasedRPG.UI
         {
             _characters = characters;
             var completeCombatFormations = new List<string>();
-            Console.WriteLine("\n\n\n");
+            completeCombatFormations.Add("\n\n\n");
             // For each row on the battlefield
             for (int i = 0; i < 3; i++)
             {

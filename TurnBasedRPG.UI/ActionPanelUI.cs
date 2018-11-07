@@ -10,7 +10,7 @@ namespace TurnBasedRPG.UI
     public class ActionPanelUI
     {
         private int _maxNumOfActions = 7;
-        private int _maxWidth = 18;
+        private int _maxWidth = 17;
         public int MaxWidth
         {
             get { return _maxWidth; }
@@ -33,7 +33,7 @@ namespace TurnBasedRPG.UI
             set
             {
                 _maxActionNameLength = value;
-                if (MaxWidth < value + 6) MaxWidth += 6;
+                if (MaxWidth < value + 5) MaxWidth += 5;
             }
         }
 
@@ -49,7 +49,7 @@ namespace TurnBasedRPG.UI
             var actionPanel = new List<string>();
             string actionName = "";
             
-            actionPanel.Add("╔" + new string('═', MaxWidth - 2));
+            actionPanel.Add("╔" + new string('═', MaxWidth - 1));
             for(int i = 1; i <= _maxNumOfActions; i++)
             {
                 string focus = focusNumber == i ? "► " : "  ";
@@ -81,11 +81,11 @@ namespace TurnBasedRPG.UI
                         actionName = "";
                         break;
                 }
-                int spaces = _maxActionNameLength - actionName.Length;
+                int spaces = MaxWidth - actionName.Length - 5;
                 actionPanel.Add("║ " + focus + actionName + new string(' ', spaces) + "│");
-                actionPanel.Add("║ " + new string(' ', MaxWidth - 4) + "│");
+                actionPanel.Add("║ " + new string(' ', MaxWidth - 3) + "│");
             }
-            actionPanel.Add("╚" + new string('═', MaxWidth - 2));
+            actionPanel.Add("╚" + new string('═', MaxWidth - 1));
             return actionPanel;
         }
     }
