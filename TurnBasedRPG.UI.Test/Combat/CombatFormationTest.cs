@@ -386,7 +386,7 @@ namespace TurnBasedRPG.UI.Test.Combat
         public void Render_WithTargets_RendersTargets()
         {
             var combatFormation = new CombatFormationUI();
-            combatFormation.IsInFormationPanel = true;
+            combatFormation.RenderFocus = true;
             combatFormation.TargetPositions = new List<int>() { 2, 4, 5, 6, 8 };
             int focusId = 1;
             var data = new List<IDisplayCharacter>();

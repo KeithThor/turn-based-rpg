@@ -67,11 +67,11 @@ namespace TurnBasedRPG.Controller.Combat
             PlayerCharacters[1].Position = 9;
             EnemyCharacters = new List<Character>()
             {
-                _characterFactory.Create(3),
-                _characterFactory.Create(3),
-                _characterFactory.Create(3),
                 _characterFactory.Create(4),
-                _characterFactory.Create(3)
+                _characterFactory.Create(3),
+                _characterFactory.Create(3),
+                _characterFactory.Create(3),
+                _characterFactory.Create(3),
             };
             EnemyCharacters[0].Position = 14;
             EnemyCharacters[1].Position = 13;
@@ -301,6 +301,15 @@ namespace TurnBasedRPG.Controller.Combat
                 return false;
             else
                 return true;
+        }
+
+        /// <summary>
+        /// Checks if it is the player's turn.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsPlayerTurn()
+        {
+            return PlayerCharacters.Contains(CurrentTurnOrder[0]);
         }
 
         /// <summary>

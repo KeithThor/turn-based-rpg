@@ -14,7 +14,7 @@ namespace TurnBasedRPG.UI.Combat
         private const int _paddingMiddle = 18;
         private const int _numberInRow = 3;
         private IReadOnlyList<IDisplayCharacter> _characters;
-        public bool IsInFormationPanel = false;
+        public bool RenderFocus = false;
         public IReadOnlyList<int> TargetPositions;
         public CombatFormationUI()
         {
@@ -109,11 +109,11 @@ namespace TurnBasedRPG.UI.Combat
                     if(i == 4)
                         sb.Append(' ', _paddingMiddle);
                     sb.Append(' ', i == 1 ? padding - 1 : padding);
-                    if(i < 4 && TargetPositions.Contains(i + iterations * _numberInRow) && IsInFormationPanel)
+                    if(i < 4 && TargetPositions.Contains(i + iterations * _numberInRow) && RenderFocus)
                     {
                         sb.Append("▲");
                     }
-                    else if(i >= 4 && TargetPositions.Contains(i + 3 + (iterations + 1) * _numberInRow) && IsInFormationPanel)
+                    else if(i >= 4 && TargetPositions.Contains(i + 3 + (iterations + 1) * _numberInRow) && RenderFocus)
                     {
                         sb.Append("▲");
                     }

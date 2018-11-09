@@ -252,7 +252,7 @@ namespace TurnBasedRPG.UI.Combat
             {
                 _isInFormationPanel = value;
                 if (_formationUI != null)
-                    _formationUI.IsInFormationPanel = value;
+                    _formationUI.RenderFocus = value;
             }
         }
         // Contains the default target positions for an action
@@ -289,6 +289,7 @@ namespace TurnBasedRPG.UI.Combat
             }
             _activeCharacterId = _combatInstance.GetNextActivePlayerId();
             _combatInstance.EndOfTurn += EndOfTurnTriggered;
+            _combatInstance.AIChoseTarget += OnAIChoseTarget;
             _displayCharacterManager = displayCharacterManager;
             _displayCharacterManager.Characters = _combatInstance.GetDisplayCharacters();
             _formationUI = formationUI;
@@ -302,9 +303,11 @@ namespace TurnBasedRPG.UI.Combat
 
         private void EndOfTurnTriggered(object sender, EndOfTurnEventArgs args)
         {
-            _activeCharacterId = _combatInstance.GetNextActivePlayerId();
+            _activeCharacterId = _combatInstance.GetActiveCharacterID();
             IsInSubPanel = false;
+            IsInCategory = false;
             IsInFormationPanel = false;
+            _tempTargetPositions = new List<int>();
             GetActiveSubPanelList();
             RefreshUI();
         }
@@ -319,17 +322,11 @@ namespace TurnBasedRPG.UI.Combat
         {
             int frameUpdates = 30;
             int msPerFrame = 50;
-            var healthChangeDict = new Dictionary<int, int>();
+            var healthChangeDict = new Dictionary<int, float>();
             foreach (var key in args.ChangeAmount.Keys)
             {
                 // Difference in health / frameUpdates, may have remainders that must be accounted for
-                int gradualHealthChange = args.ChangeAmount[key] / frameUpdates;
-                if (gradualHealthChange == 0)
-                {
-                    gradualHealthChange = 1;
-
-                    if (args.ChangeAmount[key] < 0) gradualHealthChange = -gradualHealthChange;
-                }
+                float gradualHealthChange = args.ChangeAmount[key] / ((float)frameUpdates);
                 healthChangeDict[key] = gradualHealthChange;
             }
 
@@ -338,17 +335,17 @@ namespace TurnBasedRPG.UI.Combat
 
             for (int i = 1; i <= frameUpdates; i++)
             {
-                // If current iteration is not 5, show gradual health changes over each ui update
+                // If current iteration is not the last frame, show gradual health changes over each ui update
                 if (i < frameUpdates)
                 {
                     foreach (var key in healthChangeDict.Keys)
                     {
-                        int newHealth = args.PreCharactersChanged[key] + healthChangeDict[key] * i;
+                        int newHealth = (int)(args.PreCharactersChanged[key] + healthChangeDict[key] * i);
                         _displayCharacterManager.SetCurrentHealth(key, newHealth);
                     }
                 }
-                // Current iteration is 5, set current health to the changed amount because dividing by 5 might
-                // create remainders that will cause the UI and Controller versions of characters to go out of sync
+                // Current iteration is last, set current health to the changed amount because dividing by number of iterations
+                // might create remainders that will cause the UI and Controller versions of characters to go out of sync
                 else
                 {
                     foreach (var key in args.PostCharactersChanged.Keys)
@@ -356,18 +353,26 @@ namespace TurnBasedRPG.UI.Combat
                         _displayCharacterManager.SetCurrentHealth(key, args.PostCharactersChanged[key]);
                     }
                 }
-                // 300 ms wait before refreshing each frame
-                //await Task.Run(() => RefreshUI(1, 300));
                 RefreshUI(1, msPerFrame);
             }
-
+            Thread.Sleep(1000);
             _isUIUpdating = false;
         }
 
-        private void AIChoseTargetTriggered(object sender, AIChoseTargetEventArgs args)
+        /// <summary>
+        /// Called whenever an AI has chosen an action and it's target. Refreshes the UI to visualize
+        /// the selection.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void OnAIChoseTarget(object sender, AIChoseTargetEventArgs args)
         {
+            int msWait = 1000;
+            int frames = 2;
+            _tempTargetPositions = args.TargetPositions;
             _formationUI.TargetPositions = args.TargetPositions;
-
+            _formationUI.RenderFocus = true;
+            RefreshUI(frames, msWait);
         }
 
         /// <summary>
@@ -485,7 +490,8 @@ namespace TurnBasedRPG.UI.Combat
         private IReadOnlyList<int> GetCorrectedTargets()
         {
             // In case of static targeting actions, change the default position to a static one
-            if (!_canSwitchTargetPosition)
+            // Or in case of ai's turn
+            if (!_canSwitchTargetPosition || !_characterDefaults.ContainsKey(_combatInstance.GetActiveCharacterID()))
             {
                 DefaultTargetPosition = 13;
                 return _tempTargetPositions;
@@ -855,7 +861,7 @@ namespace TurnBasedRPG.UI.Combat
         {
             // If its the enemy's turn, display focus on the enemy, else display focus on the currently active
             // player character.
-            int id = (_combatInstance.GetNextActivePlayerId() != _combatInstance.GetActiveCharacterID())
+            int id = (!_combatInstance.IsPlayerTurn())
                         ? _combatInstance.GetActiveCharacterID() : _combatInstance.GetNextActivePlayerId();
             var formations = _formationUI.Render(_displayCharacterManager.Characters, id);
             foreach (var item in formations)
@@ -874,7 +880,8 @@ namespace TurnBasedRPG.UI.Combat
             var targetUI = StartRenderTarget();
             var turnOrderIds = _combatInstance.GetTurnOrderIds();
             var turnOrderCharacters = _displayCharacterManager.GetTurnOrderCharacters(turnOrderIds[0], turnOrderIds[1]);
-            var turnOrderUI = _turnOrder.Render(IsInFormationPanel, 
+            bool renderTargets = IsInFormationPanel || !_combatInstance.IsPlayerTurn();
+            var turnOrderUI = _turnOrder.Render(renderTargets, 
                                                 GetCorrectedTargets(), 
                                                 turnOrderCharacters);
 
@@ -932,7 +939,7 @@ namespace TurnBasedRPG.UI.Combat
         {
             IReadOnlyList<string> informationPanel;
             // Display the current target character's details if in the formation panel
-            if (IsInFormationPanel)
+            if (IsInFormationPanel || !_combatInstance.IsPlayerTurn())
             {
                 DisplayCharacter display;
                 // If there are no characters within any of our target positions, return null
@@ -975,7 +982,7 @@ namespace TurnBasedRPG.UI.Combat
         /// <returns>A read-only list of string containing the target UI component.</returns>
         private IReadOnlyList<string> StartRenderTarget()
         {
-            if (IsInFormationPanel)
+            if (IsInFormationPanel || !_combatInstance.IsPlayerTurn())
             {
                 DisplayCharacter renderTarget = null;
                 // If there is a character in the player's default target position, render that target's details
@@ -1002,20 +1009,28 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         private void GetActiveSubPanelList()
         {
-            switch ((Actions)FocusNumber)
+            if (!_combatInstance.IsPlayerTurn())
             {
-                case Actions.Attack:
-                case Actions.Spells:
-                case Actions.Skills:
-                case Actions.Items:
-                    ActiveSubPanelList = _combatInstance.GetActionListFromCategory(
-                                    (Actions)FocusNumber, ActiveCategory);
-                    break;
-                default:
-                    ActiveSubPanelList = new List<IDisplayAction>();
-                    break;
+                ActiveSubPanelList = new List<IDisplayAction>();
+                SubPanelItemCount = 0;
             }
-            SubPanelItemCount = ActiveSubPanelList.Count;
+            else
+            {
+                switch ((Actions)FocusNumber)
+                {
+                    case Actions.Attack:
+                    case Actions.Spells:
+                    case Actions.Skills:
+                    case Actions.Items:
+                        ActiveSubPanelList = _combatInstance.GetActionListFromCategory(
+                                        (Actions)FocusNumber, ActiveCategory);
+                        break;
+                    default:
+                        ActiveSubPanelList = new List<IDisplayAction>();
+                        break;
+                }
+                SubPanelItemCount = ActiveSubPanelList.Count;
+            }
         }
     }
 }

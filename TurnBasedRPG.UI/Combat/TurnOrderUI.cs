@@ -23,10 +23,10 @@ namespace TurnBasedRPG.UI.Combat
         }
 
         // Renders the turn order boxes at the top right of the screen. This gets rendered with the target details ui.
-        public IReadOnlyList<string> Render(bool isInFormationPanel, IReadOnlyList<int> targetPositions, IReadOnlyList<IDisplayCharacter>[] characters)
+        public IReadOnlyList<string> Render(bool renderTargets, IReadOnlyList<int> targetPositions, IReadOnlyList<IDisplayCharacter>[] characters)
         {
             var turnOrder = RenderTurnOrderBoxes(characters);
-            turnOrder.Add(RenderFocusTargets(isInFormationPanel, targetPositions, characters));
+            turnOrder.Add(RenderFocusTargets(renderTargets, targetPositions, characters));
             return turnOrder;
         }
 
@@ -86,13 +86,13 @@ namespace TurnBasedRPG.UI.Combat
         }
 
         // Prints target triangles under a character's turn order box if it is selected by the player in the formation panel
-        private string RenderFocusTargets(bool IsInFormationPanel, IReadOnlyList<int> targetPositions, IReadOnlyList<IDisplayCharacter>[] characters)
+        private string RenderFocusTargets(bool renderTargets, IReadOnlyList<int> targetPositions, IReadOnlyList<IDisplayCharacter>[] characters)
         {
             var currentTurnOrder = characters[0];
             var nextTurnOrder = characters[1];
             // Spaces to skip in between each potential focus target triangle
             int skip = 2;
-            if (IsInFormationPanel)
+            if (renderTargets)
             {
                 int limit = GetMaxBoxes(characters);
                 int iterations = 1;
