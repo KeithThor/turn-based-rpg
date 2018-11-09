@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TurnBasedRPG.UI
+namespace TurnBasedRPG.UI.Combat
 {
     public class SubActionPanelUI
     {

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TurnBasedRPG.Controller;
 using TurnBasedRPG.UI;
 using TurnBasedRPG.Model.Entities;
+using TurnBasedRPG.UI.Combat;
 
 namespace TurnBasedRPG.Core
 {

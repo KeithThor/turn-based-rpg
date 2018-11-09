@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Shared.Interfaces;
 
-namespace TurnBasedRPG.UI
+namespace TurnBasedRPG.UI.Combat
 {
     /// <summary>
     /// UI component that is responsible for rendering a target's name and

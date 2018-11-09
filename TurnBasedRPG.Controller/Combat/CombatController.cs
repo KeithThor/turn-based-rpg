@@ -11,6 +11,7 @@ using TurnBasedRPG.Controller.EventArgs;
 using TurnBasedRPG.Shared.EventArgs;
 using TurnBasedRPG.Controller.AI.Interfaces;
 using TurnBasedRPG.Controller.AI;
+using TurnBasedRPG.Shared;
 
 namespace TurnBasedRPG.Controller.Combat
 {
@@ -36,6 +37,16 @@ namespace TurnBasedRPG.Controller.Combat
         /// </summary>
         public event EventHandler<EndOfTurnEventArgs> EndOfTurn;
 
+        /// <summary>
+        /// Event triggered whenever the AI has chosen it's target.
+        /// </summary>
+        public event EventHandler<AIChoseTargetEventArgs> AIChoseTarget;
+
+        /// <summary>
+        /// Event triggered whenever one or more characters have their health changed.
+        /// </summary>
+        public event EventHandler<CharactersHealthChangedEventArgs> CharactersHealthChanged;
+
         public CombatController(CharacterFactory characterFactory, 
                                 ActionController actionController,
                                 ViewModelController viewModelController,
@@ -44,6 +55,7 @@ namespace TurnBasedRPG.Controller.Combat
             _characterFactory = characterFactory;
             _actionController = actionController;
             _actionController.CharactersDied += OnCharactersDying;
+            _actionController.CharactersHealthChanged += OnCharactersHealthChanged;
             _viewModelController = viewModelController;
             _combatAI = combatAI;
             PlayerCharacters = new List<Character>()
@@ -79,12 +91,17 @@ namespace TurnBasedRPG.Controller.Combat
             NextTurnOrder.RemoveAll(character => args.DyingCharacters.Contains(character));
         }
 
+        private void OnCharactersHealthChanged(object sender, CharactersHealthChangedEventArgs args)
+        {
+            CharactersHealthChanged?.Invoke(sender, args);
+        }
+
         /// <summary>
         /// Ends the current turn and broadcasts the EndOfTurn event.
         /// </summary>
         public void EndTurn()
         {
-            // Start event broadcast
+            // Prepare event information before information is changed
             var eventArgs = new EndOfTurnEventArgs()
             {
                 EndOfTurnCharacterId = CurrentTurnOrder[0].Id,
@@ -116,7 +133,8 @@ namespace TurnBasedRPG.Controller.Combat
                 }
             }
 
-            EndOfTurn(this, eventArgs);
+            EndOfTurn?.Invoke(this, eventArgs);
+
             StartTurn();
         }
 
@@ -139,6 +157,19 @@ namespace TurnBasedRPG.Controller.Combat
         {
             var aiDecision = _combatAI.GetAIDecision(CurrentTurnOrder[0], EnemyCharacters, PlayerCharacters);
             if (aiDecision.ActionChoice == null) throw new Exception("AI action choice cannot be null.");
+
+            // Invoke AIChoseTarget event once the AI has come to a decision.
+            if (AIChoseTarget != null)
+            {
+                var eventArgs = new AIChoseTargetEventArgs()
+                {
+                    AICharacter = CurrentTurnOrder[0],
+                    CenterOfTarget = aiDecision.TargetPosition,
+                    TargetPositions = AITargets.GetModifiedSelection(aiDecision.ActionChoice, aiDecision.TargetPosition)
+                };
+                AIChoseTarget(this, eventArgs);
+            }
+
             StartAIAction(aiDecision.ActionChoice, aiDecision.TargetPosition);
 
             // todo: Create class to handle consumables
@@ -282,42 +313,14 @@ namespace TurnBasedRPG.Controller.Combat
         }
 
         /// <summary>
-        /// Gets an IDisplayCharacter of a character that occupies a target position. Returns null if
-        /// no characters occupy that position.
-        /// </summary>
-        /// <param name="targetPosition">The position of the target to return.</param>
-        /// <returns>The character that occupied the target position.</returns>
-        public IDisplayCharacter GetDisplayCharacterFromPosition(int targetPosition)
-        {
-            var target = AllCharacters.Find(character => character.Position == targetPosition);
-            if (target == null)
-                return null;
-            return target;
-        }
-
-        /// <summary>
-        /// Gets an IDisplayCharacter of a character using the character's Id. Returns null if no
-        /// characters exist with that Id.
-        /// </summary>
-        /// <param name="targetId">The Id of the target to return.</param>
-        /// <returns>The character whose Id matches the target Id.</returns>
-        public IDisplayCharacter GetDisplayCharacterFromId(int targetId)
-        {
-            var target = AllCharacters.Find(character => character.Id == targetId);
-            if (target == null)
-                return null;
-            return target;
-        }
-
-        /// <summary>
         /// Gets a List of IDisplayCharacters from the current and next turns.
         /// </summary>
         /// <returns></returns>
-        public IReadOnlyList<IDisplayCharacter>[] GetTurnOrderAsDisplayCharacters()
+        public IReadOnlyList<int>[] GetTurnOrderIds()
         {
-            var displayCharacters = new List<IDisplayCharacter>[2];
-            displayCharacters[0] = new List<IDisplayCharacter>(CurrentTurnOrder);
-            displayCharacters[1] = new List<IDisplayCharacter>(NextTurnOrder);
+            var displayCharacters = new List<int>[2];
+            displayCharacters[0] = new List<int>(CurrentTurnOrder.Select(chara => chara.Id));
+            displayCharacters[1] = new List<int>(NextTurnOrder.Select(chara => chara.Id));
             return displayCharacters;
         }
 
@@ -328,6 +331,29 @@ namespace TurnBasedRPG.Controller.Combat
         public IReadOnlyList<IDisplayCharacter> GetAllDisplayableCharacters()
         {
             return new List<IDisplayCharacter>(AllCharacters);
+        }
+
+        /// <summary>
+        /// Gets all characters currently in battle and returns them as a List of DisplayCharacters.
+        /// </summary>
+        /// <returns></returns>
+        public List<DisplayCharacter> GetDisplayCharacters()
+        {
+            var displayList = new List<DisplayCharacter>();
+            foreach (var character in AllCharacters)
+            {
+                displayList.Add(new DisplayCharacter()
+                {
+                    Id = character.Id,
+                    Name = character.Name,
+                    Symbol = character.Symbol,
+                    CurrentHealth = character.CurrentHealth,
+                    MaxHealth = character.CurrentMaxHealth,
+                    Position = character.Position,
+                    HealthChange = 0
+                });
+            }
+            return displayList;
         }
 
         /// <summary>

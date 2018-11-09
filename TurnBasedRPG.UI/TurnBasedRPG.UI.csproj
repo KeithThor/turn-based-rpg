@@ -40,15 +40,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Combat\DisplayCharacterManager.cs" />
     <Compile Include="GameUIController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ActionPanelUI.cs" />
-    <Compile Include="CombatFormationUI.cs" />
-    <Compile Include="CombatUI.cs" />
-    <Compile Include="InformationPanelUI.cs" />
-    <Compile Include="SubActionPanelUI.cs" />
-    <Compile Include="TargetUI.cs" />
-    <Compile Include="TurnOrderUI.cs" />
+    <Compile Include="Combat\ActionPanelUI.cs" />
+    <Compile Include="Combat\CombatFormationUI.cs" />
+    <Compile Include="Combat\CombatUI.cs" />
+    <Compile Include="Combat\InformationPanelUI.cs" />
+    <Compile Include="Combat\SubActionPanelUI.cs" />
+    <Compile Include="Combat\TargetUI.cs" />
+    <Compile Include="Combat\TurnOrderUI.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TurnBasedRPG.Controller\TurnBasedRPG.Controller.csproj">

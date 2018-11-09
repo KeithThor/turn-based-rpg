@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Shared.Enums;
 
-namespace TurnBasedRPG.UI
+namespace TurnBasedRPG.UI.Combat
 {
     public class ActionPanelUI
     {

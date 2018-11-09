@@ -6,8 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Model.Entities;
 using TurnBasedRPG.Shared.Interfaces;
+using TurnBasedRPG.UI.Combat;
 
-namespace TurnBasedRPG.UI.Test
+namespace TurnBasedRPG.UI.Test.Combat
 {
     [TestClass]
     public class CombatFormationTest

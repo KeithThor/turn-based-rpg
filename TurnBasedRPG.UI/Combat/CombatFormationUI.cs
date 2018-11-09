@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Shared.Interfaces;
 
-namespace TurnBasedRPG.UI
+namespace TurnBasedRPG.UI.Combat
 {
     // Handles the rendering of player and enemy formations in battle
     public class CombatFormationUI

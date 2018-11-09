@@ -59,6 +59,8 @@ namespace TurnBasedRPG.Model.Entities
         public List<Skill> SkillList { get; set; } = new List<Skill>();
         public Equipment[] EquippedItems;
         public List<Item> Inventory { get; set; }
+        public int HealthChanged { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         public List<StatusEffect> Buffs;
         public List<StatusEffect> Debuffs;
 

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Shared.Interfaces;
 
-namespace TurnBasedRPG.UI
+namespace TurnBasedRPG.UI.Combat
 {
     // Handles the rendering of turn order boxes
     public class TurnOrderUI

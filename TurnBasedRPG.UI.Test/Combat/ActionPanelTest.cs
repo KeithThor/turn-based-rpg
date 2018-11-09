@@ -2,8 +2,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TurnBasedRPG.Shared.Enums;
 using System.Collections.Generic;
+using TurnBasedRPG.UI.Combat;
 
-namespace TurnBasedRPG.UI.Test
+namespace TurnBasedRPG.UI.Test.Combat
 {
     [TestClass]
     public class ActionPanelTest

@@ -48,8 +48,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActionPanelTest.cs" />
-    <Compile Include="CombatFormationTest.cs" />
+    <Compile Include="Combat\ActionPanelTest.cs" />
+    <Compile Include="Combat\CombatFormationTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

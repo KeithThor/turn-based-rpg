@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="DamageStatModifier.cs" />
     <Compile Include="DamageTypes.cs" />
+    <Compile Include="DisplayCharacter.cs" />
     <Compile Include="Enums\Actions.cs" />
     <Compile Include="Enums\EquipmentSlot.cs" />
     <Compile Include="EventArgs\EndOfTurnEventArgs.cs" />

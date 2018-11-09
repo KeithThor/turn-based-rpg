@@ -7,7 +7,7 @@ using TurnBasedRPG.Shared;
 using TurnBasedRPG.Shared.Interfaces;
 using TurnBasedRPG.Shared.Viewmodel;
 
-namespace TurnBasedRPG.UI
+namespace TurnBasedRPG.UI.Combat
 {
     /// <summary>
     /// A UI component responsible for rendering more information about a selected action, character, or category.

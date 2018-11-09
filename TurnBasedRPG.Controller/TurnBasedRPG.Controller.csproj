@@ -50,6 +50,8 @@
     <Compile Include="Combat\DamageCalculator.cs" />
     <Compile Include="Combat\ThreatController.cs" />
     <Compile Include="EquipmentController.cs" />
+    <Compile Include="EventArgs\AIChoseTargetEventArgs.cs" />
+    <Compile Include="EventArgs\CharactersHealthChangedEventArgs.cs" />
     <Compile Include="EventArgs\CharactersDiedEventArgs.cs" />
     <Compile Include="EventArgs\StartOfTurnEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

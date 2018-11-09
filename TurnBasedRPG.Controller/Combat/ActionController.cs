@@ -47,6 +47,8 @@ namespace TurnBasedRPG.Controller.Combat
         }
         public event EventHandler<CharactersDiedEventArgs> CharactersDied;
 
+        public event EventHandler<CharactersHealthChangedEventArgs> CharactersHealthChanged;
+
         public ActionController(CharacterController characterController,
                                 StatusController statusController,
                                 ThreatController threatController)
@@ -55,6 +57,7 @@ namespace TurnBasedRPG.Controller.Combat
             _statusController = statusController;
             _threatController = threatController;
             _statusController.CharactersDied += OnCharactersDying;
+            _statusController.CharactersHealthChanged += OnCharactersHealthChanged;
             _random = new Random();
         }
 
@@ -66,6 +69,11 @@ namespace TurnBasedRPG.Controller.Combat
         private void OnCharactersDying(object sender, CharactersDiedEventArgs args)
         {
             CharactersDied?.Invoke(sender, args);
+        }
+
+        private void OnCharactersHealthChanged(object sender, CharactersHealthChangedEventArgs args)
+        {
+            CharactersHealthChanged?.Invoke(sender, args);
         }
 
         /// <summary>
@@ -180,9 +188,14 @@ namespace TurnBasedRPG.Controller.Combat
         {
             var damageTypes = DamageCalculator.GetDamage(actor, action);
             int[] damage = damageTypes.AsArray();
+            var postHealthChangedDict = new Dictionary<int, int>();
+            var changeAmount = new Dictionary<int, int>();
+            var preHealthChangedDict = new Dictionary<int, int>();
 
             for (int i = 0; i < targets.Count(); i++)
             {
+                int startHealth = targets[i].CurrentHealth;
+                preHealthChangedDict.Add(targets[i].Id, startHealth);
                 // Calculate and apply healing
                 int percentHealAmount = targets[i].CurrentMaxHealth * DamageCalculator.GetHealingPercentage(actor, action);
                 int modifiedHealAmount = DamageCalculator.GetHealing(actor, action);
@@ -206,7 +219,16 @@ namespace TurnBasedRPG.Controller.Combat
                                               percentHealAmount + modifiedHealAmount + totalDamage,
                                               action.Threat,
                                               action.ThreatMultiplier);
+                int healthChange = targets[i].CurrentHealth - startHealth;
+                changeAmount.Add(targets[i].Id, healthChange);
+                postHealthChangedDict.Add(targets[i].Id, targets[i].CurrentHealth);
             }
+            CharactersHealthChanged?.Invoke(this, new CharactersHealthChangedEventArgs()
+            {
+                PostCharactersChanged = postHealthChangedDict,
+                PreCharactersChanged = preHealthChangedDict,
+                ChangeAmount = changeAmount
+            });
         }
 
         /// <summary>
@@ -219,8 +241,14 @@ namespace TurnBasedRPG.Controller.Combat
                                               AllCharacters.Where(
                                                   character => action.Targets.Contains(character.Position)));
 
+            var postHealthChangedDict = new Dictionary<int, int>();
+            var changeAmount = new Dictionary<int, int>();
+            var preHealthChangedDict = new Dictionary<int, int>();
+
             for (int i = 0; i < targets.Count(); i++)
             {
+                int startingHealth = targets[i].CurrentHealth;
+                preHealthChangedDict.Add(targets[i].Id, startingHealth);
                 int totalDamage = DamageCalculator.GetTotalDamage(action.TotalDamage, targets[i]);
                 int percentHealAmount = targets[i].CurrentMaxHealth * action.HealPercentage;
 
@@ -232,8 +260,16 @@ namespace TurnBasedRPG.Controller.Combat
                                               percentHealAmount + action.HealAmount + totalDamage,
                                               action.BaseAction.Threat,
                                               action.BaseAction.ThreatMultiplier);
+                int modifiedHealth = targets[i].CurrentHealth - startingHealth;
+                changeAmount.Add(targets[i].Id, modifiedHealth);
+                postHealthChangedDict.Add(targets[i].Id, targets[i].CurrentHealth);
             }
-
+            CharactersHealthChanged?.Invoke(this, new CharactersHealthChangedEventArgs()
+            {
+                PostCharactersChanged = postHealthChangedDict,
+                PreCharactersChanged = preHealthChangedDict,
+                ChangeAmount = changeAmount
+            });
             CheckForDeadTargets(targets);
         }
 

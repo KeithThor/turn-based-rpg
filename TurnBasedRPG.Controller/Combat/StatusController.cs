@@ -56,6 +56,8 @@ namespace TurnBasedRPG.Controller.Combat
 
         public event EventHandler<CharactersDiedEventArgs> CharactersDied;
 
+        public event EventHandler<CharactersHealthChangedEventArgs> CharactersHealthChanged;
+
         public StatusController(ThreatController threatController)
         {
             _threatController = threatController;
@@ -263,6 +265,7 @@ namespace TurnBasedRPG.Controller.Combat
         private void StartOfTurnEffects(Character character)
         {
             var removeStatuses = new List<AppliedStatus>();
+            int startingHealth = character.CurrentHealth;
             int totalDamage = 0;
             // Calculate damage and apply healing from each status effect
             foreach (var status in _appliedStatuses[character])
@@ -292,6 +295,14 @@ namespace TurnBasedRPG.Controller.Combat
                     removeStatuses.Add(status);
             }
             character.CurrentHealth += totalDamage;
+
+            int modifiedHealth = character.CurrentHealth - startingHealth;
+            CharactersHealthChanged?.Invoke(this, new CharactersHealthChangedEventArgs()
+            {
+                PostCharactersChanged = new Dictionary<int, int>() { { character.Id, character.CurrentHealth } },
+                PreCharactersChanged = new Dictionary<int, int>() { { character.Id, startingHealth } },
+                ChangeAmount = new Dictionary<int, int>() { { character.Id, modifiedHealth} }
+            });
 
             // If a status is queued for removal, remove from the character's buff and debuff lists
             foreach (var status in removeStatuses)
