@@ -194,6 +194,9 @@ namespace TurnBasedRPG.Controller.Combat
 
             for (int i = 0; i < targets.Count(); i++)
             {
+                // Target is dead, skip
+                if (targets[i].CurrentHealth == 0)
+                    continue;
                 int startHealth = targets[i].CurrentHealth;
                 preHealthChangedDict.Add(targets[i].Id, startHealth);
                 // Calculate and apply healing
