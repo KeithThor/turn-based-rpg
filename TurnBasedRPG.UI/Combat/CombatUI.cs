@@ -78,7 +78,11 @@ namespace TurnBasedRPG.UI.Combat
                 if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 1;
                 return _characterDefaults[_activeCharacterId].FocusNumber;
             }
-            set { _characterDefaults[_activeCharacterId].FocusNumber = value; }
+            set
+            {
+                if (_characterDefaults.ContainsKey(_activeCharacterId))
+                    _characterDefaults[_activeCharacterId].FocusNumber = value;
+            }
         }
 
         /// <summary>
@@ -91,7 +95,11 @@ namespace TurnBasedRPG.UI.Combat
                 if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 1;
                 return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryFocusNumber;
             }
-            set { _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryFocusNumber = value; }
+            set
+            {
+                if (_characterDefaults.ContainsKey(_activeCharacterId))
+                    _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryFocusNumber = value;
+            }
         }
 
         /// <summary>
@@ -104,7 +112,11 @@ namespace TurnBasedRPG.UI.Combat
                 if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 0;
                 return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryItemCount;
             }
-            set { _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryItemCount = value; }
+            set
+            {
+                if (_characterDefaults.ContainsKey(_activeCharacterId))
+                    _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryItemCount = value;
+            }
         }
 
         /// <summary>
@@ -117,7 +129,11 @@ namespace TurnBasedRPG.UI.Combat
                 if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 0;
                 return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryLineOffset;
             }
-            set { _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryLineOffset = value; }
+            set
+            {
+                if (_characterDefaults.ContainsKey(_activeCharacterId))
+                    _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryLineOffset = value;
+            }
         }
 
         /// <summary>
@@ -130,7 +146,11 @@ namespace TurnBasedRPG.UI.Combat
                 if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 1;
                 return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubFocusNumber;
             }
-            set { _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubFocusNumber = value; }
+            set
+            {
+                if (_characterDefaults.ContainsKey(_activeCharacterId))
+                    _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubFocusNumber = value;
+            }
         }
 
         /// <summary>
@@ -143,7 +163,11 @@ namespace TurnBasedRPG.UI.Combat
                 if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 0;
                 return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubPanelItemCount;
             }
-            set { _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubPanelItemCount = value; }
+            set
+            {
+                if (_characterDefaults.ContainsKey(_activeCharacterId))
+                    _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubPanelItemCount = value;
+            }
         }
 
         /// <summary>
@@ -157,7 +181,11 @@ namespace TurnBasedRPG.UI.Combat
                 if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 0;
                 return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubPanelLineOffset;
             }
-            set { _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubPanelLineOffset = value; }
+            set
+            {
+                if (_characterDefaults.ContainsKey(_activeCharacterId))
+                    _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubPanelLineOffset = value;
+            }
         }
 
         /// <summary>
@@ -170,7 +198,11 @@ namespace TurnBasedRPG.UI.Combat
                 if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 1;
                 return _characterDefaults[_activeCharacterId].DefaultTargetPosition;
             }
-            set { _characterDefaults[_activeCharacterId].DefaultTargetPosition = value; }
+            set
+            {
+                if (_characterDefaults.ContainsKey(_activeCharacterId))
+                    _characterDefaults[_activeCharacterId].DefaultTargetPosition = value;
+            }
         }
 
         /// <summary>
@@ -183,7 +215,11 @@ namespace TurnBasedRPG.UI.Combat
                 if (!_characterDefaults.ContainsKey(_activeCharacterId)) return new List<string[]>();
                 return _characterDefaults[_activeCharacterId].ActiveCategories;
             }
-            set { _characterDefaults[_activeCharacterId].ActiveCategories = value; }
+            set
+            {
+                if (_characterDefaults.ContainsKey(_activeCharacterId))
+                    _characterDefaults[_activeCharacterId].ActiveCategories = value;
+            }
         }
         private string ActiveCategory
         {
@@ -200,7 +236,11 @@ namespace TurnBasedRPG.UI.Combat
                 if (!_characterDefaults.ContainsKey(_activeCharacterId)) return new List<IDisplayAction>();
                 return _characterDefaults[_activeCharacterId].ActiveSubPanelList;
             }
-            set { _characterDefaults[_activeCharacterId].ActiveSubPanelList = value; }
+            set
+            {
+                if (_characterDefaults.ContainsKey(_activeCharacterId))
+                    _characterDefaults[_activeCharacterId].ActiveSubPanelList = value;
+            }
         }
         private bool IsInSubPanel = false;
         private bool IsInCategory = false;
