@@ -67,9 +67,17 @@ namespace TurnBasedRPG.UI.Combat
         // Keeps default settings for each individual character player so that on consecutive turns, a character retains its last used action
         private Dictionary<int, PlayerCharacterDefaults> _characterDefaults;
         private int _activeCharacterId;
+
+        /// <summary>
+        /// Gets or sets the focus number for the action menu of the currently active character.
+        /// </summary>
         private int FocusNumber
         {
-            get { return _characterDefaults[_activeCharacterId].FocusNumber; }
+            get
+            {
+                if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 1;
+                return _characterDefaults[_activeCharacterId].FocusNumber;
+            }
             set { _characterDefaults[_activeCharacterId].FocusNumber = value; }
         }
 
@@ -78,7 +86,11 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         private int CategoryFocusNumber
         {
-            get { return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryFocusNumber; }
+            get
+            {
+                if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 1;
+                return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryFocusNumber;
+            }
             set { _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryFocusNumber = value; }
         }
 
@@ -87,7 +99,11 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         private int CategoryItemCount
         {
-            get { return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryItemCount; }
+            get
+            {
+                if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 0;
+                return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryItemCount;
+            }
             set { _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryItemCount = value; }
         }
 
@@ -96,7 +112,11 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         private int CategoryLineOffset
         {
-            get { return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryLineOffset; }
+            get
+            {
+                if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 0;
+                return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryLineOffset;
+            }
             set { _characterDefaults[_activeCharacterId].GetSubPanelDefaults().CategoryLineOffset = value; }
         }
 
@@ -105,7 +125,11 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         private int SubFocusNumber
         {
-            get { return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubFocusNumber; }
+            get
+            {
+                if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 1;
+                return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubFocusNumber;
+            }
             set { _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubFocusNumber = value; }
         }
 
@@ -114,7 +138,11 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         private int SubPanelItemCount
         {
-            get { return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubPanelItemCount; }
+            get
+            {
+                if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 0;
+                return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubPanelItemCount;
+            }
             set { _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubPanelItemCount = value; }
         }
 
@@ -124,7 +152,11 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         private int SubPanelLineOffset
         {
-            get { return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubPanelLineOffset; }
+            get
+            {
+                if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 0;
+                return _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubPanelLineOffset;
+            }
             set { _characterDefaults[_activeCharacterId].GetSubPanelDefaults().SubPanelLineOffset = value; }
         }
 
@@ -133,7 +165,11 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         private int DefaultTargetPosition
         {
-            get { return _characterDefaults[_activeCharacterId].DefaultTargetPosition; }
+            get
+            {
+                if (!_characterDefaults.ContainsKey(_activeCharacterId)) return 1;
+                return _characterDefaults[_activeCharacterId].DefaultTargetPosition;
+            }
             set { _characterDefaults[_activeCharacterId].DefaultTargetPosition = value; }
         }
 
@@ -142,7 +178,11 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         private IReadOnlyList<string[]> ActionCategories
         {
-            get { return _characterDefaults[_activeCharacterId].ActiveCategories; }
+            get
+            {
+                if (!_characterDefaults.ContainsKey(_activeCharacterId)) return new List<string[]>();
+                return _characterDefaults[_activeCharacterId].ActiveCategories;
+            }
             set { _characterDefaults[_activeCharacterId].ActiveCategories = value; }
         }
         private string ActiveCategory
@@ -155,7 +195,11 @@ namespace TurnBasedRPG.UI.Combat
         }
         private IReadOnlyList<IDisplayAction> ActiveSubPanelList
         {
-            get { return _characterDefaults[_activeCharacterId].ActiveSubPanelList; }
+            get
+            {
+                if (!_characterDefaults.ContainsKey(_activeCharacterId)) return new List<IDisplayAction>();
+                return _characterDefaults[_activeCharacterId].ActiveSubPanelList;
+            }
             set { _characterDefaults[_activeCharacterId].ActiveSubPanelList = value; }
         }
         private bool IsInSubPanel = false;
