@@ -261,6 +261,8 @@ namespace TurnBasedRPG.UI.Combat
         private bool _canSwitchTargetPosition;
         private bool _canTargetThroughUnits;
         private bool _isUIUpdating = false;
+        private bool _skipUpdating = false;
+        private bool _isUIUpdatingFinished = false;
         
         private CombatController _combatInstance;
         private CombatFormationUI _formationUI;
@@ -321,7 +323,6 @@ namespace TurnBasedRPG.UI.Combat
         private void OnCharactersHealthChanged(object sender, CharactersHealthChangedEventArgs args)
         {
             int frameUpdates = 30;
-            int msPerFrame = 50;
             var healthChangeDict = new Dictionary<int, float>();
             foreach (var key in args.ChangeAmount.Keys)
             {
@@ -330,23 +331,55 @@ namespace TurnBasedRPG.UI.Combat
                 healthChangeDict[key] = gradualHealthChange;
             }
 
-            // Prevent input while ui is updating
+            // Prevent normal input while ui is updating
             _isUIUpdating = true;
+            _skipUpdating = false;
+            _isUIUpdatingFinished = false;
 
-            for (int i = 1; i <= frameUpdates; i++)
+            var task = Task.Run(() => UpdateHealthGradually(args, healthChangeDict, frameUpdates));
+
+            ListenForUISkip();
+
+            task.Wait();
+
+            Thread.Sleep(1000);
+            _isUIUpdating = false;
+            _skipUpdating = false;
+            _isUIUpdatingFinished = false;
+        }
+
+        /// <summary>
+        /// Update the health of multiple characters over a specified number of frames with a 50ms wait per frame.
+        /// <para>Will terminate prematurely if _skipUpdating is triggered.</para>
+        /// </summary>
+        /// <param name="args">Contains the health values for the health-modified characters before and after the health change.</param>
+        /// <param name="gradualChanges">The amount of health each character should have their health changed by per frame.</param>
+        /// <param name="frameUpdates">The number of frames to update the health of the characters for.</param>
+        private void UpdateHealthGradually(CharactersHealthChangedEventArgs args,
+                                           Dictionary<int, float> gradualChanges,
+                                           int frameUpdates)
+        {
+            int msPerFrame = 50;
+            bool lastUpdate = false;
+            int i = 1;
+            while (i <= frameUpdates && !lastUpdate)
             {
-                // If current iteration is not the last frame, show gradual health changes over each ui update
-                if (i < frameUpdates)
+                if (_skipUpdating)
                 {
-                    foreach (var key in healthChangeDict.Keys)
+                    lastUpdate = true;
+                }
+                // If current iteration is not the last frame, show gradual health changes over each ui update
+                if (i < frameUpdates && !lastUpdate)
+                {
+                    foreach (var key in gradualChanges.Keys)
                     {
-                        int newHealth = (int)(args.PreCharactersChanged[key] + healthChangeDict[key] * i);
+                        int newHealth = (int)(args.PreCharactersChanged[key] + gradualChanges[key] * i);
                         _displayCharacterManager.SetCurrentHealth(key, newHealth);
                     }
                 }
                 // Current iteration is last, set current health to the changed amount because dividing by number of iterations
                 // might create remainders that will cause the UI and Controller versions of characters to go out of sync
-                else
+                else if (i == frameUpdates || lastUpdate)
                 {
                     foreach (var key in args.PostCharactersChanged.Keys)
                     {
@@ -354,9 +387,9 @@ namespace TurnBasedRPG.UI.Combat
                     }
                 }
                 RefreshUI(1, msPerFrame);
+                i++;
             }
-            Thread.Sleep(1000);
-            _isUIUpdating = false;
+            _isUIUpdatingFinished = true;
         }
 
         /// <summary>
@@ -599,9 +632,39 @@ namespace TurnBasedRPG.UI.Combat
                             EscapeKeyPressed();
                             break;
                         default:
+                            ListenForKeyPress();
                             break;
                     }
+                    while(Console.KeyAvailable)
+                    {
+                        Console.ReadKey(true);
+                    }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Loops and listens for the player to skip UI updating. If the UI updating finishes
+        /// without the user skipping, then exit the loop.
+        /// </summary>
+        private void ListenForUISkip()
+        {
+            while(!_skipUpdating && !_isUIUpdatingFinished)
+            {
+                bool consumedInput = false;
+                if (Console.KeyAvailable && !consumedInput)
+                {
+                    consumedInput = true;
+                    ConsoleKeyInfo keyinfo = Console.ReadKey(false);
+                    if (keyinfo.Key == ConsoleKey.Enter)
+                    {
+                        _skipUpdating = true;
+                    }
+                }
+            }
+            while (Console.KeyAvailable)
+            {
+                Console.ReadKey(true);
             }
         }
         
