@@ -8,7 +8,7 @@ using TurnBasedRPG.Shared.Interfaces;
 namespace TurnBasedRPG.UI.Combat
 {
     // Handles the rendering of turn order boxes
-    public class TurnOrderUI
+    public class TurnOrderPanel
     {
         private int _maxWidth;
         public int MaxWidth
@@ -17,7 +17,7 @@ namespace TurnBasedRPG.UI.Combat
             set { _maxWidth = value - (value - 1) % 3; }
         }
 
-        public TurnOrderUI()
+        public TurnOrderPanel()
         {
             MaxWidth = 51;
         }

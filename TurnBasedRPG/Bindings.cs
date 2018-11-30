@@ -9,6 +9,7 @@ using TurnBasedRPG.Controller.AI.Interfaces;
 using TurnBasedRPG.Model.Entities;
 using TurnBasedRPG.Model.Repository;
 using TurnBasedRPG.Model.Repository.Interfaces;
+using TurnBasedRPG.UI;
 
 namespace TurnBasedRPG
 {
@@ -16,6 +17,7 @@ namespace TurnBasedRPG
     {
         public override void Load()
         {
+            // Interfaces
             Bind<IRepository<Attack>>().To<AttackRepository>();
             Bind<IRepository<Category>>().To<CategoryRepository>();
             Bind<IRepository<CharacterBase>>().To<CharacterBaseRepository>();
@@ -25,6 +27,9 @@ namespace TurnBasedRPG
             Bind<IRepository<StatusEffect>>().To<StatusEffectRepository>();
             Bind<IRepository<Weapon>>().To<WeaponRepository>();
             Bind<ICombatAI>().To<BasicCombatAI>();
+
+            // Scopings
+            Bind<GameUIConstants>().ToSelf().InSingletonScope();
         }
     }
 }

@@ -11,13 +11,14 @@ using TurnBasedRPG.UI.Combat;
 namespace TurnBasedRPG.UI.Test.Combat
 {
     [TestClass]
-    public class CombatFormationTest
+    public class FormationPanelTest
     {
         [TestMethod]
         public void Render_WithPositionsOneTwoFour_RendersSymbols()
         {
-            var combatFormation = new CombatFormationUI();
+            var formationPanel = new FormationPanel();
             int focusId = 1;
+            var blankTargets = new List<int>();
             var data = new List<IDisplayCharacter>()
             {
                 new Character()
@@ -74,7 +75,7 @@ namespace TurnBasedRPG.UI.Test.Combat
                 "\n"
             };
 
-            var actual = new List<string>(combatFormation.Render(data, focusId));
+            var actual = new List<string>(formationPanel.Render(data, focusId, blankTargets));
 
             CollectionAssert.AreEqual(expected, actual);
         }
@@ -82,8 +83,9 @@ namespace TurnBasedRPG.UI.Test.Combat
         [TestMethod]
         public void Render_WithPositionsSixNineElevenFourteen_RendersSymbols()
         {
-            var combatFormation = new CombatFormationUI();
+            var formationPanel = new FormationPanel();
             int focusId = 1;
+            var blankTargets = new List<int>();
             var data = new List<IDisplayCharacter>()
             {
                 new Character()
@@ -149,7 +151,7 @@ namespace TurnBasedRPG.UI.Test.Combat
                 "\n"
             };
 
-            var actual = new List<string>(combatFormation.Render(data, focusId));
+            var actual = new List<string>(formationPanel.Render(data, focusId, blankTargets));
 
             CollectionAssert.AreEqual(expected, actual);
         }
@@ -157,8 +159,9 @@ namespace TurnBasedRPG.UI.Test.Combat
         [TestMethod]
         public void Render_WithPositionsTwoFive_RendersNames()
         {
-            var combatFormation = new CombatFormationUI();
+            var formationPanel = new FormationPanel();
             int focusId = 1;
+            var blankTargets = new List<int>();
             var data = new List<IDisplayCharacter>()
             {
                 new Character()
@@ -206,7 +209,7 @@ namespace TurnBasedRPG.UI.Test.Combat
                 "\n"
             };
 
-            var actual = new List<string>(combatFormation.Render(data, focusId));
+            var actual = new List<string>(formationPanel.Render(data, focusId, blankTargets));
 
             CollectionAssert.AreEqual(expected, actual);
         }
@@ -214,8 +217,9 @@ namespace TurnBasedRPG.UI.Test.Combat
         [TestMethod]
         public void Render_WithPositionsTwoFiveAndDamaged_RendersHealthbars()
         {
-            var combatFormation = new CombatFormationUI();
+            var formationPanel = new FormationPanel();
             int focusId = 1;
+            var blankTargets = new List<int>();
             var data = new List<IDisplayCharacter>()
             {
                 new Character()
@@ -263,7 +267,7 @@ namespace TurnBasedRPG.UI.Test.Combat
                 "\n"
             };
 
-            var actual = new List<string>(combatFormation.Render(data, focusId));
+            var actual = new List<string>(formationPanel.Render(data, focusId, blankTargets));
 
             CollectionAssert.AreEqual(expected, actual);
         }
@@ -271,8 +275,9 @@ namespace TurnBasedRPG.UI.Test.Combat
         [TestMethod]
         public void Render_WithPositionsTwoFiveAndDead_RendersDead()
         {
-            var combatFormation = new CombatFormationUI();
+            var formationPanel = new FormationPanel();
             int focusId = 1;
+            var blankTargets = new List<int>();
             var data = new List<IDisplayCharacter>()
             {
                 new Character()
@@ -320,7 +325,7 @@ namespace TurnBasedRPG.UI.Test.Combat
                 "\n"
             };
 
-            var actual = new List<string>(combatFormation.Render(data, focusId));
+            var actual = new List<string>(formationPanel.Render(data, focusId, blankTargets));
 
             CollectionAssert.AreEqual(expected, actual);
         }
@@ -328,8 +333,9 @@ namespace TurnBasedRPG.UI.Test.Combat
         [TestMethod]
         public void Render_WithPositionsTwoFiveAndActiveId_RendersActiveBox()
         {
-            var combatFormation = new CombatFormationUI();
+            var formationPanel = new FormationPanel();
             int focusId = 1;
+            var blankTargets = new List<int>();
             var data = new List<IDisplayCharacter>()
             {
                 new Character()
@@ -377,7 +383,7 @@ namespace TurnBasedRPG.UI.Test.Combat
                 "\n"
             };
 
-            var actual = new List<string>(combatFormation.Render(data, focusId));
+            var actual = new List<string>(formationPanel.Render(data, focusId, blankTargets));
 
             CollectionAssert.AreEqual(expected, actual);
         }
@@ -385,9 +391,9 @@ namespace TurnBasedRPG.UI.Test.Combat
         [TestMethod]
         public void Render_WithTargets_RendersTargets()
         {
-            var combatFormation = new CombatFormationUI();
-            combatFormation.RenderFocus = true;
-            combatFormation.TargetPositions = new List<int>() { 2, 4, 5, 6, 8 };
+            var formationPanel = new FormationPanel();
+            formationPanel.RenderFocus = true;
+            var targets = new List<int>() { 2, 4, 5, 6, 8 };
             int focusId = 1;
             var data = new List<IDisplayCharacter>();
             var expected = new List<string>()
@@ -416,7 +422,7 @@ namespace TurnBasedRPG.UI.Test.Combat
                 "\n"
             };
 
-            var actual = new List<string>(combatFormation.Render(data, focusId));
+            var actual = new List<string>(formationPanel.Render(data, focusId, targets));
 
             CollectionAssert.AreEqual(expected, actual);
         }

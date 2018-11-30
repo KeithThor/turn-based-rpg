@@ -12,13 +12,13 @@ namespace TurnBasedRPG.Core
     public class Game
     {
         public bool ShutdownTriggered { get; set; }
-        private GameUIController UIInstance { get; set; }
+        private GameUIConstants UIInstance { get; set; }
         private CombatUI _combatUI;
 
         private List<Character> PlayerCharacters { get; set; }
         private List<Character> EnemyCharacters { get; set; }
 
-        public Game(GameUIController uiInstance, CombatUI combatUI)
+        public Game(GameUIConstants uiInstance, CombatUI combatUI)
         {
             ShutdownTriggered = false;
             UIInstance = uiInstance;
@@ -297,7 +297,7 @@ namespace TurnBasedRPG.Core
 
         public void StartCombat()
         {
-            _combatUI.StartRender();
+            _combatUI.StartCombat();
         }
     }
 }

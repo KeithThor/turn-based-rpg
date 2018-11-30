@@ -9,6 +9,7 @@ namespace TurnBasedRPG.Controller.EventArgs
 {
     public class StartOfTurnEventArgs : System.EventArgs
     {
-        public Character StartOfTurnCharacter { get; set; }
+        public int CharacterId { get; set; }
+        public bool IsPlayerTurn { get; set; }
     }
 }

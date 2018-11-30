@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TurnBasedRPG.Shared.Viewmodel
 {
-    public class SubActionData
+    public class ActionData
     {
         public DamageTypes Damage { get; set; }
         public DamageTypes ModifiedDamage { get; set; }

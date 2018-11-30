@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TurnBasedRPG.Shared.Enums
 {
-    public enum Actions
+    public enum Commands
     {
         Attack = 1,
         Spells,

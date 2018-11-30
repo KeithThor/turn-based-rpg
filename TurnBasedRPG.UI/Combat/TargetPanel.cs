@@ -11,7 +11,7 @@ namespace TurnBasedRPG.UI.Combat
     /// UI component that is responsible for rendering a target's name and
     /// a health bar that shows a target's current health.
     /// </summary>
-    public class TargetUI
+    public class TargetPanel
     {
         private int _maxWidth = 42;
         /// <summary>
@@ -42,7 +42,7 @@ namespace TurnBasedRPG.UI.Combat
         }
         public int MaxDetailsLength { get; set; } = 32;
 
-        public TargetUI()
+        public TargetPanel()
         {
             _widthOfHealthBar = _maxWidth - 2;
         }

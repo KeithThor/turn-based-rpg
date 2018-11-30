@@ -12,8 +12,8 @@ namespace TurnBasedRPG.UI.Test.Combat
         [TestMethod]
         public void Render_WithAttackFocus_RendersCorrectly()
         {
-            int focus = (int)Actions.Attack;
-            ActionPanelUI actionPanel = new ActionPanelUI();
+            int focus = (int)Commands.Attack;
+            CommandPanel actionPanel = new CommandPanel();
             List<string> expected = new List<string>()
             {
                 "╔════════════════",
@@ -43,8 +43,8 @@ namespace TurnBasedRPG.UI.Test.Combat
         [TestMethod]
         public void Render_WithSkillsFocus_RendersCorrectly()
         {
-            int focus = (int)Actions.Skills;
-            ActionPanelUI actionPanel = new ActionPanelUI();
+            int focus = (int)Commands.Skills;
+            CommandPanel actionPanel = new CommandPanel();
             List<string> expected = new List<string>()
             {
                 "╔════════════════",
@@ -74,8 +74,8 @@ namespace TurnBasedRPG.UI.Test.Combat
         [TestMethod]
         public void Render_WithAttackFocusAndDifferentWidth_RendersCorrectly()
         {
-            int focus = (int)Actions.Attack;
-            ActionPanelUI actionPanel = new ActionPanelUI
+            int focus = (int)Commands.Attack;
+            CommandPanel actionPanel = new CommandPanel
             {
                 MaxWidth = 20
             };

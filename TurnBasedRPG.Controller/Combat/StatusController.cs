@@ -373,6 +373,7 @@ namespace TurnBasedRPG.Controller.Combat
         {
             return new AppliedStatus()
             {
+                Applicator = status.Applicator,
                 BaseStatus = status.BaseStatus,
                 TotalDamage = status.TotalDamage,
                 HealAmount = status.HealAmount,

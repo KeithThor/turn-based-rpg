@@ -8,22 +8,25 @@ using TurnBasedRPG.Shared.Interfaces;
 namespace TurnBasedRPG.UI.Combat
 {
     // Handles the rendering of player and enemy formations in battle
-    public class CombatFormationUI
+    public class FormationPanel
     {
         private const int _paddingLeft = 12;
         private const int _paddingMiddle = 18;
         private const int _numberInRow = 3;
         private IReadOnlyList<IDisplayCharacter> _characters;
-        public bool RenderFocus = false;
-        public IReadOnlyList<int> TargetPositions;
-        public CombatFormationUI()
+        public bool RenderFocus;
+        private IReadOnlyList<int> TargetPositions;
+        public FormationPanel()
         {
             TargetPositions = new List<int>();
             _characters = new List<IDisplayCharacter>();
         }
 
-        public IReadOnlyList<string> Render(IReadOnlyList<IDisplayCharacter> characters, int activeCharacterId)
+        public IReadOnlyList<string> Render(IReadOnlyList<IDisplayCharacter> characters, 
+                                            int activeCharacterId,
+                                            IReadOnlyList<int> targets)
         {
+            TargetPositions = targets;
             _characters = characters;
             var completeCombatFormations = new List<string>();
             completeCombatFormations.Add("\n\n\n");

@@ -9,34 +9,16 @@ using TurnBasedRPG.Shared.Viewmodel;
 
 namespace TurnBasedRPG.UI.Combat
 {
-    /// <summary>
-    /// A UI component responsible for rendering more information about a selected action, character, or category.
-    /// </summary>
-    public class InformationPanelUI
+    public class ActionDetailsPanel
     {
-        private int _maxWidth;
-        public int MaxWidth
-        {
-            get { return _maxWidth; }
-            set { _maxWidth = value; }
-        }
-        private int _maxHeight;
+        public int MaxWidth { get; set; }
+        public int MaxHeight { get; set; }
 
-        public int MaxHeight
-        {
-            get { return _maxHeight; }
-            set { _maxHeight = value; }
-        }
-
-        public InformationPanelUI()
+        public ActionDetailsPanel()
         {
             MaxWidth = 55;
             MaxHeight = 16;
         }
-
-        
-
-        
 
         /// <summary>
         /// Returns a read-only list containing the information panel injected with data from the a
@@ -68,7 +50,7 @@ namespace TurnBasedRPG.UI.Combat
             informationPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
             return informationPanel;
         }
-        
+
         /// <summary>
         /// In case of null objects, renders a panel with no data.
         /// </summary>
@@ -146,48 +128,6 @@ namespace TurnBasedRPG.UI.Combat
                 actionTargets.Add("│ " + item + new string(' ', maxWidth - item.Count() - 4) + " ║");
             }
             return actionTargets;
-        }
-
-        /// <summary>
-        /// Returns a list of string containing the description of an action's category.
-        /// </summary>
-        /// <param name="category">A string array containing the category name and the category description.</param>
-        /// <returns>Contains the description of an action's category.</returns>
-        private List<string> RenderCategoryDescription(string[] category)
-        {
-            List<string> descriptionFull = new List<string>();
-            int maxLineWidth = MaxWidth - 3;
-            var descriptionAsArr = category[1].GetStringAsList(maxLineWidth);
-            for (int i = 0; i < MaxHeight - 4; i++)
-            {
-                if(i < descriptionAsArr.Count())
-                {
-                    string description = descriptionAsArr.ElementAt(i);
-                    description = description + new string(' ', maxLineWidth - description.Count());
-                    descriptionFull.Add("║ " + description + "║");
-                }
-                else
-                {
-                    descriptionFull.Add("║" + new string(' ', MaxWidth - 2) + "║");
-                }
-            }
-            return descriptionFull;
-        }
-
-        /// <summary>
-        /// Returns a string containing the display information for a single stat.
-        /// </summary>
-        /// <param name="statName">The name of the stat to display.</param>
-        /// <param name="statAmount1">The amount of the stat.</param>
-        /// <param name="statAmount2">If the stat is modified, this is the modified stat amount.</param>
-        /// <returns>Contains the display information for a single stat.</returns>
-        private string GetStatDisplay(string statName, string statAmount1, string statAmount2 = "")
-        {
-            int length = statName.Count() + statAmount1.Count() + statAmount2.Count() + 6;
-            if(statAmount2.Count() == 0)
-                return "║ " + statName + ": " + statAmount1 + new string(' ', MaxWidth - length + 1) + "║";
-            else
-                return "║ " + statName + ": " + statAmount1 + "/" + statAmount2 + new string(' ', MaxWidth - length) + "║";
         }
 
         /// <summary>

@@ -10,9 +10,11 @@ namespace TurnBasedRPG.UI.Combat
     /// <summary>
     /// Class responsible for handling the UI version of characters in combat.
     /// </summary>
-    public class DisplayCharacterManager
+    public class UICharacterManager
     {
         public List<DisplayCharacter> Characters { get; set; } = new List<DisplayCharacter>();
+        public IReadOnlyList<int> CurrentRoundOrderIds { get; set; }
+        public IReadOnlyList<int> NextRoundOrderIds { get; set; }
 
         public DisplayCharacter GetCharacterFromId(int id)
         {
@@ -57,6 +59,27 @@ namespace TurnBasedRPG.UI.Combat
             if (target == null)
                 return null;
             return target;
+        }
+
+        /// <summary>
+        /// Returns true if a character exists in a given position.
+        /// <para>
+        /// Defaults to including dead characters in the query.
+        /// </para>
+        /// </summary>
+        /// <param name="position">The position to check if a character occupies.</param>
+        /// <param name="includeDead">Returns true if a dead character occupies the target position, else returns false even
+        /// if a dead character occupies it.</param>
+        /// <returns>True if a character occupies a position.</returns>
+        public bool CharacterInPositionExists(int position, bool includeDead = true)
+        {
+            var character = GetCharacterFromPosition(position);
+            if (character == null)
+                return false;
+            else if (character.CurrentHealth <= 0 && !includeDead)
+                return false;
+            else
+                return true;
         }
 
         /// <summary>

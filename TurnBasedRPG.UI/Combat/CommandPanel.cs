@@ -7,7 +7,11 @@ using TurnBasedRPG.Shared.Enums;
 
 namespace TurnBasedRPG.UI.Combat
 {
-    public class ActionPanelUI
+    /// <summary>
+    /// Responsible for rendering the command panel for the UI, containing the commands a player can use such as
+    /// Attack, Flee, and Spells.
+    /// </summary>
+    public class CommandPanel
     {
         private int _maxNumOfActions = 7;
         private int _maxWidth = 17;
@@ -54,27 +58,27 @@ namespace TurnBasedRPG.UI.Combat
             {
                 string focus = focusNumber == i ? "► " : "  ";
                 // Determines the name of the action to display
-                switch ((Actions)i)
+                switch ((Commands)i)
                 {
-                    case Actions.Attack:
+                    case Commands.Attack:
                         actionName = "Attack";
                         break;
-                    case Actions.Spells:
+                    case Commands.Spells:
                         actionName = "Spells";
                         break;
-                    case Actions.Skills:
+                    case Commands.Skills:
                         actionName = "Skills";
                         break;
-                    case Actions.Items:
+                    case Commands.Items:
                         actionName = "Items";
                         break;
-                    case Actions.Status:
+                    case Commands.Status:
                         actionName = "Status";
                         break;
-                    case Actions.Pass:
+                    case Commands.Pass:
                         actionName = "Pass";
                         break;
-                    case Actions.Run:
+                    case Commands.Run:
                         actionName = "Run";
                         break;
                     default:
