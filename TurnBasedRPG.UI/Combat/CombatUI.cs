@@ -151,7 +151,9 @@ namespace TurnBasedRPG.UI.Combat
                 CanTargetThroughUnits = activeAction.CanTargetThroughUnits
             };
 
-            if (_defaultsHandler.CurrentTargetPosition < 1 || _defaultsHandler.CurrentTargetPosition > 18)
+            if (_defaultsHandler.CurrentTargetPosition < 1 
+                || _defaultsHandler.CurrentTargetPosition > 18
+                || !activeAction.CanTargetThroughUnits)
                 _defaultsHandler.CurrentTargetPosition = 13;
 
             _defaultsHandler.CurrentTargetPositions = CombatTargeter.GetTranslatedTargetPositions(_defaultsHandler.ActiveAction.TargetPositions,
@@ -228,9 +230,7 @@ namespace TurnBasedRPG.UI.Combat
 
             Thread.Sleep(1000);
         }
-
         
-
         /// <summary>
         /// Called whenever an AI has chosen an action and it's target. Refreshes the UI to visualize
         /// the selection.
