@@ -176,6 +176,7 @@ namespace TurnBasedRPG.Controller.Combat
         /// <param name="actionTargetPositions">The list of positions the action is targeting.</param>
         public void StartAction(Commands commandType, string category, int index, IReadOnlyList<int> actionTargetPositions)
         {
+            bool isInvalidAction = false;
             switch (commandType)
             {
                 case Commands.Attack:
@@ -191,14 +192,19 @@ namespace TurnBasedRPG.Controller.Combat
                     item.Charges--;
                     _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], item.ItemSpell, actionTargetPositions);
                     break;
-                case Commands.Pass:
-                    CombatStateHandler.CurrentRoundOrder.Add(CombatStateHandler.CurrentRoundOrder[0]);
+                case Commands.Wait:
+                    if (CombatStateHandler.CurrentRoundOrder.Count() == 1)
+                        isInvalidAction = true;
+                    else
+                        CombatStateHandler.BeginWait();
                     break;
                 default:
+                    isInvalidAction = true;
                     break;
             }
             
-            EndTurn();
+            if (!isInvalidAction)
+                EndTurn();
         }
     }
 }

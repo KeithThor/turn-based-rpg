@@ -40,6 +40,16 @@ namespace TurnBasedRPG.Controller.Combat
         /// </summary>
         internal List<Character> NextRoundOrder;
 
+        /// <summary>
+        /// The starting index of all characters waiting until the end of the round to act.
+        /// </summary>
+        private int _waitingCharactersIndex;
+
+        /// <summary>
+        /// Whether or not there are any characters currently waiting until the end of the round to act.
+        /// </summary>
+        private bool _anyWaitingCharacters;
+
         private readonly CharacterFactory _characterFactory;
 
         public CombatStateHandler(CharacterFactory characterFactory)
@@ -72,6 +82,7 @@ namespace TurnBasedRPG.Controller.Combat
 
             CurrentRoundOrder = DetermineTurnOrder();
             NextRoundOrder = new List<Character>(CurrentRoundOrder);
+            _anyWaitingCharacters = false;
         }
 
         /// <summary>
@@ -154,11 +165,14 @@ namespace TurnBasedRPG.Controller.Combat
             }
             else if (speedChange < 0)
             {
+                // If there are any waiting characters, can't be slower than them
+                int maxIndex = (_anyWaitingCharacters) ? _waitingCharactersIndex - 1 : RoundOrder.Count() - 1;
+
                 // Character is already the last to act in the round, can't be slower than anyone else
-                if (startIndex >= RoundOrder.Count() - 1) return;
+                if (startIndex >= maxIndex) return;
 
                 bool foundMaxDisplacement = false;
-                while (startIndex < RoundOrder.Count() - 1 && !foundMaxDisplacement)
+                while (startIndex < maxIndex && !foundMaxDisplacement)
                 {
                     if (RoundOrder[startIndex + 1].CurrentStats.Speed > RoundOrder[startIndex].CurrentStats.Speed)
                     {
@@ -183,6 +197,29 @@ namespace TurnBasedRPG.Controller.Combat
             livingCharacters.AddRange(EnemyCharacters);
             livingCharacters.RemoveAll(character => character.CurrentHealth <= 0);
             return livingCharacters;
+        }
+
+        /// <summary>
+        /// Makes the current turn character wait until the end of the round to act.
+        /// </summary>
+        internal void BeginWait()
+        {
+            var character = CurrentRoundOrder[0];
+            BeginWait(character);
+        }
+
+        /// <summary>
+        /// Makes a character wait until the end of the round to act.
+        /// </summary>
+        /// <param name="character">The character that is waiting.</param>
+        internal void BeginWait(Character character)
+        {
+            CurrentRoundOrder.Add(character);
+            if(!_anyWaitingCharacters)
+            {
+                _anyWaitingCharacters = true;
+                _waitingCharactersIndex = CurrentRoundOrder.Count() - 1;
+            }
         }
 
         /// <summary>
@@ -248,12 +285,15 @@ namespace TurnBasedRPG.Controller.Combat
             {
                 CurrentRoundOrder = new List<Character>(NextRoundOrder);
                 NextRoundOrder = DetermineTurnOrder();
+                _anyWaitingCharacters = false;
+                _waitingCharactersIndex = -1;
             }
-            // Remove the current turn from the turn order list
+            // Remove the current turn from the round order list
             else
             {
                 var indecesToCull = new List<int>();
                 int maxIndex = CurrentRoundOrder.Count - 1;
+                if (_waitingCharactersIndex > 0 && _anyWaitingCharacters) _waitingCharactersIndex--;
                 Character charToMove = null;
                 for (int i = maxIndex; i >= 0; i--)
                 {

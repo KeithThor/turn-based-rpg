@@ -178,10 +178,10 @@ namespace TurnBasedRPG.UI.Combat
                         if (_defaultsHandler.CategoryItemCount > 0)
                             _defaultsHandler.IsInCategoryPanel = true;
                         break;
-                    case Commands.Pass:
+                    case Commands.Wait:
                         ActionStartedEvent?.Invoke(this, new ActionStartedEventArgs()
                         {
-                            ActionType = Commands.Pass,
+                            ActionType = Commands.Wait,
                             CategoryName = "",
                             ActionIndex = -1,
                             TargetPositions = null

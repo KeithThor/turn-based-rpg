@@ -81,8 +81,8 @@ namespace TurnBasedRPG.UI.Combat
                     case Commands.Status:
                         actionName = "Status";
                         break;
-                    case Commands.Pass:
-                        actionName = "Pass";
+                    case Commands.Wait:
+                        actionName = "Wait";
                         break;
                     case Commands.Run:
                         actionName = "Run";

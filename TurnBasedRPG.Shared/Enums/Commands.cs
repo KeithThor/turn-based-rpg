@@ -13,7 +13,7 @@ namespace TurnBasedRPG.Shared.Enums
         Skills,
         Items,
         Status,
-        Pass,
+        Wait,
         Run
     }
 }

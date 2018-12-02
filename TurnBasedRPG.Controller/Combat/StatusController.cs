@@ -443,6 +443,8 @@ namespace TurnBasedRPG.Controller.Combat
         {
             if (status.BaseStatus.IsPermanent && !removePermanent) return;
 
+            int preSpeedChange = character.CurrentStats.Speed;
+
             var baseStatus = status.BaseStatus;
             character.Armor -= baseStatus.Armor * status.StackCount;
             character.ArmorPercentage -= baseStatus.ArmorPercentage * status.StackCount;
@@ -457,6 +459,16 @@ namespace TurnBasedRPG.Controller.Combat
             character.ResistAllPercentage -= baseStatus.ResistAllPercentage * status.StackCount;
             character.SpellDamageModifier -= baseStatus.SpellDamageModifier * status.StackCount;
             character.SpellDamagePercentageModifier -= baseStatus.SpellDamagePercentageModifier * status.StackCount;
+
+            if (baseStatus.ModifyStats.Speed != 0)
+            {
+                CharacterSpeedChanged?.Invoke(this, new CharacterSpeedChangedEventArgs()
+                {
+                    CharacterId = character.Id,
+                    PreSpeedChange = preSpeedChange,
+                    SpeedChange = baseStatus.ModifyStats.Speed
+                });
+            }
         }
     }
 }
