@@ -9,6 +9,7 @@ using TurnBasedRPG.Shared.Viewmodel;
 
 namespace TurnBasedRPG.UI.Combat
 {
+    [Obsolete]
     /// <summary>
     /// A UI component responsible for rendering more information about a selected action, character, or category.
     /// </summary>
@@ -33,10 +34,6 @@ namespace TurnBasedRPG.UI.Combat
             MaxWidth = 55;
             MaxHeight = 16;
         }
-
-        
-
-        
 
         /// <summary>
         /// Returns a read-only list containing the information panel injected with data from the a

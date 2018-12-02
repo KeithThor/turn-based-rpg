@@ -15,16 +15,12 @@ using TurnBasedRPG.Shared.Combat;
 namespace TurnBasedRPG.UI.Combat
 {
     /// <summary>
-    /// UI controller responsible for handling UI rendering logic.
+    /// Class that contains other UI related components.
     /// </summary>
     public class CombatUI
     {
-        private bool _isUIUpdating = false;
-        private bool _skipUpdating = false;
-        private bool _isUIUpdatingFinished = false;
-        
-        private CombatController _combatInstance;
-        private UICharacterManager _uiCharacterManager;
+        private readonly CombatController _combatInstance;
+        private readonly UICharacterManager _uiCharacterManager;
         private readonly DefaultsHandler _defaultsHandler;
         private readonly UIContainer _uiContainer;
         private readonly UserInput _userInput;

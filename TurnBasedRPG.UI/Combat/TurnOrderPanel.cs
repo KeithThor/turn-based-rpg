@@ -22,12 +22,59 @@ namespace TurnBasedRPG.UI.Combat
             MaxWidth = 51;
         }
 
-        // Renders the turn order boxes at the top right of the screen. This gets rendered with the target details ui.
-        public IReadOnlyList<string> Render(bool renderTargets, IReadOnlyList<int> targetPositions, IReadOnlyList<IDisplayCharacter>[] characters)
+        private IReadOnlyList<string> _cachedRender;
+        private CachedData _cachedData;
+        private class CachedData
         {
+            public bool RenderTargets;
+            public IReadOnlyList<int> Targets;
+            public IReadOnlyList<int>[] CharacterIds;
+        }
+
+        // Renders the turn order boxes at the top right of the screen. This gets rendered with the target details ui.
+        public IReadOnlyList<string> Render(bool renderTargets, 
+                                            IReadOnlyList<int> targetPositions, 
+                                            IReadOnlyList<IDisplayCharacter>[] characters)
+        {
+            if (IsCacheData(renderTargets, targetPositions, characters)) return _cachedRender;
+            else
+            {
+                _cachedData = new CachedData()
+                {
+                    RenderTargets = renderTargets,
+                    Targets = targetPositions,
+                    CharacterIds = new IReadOnlyList<int>[]
+                    {
+                        new List<int>(characters[0].Select(chr => chr.GetId())),
+                        new List<int>(characters[1].Select(chr => chr.GetId()))
+                    }
+                };
+            }
+
             var turnOrder = RenderTurnOrderBoxes(characters);
             turnOrder.Add(RenderFocusTargets(renderTargets, targetPositions, characters));
+
+            _cachedRender = turnOrder;
             return turnOrder;
+        }
+
+        private bool IsCacheData(bool renderTargets,
+                                 IReadOnlyList<int> targetPositions,
+                                 IReadOnlyList<IDisplayCharacter>[] characters)
+        {
+            if (_cachedData == null) return false;
+            if (_cachedData.RenderTargets != renderTargets) return false;
+            if (!_cachedData.Targets.SequenceEqual(targetPositions)) return false;
+            if (_cachedData.CharacterIds[0].Count() != characters[0].Count()) return false;
+            if (_cachedData.CharacterIds[1].Count() != characters[1].Count()) return false;
+            for (int j = 0; j < 2; j++)
+            {
+                for (int i = 0; i < characters[0].Count(); i++)
+                {
+                    if (characters[j][i].GetId() != _cachedData.CharacterIds[j][i]) return false;
+                }
+            }
+            return true;
         }
 
         private List<string> RenderTurnOrderBoxes(IReadOnlyList<IDisplayCharacter>[] characters)

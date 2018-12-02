@@ -47,6 +47,15 @@ namespace TurnBasedRPG.UI.Combat
             _widthOfHealthBar = _maxWidth - 2;
         }
 
+        private IReadOnlyList<string> _cachedRender;
+        private CachedData _cachedData;
+        private class CachedData
+        {
+            public int Id;
+            public int CurrentHealth;
+            public int MaxHealth;
+        }
+
         /// <summary>
         /// Creates and returns a list of string that represents the targetUI component with a target's
         /// details and a healthbar.
@@ -55,6 +64,17 @@ namespace TurnBasedRPG.UI.Combat
         /// <returns>A read-only list of string that represents the targetUI component.</returns>
         public IReadOnlyList<string> RenderTargetDetails(IDisplayCharacter target)
         {
+            if (IsCacheData(target)) return _cachedRender;
+            else
+            {
+                _cachedData = new CachedData()
+                {
+                    Id = target.GetId(),
+                    CurrentHealth = target.GetCurrenthealth(),
+                    MaxHealth = target.GetMaxHealth()
+                };
+            }
+
             var targetDetails = new List<string>();
             // Calculate healthbar string
             int healthBars = target.GetCurrenthealth() * 100 / target.GetMaxHealth() * WidthOfHealthBar / 100;
@@ -76,7 +96,24 @@ namespace TurnBasedRPG.UI.Combat
             targetDetails.Add("┌" + new string('─', WidthOfHealthBar) + "┐");
             targetDetails.Add(healthString.ToString());
             targetDetails.Add("└" + new string('─', WidthOfHealthBar) + "┘");
+
+            _cachedRender = targetDetails;
             return targetDetails;
+        }
+
+        /// <summary>
+        /// Checks whether or not the character passed in contains the same values as the cached data.
+        /// </summary>
+        /// <param name="character">The character whose values to check.</param>
+        /// <returns>Returns whether or not the character contains the same values as the cached data.</returns>
+        private bool IsCacheData(IDisplayCharacter character)
+        {
+            if (_cachedData == null) return false;
+            if (character.GetId() != _cachedData.Id) return false;
+            if (character.GetCurrenthealth() != _cachedData.CurrentHealth) return false;
+            if (character.GetMaxHealth() != _cachedData.MaxHealth) return false;
+
+            return true;
         }
     }
 }

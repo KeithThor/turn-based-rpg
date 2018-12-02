@@ -26,6 +26,8 @@ namespace TurnBasedRPG.Model.Entities
             set { }
         }
 
+        public int GetId() { return Id; }
+
         public IReadOnlyList<int> GetActionTargets()
         {
             return ItemSpell.TargetPositions;

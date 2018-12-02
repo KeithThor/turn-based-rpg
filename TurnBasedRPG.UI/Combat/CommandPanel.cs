@@ -41,11 +41,17 @@ namespace TurnBasedRPG.UI.Combat
             }
         }
 
+        private int _cachedFocus;
+        private IReadOnlyList<string> _cachedRender;
 
         // Renders the action panel with the names of the actions as well as a focus triangle if an action is focused by the player
         public IReadOnlyList<string> Render(int focusNumber)
         {
-            return RenderActionPanel(focusNumber);
+            if (_cachedFocus == focusNumber) return _cachedRender;
+            else _cachedFocus = focusNumber;
+
+            _cachedRender = RenderActionPanel(focusNumber);
+            return _cachedRender;
         }
 
         private List<string> RenderActionPanel(int focusNumber)

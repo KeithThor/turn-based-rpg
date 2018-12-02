@@ -42,26 +42,47 @@ namespace TurnBasedRPG.UI.Combat
 
         public ActionPanel() { }
 
+        private IReadOnlyList<string> _cachedNames = new List<string>();
+        private bool _cachedFocus;
+        private int _cachedFocusNumber;
+        private IReadOnlyList<string> _cachedRender;
+
         // Renders an action panel along with action names
-        public IReadOnlyList<string> Render(IReadOnlyList<string> actionNames, bool isactionPanelFocused, int focusNumber)
+        public IReadOnlyList<string> Render(IReadOnlyList<string> actionNames, bool isActionPanelFocused, int focusNumber)
         {
+            // Return the cached render if the parameters are the same as the previous render
+            if (isActionPanelFocused == _cachedFocus
+                && focusNumber == _cachedFocusNumber
+                && actionNames.SequenceEqual(_cachedNames))
+            {
+                return _cachedRender;
+            }
+            else
+            {
+                _cachedNames = actionNames;
+                _cachedFocus = isActionPanelFocused;
+                _cachedFocusNumber = focusNumber;
+            }
+
             var actionPanel = new List<string>();
             
             actionPanel.Add(new string('═', MaxPanelWidth - 1) + "╗");
             actionPanel.AddRange(
-                RenderAllActions(actionNames, isactionPanelFocused, focusNumber));
+                RenderAllActions(actionNames, isActionPanelFocused, focusNumber));
             actionPanel.Add(new string('═', MaxPanelWidth - 1) + "╝");
+
+            _cachedRender = actionPanel;
             return actionPanel;
         }
 
         // Renders the max  actions per line along with a focus triangle if an action is focused by the player
-        private List<string> RenderAllActions(IReadOnlyList<string> ActionNames, bool isSubPanelFocused, int focusNumber)
+        private List<string> RenderAllActions(IReadOnlyList<string> ActionNames, bool isActionPanelFocused, int focusNumber)
         {
             var actions = new List<string>();
             string actionLine = "";
             for (int i = 0; i < MaxActionPanelItems; i++)
             {
-                bool isFocus = isSubPanelFocused && focusNumber == i + 1;
+                bool isFocus = isActionPanelFocused && focusNumber == i + 1;
                 if (i < ActionNames.Count)
                     actionLine += RenderSubActionName(ActionNames[i], isFocus);
                 else

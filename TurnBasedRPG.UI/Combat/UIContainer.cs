@@ -189,12 +189,6 @@ namespace TurnBasedRPG.UI.Combat
             var turnOrderCharacters = _uiCharacterManager.GetTurnOrderCharacters(turnOrderIds[0], turnOrderIds[1]);
             bool renderTargets = _defaultsHandler.IsInFormationPanel || !IsPlayerTurn;
 
-            //var correctedTargets = CombatTargeter.GetTranslatedTargetPositions(_defaultsHandler.ActiveAction.TargetPositions,
-            //                                                                   _defaultsHandler.ActiveAction.CenterOfTargets,
-            //                                                                   _defaultsHandler.ActiveAction.CanSwitchTargetPosition
-            //                                                                    || !IsPlayerTurn,
-            //                                                                   _defaultsHandler.CurrentTargetPosition);
-
             var correctedTargets = _defaultsHandler.CurrentTargetPositions;
 
             var turnOrderUI = _turnOrderPanel.Render(renderTargets,
@@ -323,11 +317,6 @@ namespace TurnBasedRPG.UI.Combat
                 // Finds any character that is in the player's target list and render that target's details
                 else
                 {
-                    //var correctedTargets = CombatTargeter.GetTranslatedTargetPositions(_defaultsHandler.ActiveAction.TargetPositions,
-                    //                                                                   _defaultsHandler.ActiveAction.CenterOfTargets,
-                    //                                                                   _defaultsHandler.ActiveAction.CanSwitchTargetPosition
-                    //                                                                      || !IsPlayerTurn,
-                    //                                                                   _defaultsHandler.CurrentTargetPosition);
                     var targets = _defaultsHandler.CurrentTargetPositions;
 
                     renderTarget = _uiCharacterManager.Characters.FirstOrDefault(chr => targets.Contains(chr.Position));

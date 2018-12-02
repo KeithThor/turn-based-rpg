@@ -18,6 +18,8 @@ namespace TurnBasedRPG.Model.Entities
         {
         }
 
+        public int GetId() { return Id; }
+
         public string GetDisplayName()
         {
             return Name;

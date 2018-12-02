@@ -18,27 +18,34 @@ namespace TurnBasedRPG.UI.Combat
             MaxHeight = 16;
         }
 
+        private string[] _cachedCategory = new string[] { "" };
+        private IReadOnlyList<string> _cachedRender;
+
         /// <summary>
-        /// Returns an information panel injected with a category name and it's description.
+        /// Returns an details panel injected with a category name and it's description.
         /// </summary>
         /// <param name="category">A string array of 2 indeces, containing the category name and description.</param>
-        /// <returns>A read-only list of string containing the information panel.</returns>
+        /// <returns>A read-only list of string containing the details panel.</returns>
         public IReadOnlyList<string> RenderCategoryDetails(string[] category)
         {
             if (category == null) return RenderBlankPanel();
+            if (category.SequenceEqual(_cachedCategory)) return _cachedRender;
+            else _cachedCategory = category;
 
-            var informationPanel = new List<string>();
+            var detailsPanel = new List<string>();
             int maxLineWidth = MaxWidth - 3;
 
 
-            informationPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
-            informationPanel.Add("║ " + category[0] + new string(' ', maxLineWidth - category[0].Count()) + "║");
-            informationPanel.Add("║" + new string('─', MaxWidth - 2) + "║");
+            detailsPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
+            detailsPanel.Add("║ " + category[0] + new string(' ', maxLineWidth - category[0].Count()) + "║");
+            detailsPanel.Add("║" + new string('─', MaxWidth - 2) + "║");
 
-            informationPanel.AddRange(RenderCategoryDescription(category));
+            detailsPanel.AddRange(RenderCategoryDescription(category));
 
-            informationPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
-            return informationPanel;
+            detailsPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
+
+            _cachedRender = detailsPanel;
+            return detailsPanel;
         }
 
         /// <summary>
@@ -47,14 +54,14 @@ namespace TurnBasedRPG.UI.Combat
         /// <returns>A panel with no data.</returns>
         private List<string> RenderBlankPanel()
         {
-            var informationPanel = new List<string>();
-            informationPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
+            var detailsPanel = new List<string>();
+            detailsPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
             for (int i = 0; i < MaxHeight - 2; i++)
             {
-                informationPanel.Add("║ " + new string(' ', MaxWidth - 3) + "║");
+                detailsPanel.Add("║ " + new string(' ', MaxWidth - 3) + "║");
             }
-            informationPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
-            return informationPanel;
+            detailsPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
+            return detailsPanel;
         }
 
         /// <summary>

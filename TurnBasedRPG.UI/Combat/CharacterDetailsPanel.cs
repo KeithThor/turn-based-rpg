@@ -17,15 +17,35 @@ namespace TurnBasedRPG.UI.Combat
             MaxWidth = 55;
             MaxHeight = 16;
         }
+        
+        private struct CachedCharacter
+        {
+            public int Id;
+            public int CurrentHealth;
+            public int MaxHealth;
+        }
+
+        private CachedCharacter _cachedCharacter;
+        private IReadOnlyList<string> _cachedRender;
 
         /// <summary>
-        /// Returns an information panel injected with the data from a character.
+        /// Returns a details panel injected with the data from a character.
         /// </summary>
-        /// <param name="character">The character whose data will be used to fill the information panel.</param>
-        /// <returns>A read-only list of string that contains the information panel.</returns>
+        /// <param name="character">The character whose data will be used to fill the details panel.</param>
+        /// <returns>A read-only list of string that contains the details panel.</returns>
         public IReadOnlyList<string> RenderCharacterDetails(IDisplayCharacter character)
         {
             if (character == null) return RenderBlankPanel();
+            if (IsCachedData(character)) return _cachedRender;
+            else
+            {
+                _cachedCharacter = new CachedCharacter()
+                {
+                    Id = character.GetId(),
+                    CurrentHealth = character.GetCurrenthealth(),
+                    MaxHealth = character.GetMaxHealth()
+                };
+            }
 
             var characterDetails = new List<string>();
             characterDetails.Add("╔" + new string('═', MaxWidth - 2) + "╗");
@@ -41,8 +61,9 @@ namespace TurnBasedRPG.UI.Combat
             {
                 characterDetails.Add("║" + new string(' ', MaxWidth - 2) + "║");
             }
-
             characterDetails.Add("╚" + new string('═', MaxWidth - 2) + "╝");
+
+            _cachedRender = characterDetails;
             return characterDetails;
         }
 
@@ -52,23 +73,23 @@ namespace TurnBasedRPG.UI.Combat
         /// <returns>A panel with no data.</returns>
         private List<string> RenderBlankPanel()
         {
-            var informationPanel = new List<string>();
-            informationPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
+            var detailsPanel = new List<string>();
+            detailsPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
             for (int i = 0; i < MaxHeight - 2; i++)
             {
-                informationPanel.Add("║ " + new string(' ', MaxWidth - 3) + "║");
+                detailsPanel.Add("║ " + new string(' ', MaxWidth - 3) + "║");
             }
-            informationPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
-            return informationPanel;
+            detailsPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
+            return detailsPanel;
         }
 
         /// <summary>
-        /// Returns a string containing the display information for a single stat.
+        /// Returns a string containing the display details for a single stat.
         /// </summary>
         /// <param name="statName">The name of the stat to display.</param>
         /// <param name="statAmount1">The amount of the stat.</param>
         /// <param name="statAmount2">If the stat is modified, this is the modified stat amount.</param>
-        /// <returns>Contains the display information for a single stat.</returns>
+        /// <returns>Contains the display details for a single stat.</returns>
         private string GetStatDisplay(string statName, string statAmount1, string statAmount2 = "")
         {
             int length = statName.Count() + statAmount1.Count() + statAmount2.Count() + 6;
@@ -76,6 +97,20 @@ namespace TurnBasedRPG.UI.Combat
                 return "║ " + statName + ": " + statAmount1 + new string(' ', MaxWidth - length + 1) + "║";
             else
                 return "║ " + statName + ": " + statAmount1 + "/" + statAmount2 + new string(' ', MaxWidth - length) + "║";
+        }
+
+        /// <summary>
+        /// Returns whether or not the stats of the character being passed in is the same as the cached data.
+        /// </summary>
+        /// <param name="character">The character to check with the cached data.</param>
+        /// <returns>Returns whether or not the stats of the character being passed in is the same as the cached data.</returns>
+        private bool IsCachedData(IDisplayCharacter character)
+        {
+            if (character.GetId() != _cachedCharacter.Id) return false;
+            if (character.GetCurrenthealth() != _cachedCharacter.CurrentHealth) return false;
+            if (character.GetMaxHealth() != _cachedCharacter.MaxHealth) return false;
+
+            return true;
         }
     }
 }

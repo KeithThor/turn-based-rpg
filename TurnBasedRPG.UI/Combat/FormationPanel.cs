@@ -16,6 +16,23 @@ namespace TurnBasedRPG.UI.Combat
         private IReadOnlyList<IDisplayCharacter> _characters;
         public bool RenderFocus;
         private IReadOnlyList<int> TargetPositions;
+        private CachedData _cachedData;
+        private IReadOnlyList<string> _cachedRender;
+        
+        private class CachedData
+        {
+            public int ActiveCharacterId;
+            public IReadOnlyList<int> Targets;
+            public Dictionary<int, CachedCharacter> CachedCharacters;
+        }
+
+        private class CachedCharacter
+        {
+            public int Position;
+            public int CurrentHealth;
+            public int MaxHealth;
+        }
+
         public FormationPanel()
         {
             TargetPositions = new List<int>();
@@ -26,6 +43,17 @@ namespace TurnBasedRPG.UI.Combat
                                             int activeCharacterId,
                                             IReadOnlyList<int> targets)
         {
+            if (IsCachedData(characters, activeCharacterId, targets)) return _cachedRender;
+            else
+            {
+                _cachedData = new CachedData()
+                {
+                    ActiveCharacterId = activeCharacterId,
+                    Targets = targets,
+                    CachedCharacters = CacheCharacters(characters)
+                };
+            }
+
             TargetPositions = targets;
             _characters = characters;
             var completeCombatFormations = new List<string>();
@@ -39,7 +67,56 @@ namespace TurnBasedRPG.UI.Combat
                 completeCombatFormations.Add(RenderFormationTargets(i));
                 completeCombatFormations.Add("\n");
             }
+
+            _cachedRender = completeCombatFormations;
             return completeCombatFormations;
+        }
+
+        /// <summary>
+        /// Checks incoming data against the cached data to see if both represent the same data.
+        /// </summary>
+        /// <param name="characters">The characters to display in the formation.</param>
+        /// <param name="activeCharacterId">The Id of the currently active character.</param>
+        /// <param name="targets">The targets to focus on in the formation.</param>
+        /// <returns>Returns whether or not the incoming data is the same as the cached data.</returns>
+        private bool IsCachedData(IReadOnlyList<IDisplayCharacter> characters,
+                                  int activeCharacterId,
+                                  IReadOnlyList<int> targets)
+        {
+            if (_cachedData == null) return false;
+            if (activeCharacterId != _cachedData.ActiveCharacterId) return false;
+            if (characters.Count() != _cachedData.CachedCharacters.Count()) return false;
+            if (!targets.SequenceEqual(_cachedData.Targets)) return false;
+            foreach (var character in characters)
+            {
+                int id = character.GetId();
+                if (!_cachedData.CachedCharacters.ContainsKey(character.GetId())) return false;
+                if (_cachedData.CachedCharacters[id].CurrentHealth != character.GetCurrenthealth()) return false;
+                if (_cachedData.CachedCharacters[id].MaxHealth != character.GetMaxHealth()) return false;
+                if (_cachedData.CachedCharacters[id].Position != character.GetPosition()) return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Constructs a character cache from a list of IDisplayCharacters.
+        /// </summary>
+        /// <param name="characters">The list of IDisplayCharacters to construct a cache from.</param>
+        /// <returns>A dictionary with the Id of each characters as the key and the cache data as the value.</returns>
+        private Dictionary<int, CachedCharacter> CacheCharacters(IReadOnlyList<IDisplayCharacter> characters)
+        {
+            var cache = new Dictionary<int, CachedCharacter>();
+            foreach (var character in characters)
+            {
+                int id = character.GetId();
+                cache[id] = new CachedCharacter()
+                {
+                    Position = character.GetPosition(),
+                    CurrentHealth = character.GetCurrenthealth(),
+                    MaxHealth = character.GetMaxHealth()
+                };
+            }
+            return cache;
         }
 
         private List<IDisplayCharacter> FindCharactersInLine(int offset)

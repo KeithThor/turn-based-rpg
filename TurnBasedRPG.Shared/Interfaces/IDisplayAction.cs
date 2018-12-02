@@ -8,6 +8,7 @@ namespace TurnBasedRPG.Shared.Interfaces
 {
     public interface IDisplayAction
     {
+        int GetId();
         string GetDisplayName();
         string GetDescription();
         IReadOnlyList<int> GetActionTargets();

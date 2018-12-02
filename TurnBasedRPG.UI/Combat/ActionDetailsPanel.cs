@@ -20,6 +20,10 @@ namespace TurnBasedRPG.UI.Combat
             MaxHeight = 16;
         }
 
+        private int _cachedActionId = 0;
+        private ActionData _cachedActionData;
+        private IReadOnlyList<string> _cachedRender;
+
         /// <summary>
         /// Returns a read-only list containing the information panel injected with data from the a
         /// provided action.
@@ -31,24 +35,37 @@ namespace TurnBasedRPG.UI.Combat
         {
             if (action == null) return RenderBlankPanel();
 
-            var informationPanel = new List<string>();
-            informationPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
+            // If data is the same as previous render, use cached render instead of rerendering
+            if (action.GetId() == _cachedActionId && data == _cachedActionData)
+            {
+                return _cachedRender;
+            }
+            else
+            {
+                _cachedActionId = action.GetId();
+                _cachedActionData = data;
+            }
+
+            var actionPanel = new List<string>();
+            actionPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
             int spaces = MaxWidth - 2 - action.GetDisplayName().Count();
-            informationPanel.Add("║ " + action.GetDisplayName() + new string(' ', spaces - 1) + "║");
-            informationPanel.Add("║" + new string('─', MaxWidth - 2) + "║");
+            actionPanel.Add("║ " + action.GetDisplayName() + new string(' ', spaces - 1) + "║");
+            actionPanel.Add("║" + new string('─', MaxWidth - 2) + "║");
             var actionTargetBoxes = RenderActionTargets(action);
             var actionDescription = RenderActionDescription(action, data);
             for (int i = 0; i < actionTargetBoxes.Count(); i++)
             {
-                informationPanel.Add(actionDescription.ElementAt(i) + actionTargetBoxes.ElementAt(i));
+                actionPanel.Add(actionDescription.ElementAt(i) + actionTargetBoxes.ElementAt(i));
             }
-            int size = informationPanel.Count();
+            int size = actionPanel.Count();
             for (int i = 0; i < MaxHeight - size - 1; i++)
             {
-                informationPanel.Add("║" + new string(' ', MaxWidth - 2) + "║");
+                actionPanel.Add("║" + new string(' ', MaxWidth - 2) + "║");
             }
-            informationPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
-            return informationPanel;
+            actionPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
+
+            _cachedRender = actionPanel;
+            return actionPanel;
         }
 
         /// <summary>
@@ -57,14 +74,14 @@ namespace TurnBasedRPG.UI.Combat
         /// <returns>A panel with no data.</returns>
         private List<string> RenderBlankPanel()
         {
-            var informationPanel = new List<string>();
-            informationPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
+            var actionPanel = new List<string>();
+            actionPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
             for (int i = 0; i < MaxHeight - 2; i++)
             {
-                informationPanel.Add("║ " + new string(' ', MaxWidth - 3) + "║");
+                actionPanel.Add("║ " + new string(' ', MaxWidth - 3) + "║");
             }
-            informationPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
-            return informationPanel;
+            actionPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
+            return actionPanel;
         }
 
         /// <summary>

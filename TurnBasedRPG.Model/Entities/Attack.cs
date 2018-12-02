@@ -19,6 +19,8 @@ namespace TurnBasedRPG.Model.Entities
             return TargetPositions;
         }
 
+        public int GetId() { return Id; }
+
         public string GetDisplayName()
         {
             // return _name;
