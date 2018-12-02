@@ -26,17 +26,11 @@ namespace TurnBasedRPG.UI.Combat
             }
         }
         public int MaxActionNameLength { get; set; } = 20;
-        private int _maxHeight = 16;
-
-        public int MaxHeight
-        {
-            get { return _maxHeight; }
-            set { _maxHeight = value; }
-        }
+        public int MaxHeight { get; set; }
 
         public int MaxActionPanelItems
         {
-            get { return _maxHeight - 2; }
+            get { return MaxHeight - 2; }
         }
         public int MaxActionsPerLine { get; set; } = 2;
 

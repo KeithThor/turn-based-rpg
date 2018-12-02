@@ -27,7 +27,7 @@ namespace TurnBasedRPG.UI.Combat
             set
             {
                 _maxHeight = value;
-                _maxNumOfActions = value - 2 / 2;
+                _maxNumOfActions = (value - 2) / 2;
             }
         }
         private int _maxActionNameLength = 12;
