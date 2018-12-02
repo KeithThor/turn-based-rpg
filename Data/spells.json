@@ -5,6 +5,7 @@
         "description": "Hurls a bolt of ice at the target.",
         "categoryId": 1,
         "targetPositions": [2, 4, 5, 6, 8],
+        "statusIds": [2],
         "damage": {"frost": 25},
         "damageStatModifier": {"intellect": {"frost": 2}},
         "canTargetThroughUnits": true,
@@ -157,6 +158,17 @@
         "centerOfTargetsPosition": 4,
         "healAmount" : 25,
         "healStatModifier": {"intellect": 2},
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": true
+    },
+    {
+        "name": "Blessing of Haste",
+        "id": 13,
+        "description": "Blesses a target character with divine speed.",
+        "categoryId": 9,
+        "targetPositions": [5],
+        "centerOfTargetsPosition": 5,
+        "statusIds": [3],
         "canTargetThroughUnits": true,
         "canSwitchTargetPosition": true
     }

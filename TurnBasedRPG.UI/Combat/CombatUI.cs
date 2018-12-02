@@ -86,6 +86,8 @@ namespace TurnBasedRPG.UI.Combat
         /// <param name="args"></param>
         private void EndOfTurnTriggered(object sender, EndOfTurnEventArgs args)
         {
+            Thread.Sleep(1000);
+
             _defaultsHandler.ActiveCharacterId = _combatStateHandler.GetActiveCharacterID();
             _defaultsHandler.IsInActionPanel = false;
             _defaultsHandler.IsInCategoryPanel = false;
@@ -223,8 +225,6 @@ namespace TurnBasedRPG.UI.Combat
             _userInput.ListenForUISkip();
 
             task.Wait();
-
-            Thread.Sleep(1000);
         }
         
         /// <summary>

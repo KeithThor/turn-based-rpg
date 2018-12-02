@@ -57,6 +57,7 @@
     <Compile Include="EventArgs\AIChoseTargetEventArgs.cs" />
     <Compile Include="EventArgs\CharactersHealthChangedEventArgs.cs" />
     <Compile Include="EventArgs\CharactersDiedEventArgs.cs" />
+    <Compile Include="EventArgs\CharacterSpeedChangedEventArgs.cs" />
     <Compile Include="EventArgs\EndOfTurnEventArgs.cs" />
     <Compile Include="EventArgs\StartOfTurnEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

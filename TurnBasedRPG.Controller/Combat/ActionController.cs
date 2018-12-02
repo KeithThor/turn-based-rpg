@@ -45,9 +45,22 @@ namespace TurnBasedRPG.Controller.Combat
                 _allCharacters = value;
             }
         }
+
+        /// <summary>
+        /// Event invoked whenever one or multiple characters die as a result of an action or the status effect caused by an action.
+        /// </summary>
         public event EventHandler<CharactersDiedEventArgs> CharactersDied;
 
+        /// <summary>
+        /// Event invoked whenever one or multiple characters have their health changed as a result of an action or the status
+        /// effect caused by an action.
+        /// </summary>
         public event EventHandler<CharactersHealthChangedEventArgs> CharactersHealthChanged;
+
+        /// <summary>
+        /// Event invoked whenever a character has it's speed changed by a status effect caused by an action.
+        /// </summary>
+        public event EventHandler<CharacterSpeedChangedEventArgs> CharacterSpeedChanged;
 
         public ActionController(CharacterController characterController,
                                 StatusController statusController,
@@ -56,9 +69,16 @@ namespace TurnBasedRPG.Controller.Combat
             _characterController = characterController;
             _statusController = statusController;
             _threatController = threatController;
+            _random = new Random();
+
+            BindEvents();
+        }
+
+        private void BindEvents()
+        {
+            _statusController.CharacterSpeedChanged += OnCharacterSpeedChanged;
             _statusController.CharactersDied += OnCharactersDying;
             _statusController.CharactersHealthChanged += OnCharactersHealthChanged;
-            _random = new Random();
         }
 
         /// <summary>
@@ -74,6 +94,11 @@ namespace TurnBasedRPG.Controller.Combat
         private void OnCharactersHealthChanged(object sender, CharactersHealthChangedEventArgs args)
         {
             CharactersHealthChanged?.Invoke(sender, args);
+        }
+
+        private void OnCharacterSpeedChanged(object sender, CharacterSpeedChangedEventArgs args)
+        {
+            CharacterSpeedChanged?.Invoke(sender, args);
         }
 
         /// <summary>
@@ -226,12 +251,15 @@ namespace TurnBasedRPG.Controller.Combat
                 changeAmount.Add(targets[i].Id, healthChange);
                 postHealthChangedDict.Add(targets[i].Id, targets[i].CurrentHealth);
             }
-            CharactersHealthChanged?.Invoke(this, new CharactersHealthChangedEventArgs()
+            if (changeAmount.Values.Any(val => val != 0))
             {
-                PostCharactersChanged = postHealthChangedDict,
-                PreCharactersChanged = preHealthChangedDict,
-                ChangeAmount = changeAmount
-            });
+                CharactersHealthChanged?.Invoke(this, new CharactersHealthChangedEventArgs()
+                {
+                    PostCharactersChanged = postHealthChangedDict,
+                    PreCharactersChanged = preHealthChangedDict,
+                    ChangeAmount = changeAmount
+                });
+            }
         }
 
         /// <summary>
@@ -267,12 +295,17 @@ namespace TurnBasedRPG.Controller.Combat
                 changeAmount.Add(targets[i].Id, modifiedHealth);
                 postHealthChangedDict.Add(targets[i].Id, targets[i].CurrentHealth);
             }
-            CharactersHealthChanged?.Invoke(this, new CharactersHealthChangedEventArgs()
+
+            if (changeAmount.Values.Any(val => val != 0))
             {
-                PostCharactersChanged = postHealthChangedDict,
-                PreCharactersChanged = preHealthChangedDict,
-                ChangeAmount = changeAmount
-            });
+                CharactersHealthChanged?.Invoke(this, new CharactersHealthChangedEventArgs()
+                {
+                    PostCharactersChanged = postHealthChangedDict,
+                    PreCharactersChanged = preHealthChangedDict,
+                    ChangeAmount = changeAmount
+                });
+            }
+
             CheckForDeadTargets(targets);
         }
 

@@ -8,5 +8,22 @@
         "armorPercentage": { "fire": -20 },
         "duration": 2,
         "isDebuff": true
+    },
+    {
+        "id": 2,
+        "name": "Chilled",
+        "symbol": "C",
+        "armorPercentage": { "frost": -20 },
+        "modifyStats": { "speed": -5 },
+        "duration": 2,
+        "isDebuff": true
+    },
+    {
+        "id": 3,
+        "name": "Blessing of Haste",
+        "symbol": "H",
+        "modifyStats": { "speed": 10 },
+        "duration": 2,
+        "isDebuff": false
     }
 ]

@@ -54,9 +54,20 @@ namespace TurnBasedRPG.Controller.Combat
         private Random _random = new Random();
         public IReadOnlyList<Character> AllCharacters { get; set; }
 
+        /// <summary>
+        /// Event invoked whenever one or many characters die as a result of status effect damage.
+        /// </summary>
         public event EventHandler<CharactersDiedEventArgs> CharactersDied;
 
+        /// <summary>
+        /// Event invoked whenever one or many characters have their health changed as a result of a status effect.
+        /// </summary>
         public event EventHandler<CharactersHealthChangedEventArgs> CharactersHealthChanged;
+
+        /// <summary>
+        /// Event invoked whenever a character has it's speed changed as a result of a status effect.
+        /// </summary>
+        public event EventHandler<CharacterSpeedChangedEventArgs> CharacterSpeedChanged;
 
         public StatusController(ThreatController threatController)
         {
@@ -297,12 +308,15 @@ namespace TurnBasedRPG.Controller.Combat
             character.CurrentHealth += totalDamage;
 
             int modifiedHealth = character.CurrentHealth - startingHealth;
-            CharactersHealthChanged?.Invoke(this, new CharactersHealthChangedEventArgs()
+            if (modifiedHealth != 0)
             {
-                PostCharactersChanged = new Dictionary<int, int>() { { character.Id, character.CurrentHealth } },
-                PreCharactersChanged = new Dictionary<int, int>() { { character.Id, startingHealth } },
-                ChangeAmount = new Dictionary<int, int>() { { character.Id, modifiedHealth} }
-            });
+                CharactersHealthChanged?.Invoke(this, new CharactersHealthChangedEventArgs()
+                {
+                    PostCharactersChanged = new Dictionary<int, int>() { { character.Id, character.CurrentHealth } },
+                    PreCharactersChanged = new Dictionary<int, int>() { { character.Id, startingHealth } },
+                    ChangeAmount = new Dictionary<int, int>() { { character.Id, modifiedHealth } }
+                });
+            }
 
             // If a status is queued for removal, remove from the character's buff and debuff lists
             foreach (var status in removeStatuses)
@@ -392,6 +406,8 @@ namespace TurnBasedRPG.Controller.Combat
         /// <param name="character">The character to apply the modifications to.</param>
         private void ApplyStatusEffects(StatusEffect status, Character character)
         {
+            int preSpeedChange = character.CurrentStats.Speed;
+
             character.Armor += status.Armor;
             character.ArmorPercentage += status.ArmorPercentage;
             character.CurrentMaxHealth += status.ModifyMaxHealth;
@@ -405,6 +421,16 @@ namespace TurnBasedRPG.Controller.Combat
             character.ResistAllPercentage += status.ResistAllPercentage;
             character.SpellDamageModifier += status.SpellDamageModifier;
             character.SpellDamagePercentageModifier += status.SpellDamagePercentageModifier;
+
+            if (status.ModifyStats.Speed != 0)
+            {
+                CharacterSpeedChanged?.Invoke(this, new CharacterSpeedChangedEventArgs()
+                {
+                    CharacterId = character.Id,
+                    PreSpeedChange = preSpeedChange,
+                    SpeedChange = status.ModifyStats.Speed
+                });
+            }
         }
 
         /// <summary>

@@ -115,6 +115,65 @@ namespace TurnBasedRPG.Controller.Combat
         }
 
         /// <summary>
+        /// Whenever a character has it's speed changed, check to see if it changes the round order, if so, make the appropriate changes.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        public void OnCharacterSpeedChanged(object sender, CharacterSpeedChangedEventArgs args)
+        {
+            int speedChange = args.SpeedChange;
+            ChangeRoundOrder(args.CharacterId, CurrentRoundOrder, speedChange);
+            ChangeRoundOrder(args.CharacterId, NextRoundOrder, speedChange);
+        }
+
+        /// <summary>
+        /// Potentially changes the round order of a round if a character has it's speed changed.
+        /// </summary>
+        /// <param name="characterId">The Id of the character whose speed changed.</param>
+        /// <param name="RoundOrder">The round order list to change the order of.</param>
+        /// <param name="speedChange">The amount that the character's speed is changed by.</param>
+        private void ChangeRoundOrder(int characterId, List<Character> RoundOrder, int speedChange)
+        {
+            int startIndex = CurrentRoundOrder.FindIndex(chr => chr.Id == characterId);
+            if (speedChange > 0)
+            {
+                bool foundMaxDisplacement = false;
+                // Can never surpass current turn character
+                while (startIndex > 1 && !foundMaxDisplacement)
+                {
+                    if (RoundOrder[startIndex - 1].CurrentStats.Speed < RoundOrder[startIndex].CurrentStats.Speed)
+                    {
+                        Character temp = RoundOrder[startIndex - 1];
+                        RoundOrder[startIndex - 1] = RoundOrder[startIndex];
+                        RoundOrder[startIndex] = temp;
+                        startIndex--;
+                    }
+                    else
+                        foundMaxDisplacement = true;
+                }
+            }
+            else if (speedChange < 0)
+            {
+                // Character is already the last to act in the round, can't be slower than anyone else
+                if (startIndex >= RoundOrder.Count() - 1) return;
+
+                bool foundMaxDisplacement = false;
+                while (startIndex < RoundOrder.Count() - 1 && !foundMaxDisplacement)
+                {
+                    if (RoundOrder[startIndex + 1].CurrentStats.Speed > RoundOrder[startIndex].CurrentStats.Speed)
+                    {
+                        Character temp = RoundOrder[startIndex + 1];
+                        RoundOrder[startIndex + 1] = RoundOrder[startIndex];
+                        RoundOrder[startIndex] = temp;
+                        startIndex++;
+                    }
+                    else
+                        foundMaxDisplacement = true;
+                }
+            }
+        }
+
+        /// <summary>
         /// Returns a list of characters containing all living characters currently in combat.
         /// </summary>
         /// <returns>A list of character containing living characters.</returns>

@@ -67,6 +67,7 @@ namespace TurnBasedRPG.Controller.Combat
         {
             _actionController.CharactersDied += OnCharactersDying;
             _actionController.CharactersHealthChanged += OnCharactersHealthChanged;
+            _actionController.CharacterSpeedChanged += OnCharacterSpeedChanged;
         }
 
         private void OnCharactersDying(object sender, CharactersDiedEventArgs args)
@@ -77,6 +78,11 @@ namespace TurnBasedRPG.Controller.Combat
         private void OnCharactersHealthChanged(object sender, CharactersHealthChangedEventArgs args)
         {
             CharactersHealthChanged?.Invoke(sender, args);
+        }
+
+        private void OnCharacterSpeedChanged(object sender, CharacterSpeedChangedEventArgs args)
+        {
+            CombatStateHandler.OnCharacterSpeedChanged(sender, args);
         }
 
         /// <summary>
