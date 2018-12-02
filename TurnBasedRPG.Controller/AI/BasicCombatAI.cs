@@ -100,9 +100,14 @@ namespace TurnBasedRPG.Controller.AI
             foreach (var action in actionPriorities.DefensiveActionPriorities.Keys)
             {
                 var temp = GetMaxPriorityTarget(action, allPriorities);
+                // If the max priority target hasn't been set
+                if (maxPriorityTarget.TargetPosition == 0)
+                {
+                    maxPriorityTarget = temp;
+                }
                 // If this action's total priority is greater than the current highest priority action, replace it
                 // In case of equal priorities, 50% chance to replace current action
-                if (temp.TotalPriority > maxPriorityTarget.TotalPriority ||
+                else if (temp.TotalPriority > maxPriorityTarget.TotalPriority ||
                     (_rand.Next(0, 2) == 0 && temp.TotalPriority == maxPriorityTarget.TotalPriority))
                 {
                     maxPriorityTarget = temp;
@@ -308,7 +313,7 @@ namespace TurnBasedRPG.Controller.AI
             if (!action.CanSwitchTargetPosition)
             {
                 var characterTargets = GetSelectionTargets(action, action.CenterOfTargetsPosition);
-                maxPotentialTarget = action.CenterOfTargetsPosition;
+                maxPotentialTarget = AITargets.GetModifiedCenter(action.CenterOfTargetsPosition);
 
                 foreach (var character in characterTargets.MyCharacters)
                 {

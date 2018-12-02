@@ -25,8 +25,8 @@
     },
     {
         "id": 4,
-        "targetPositions": [1, 4, 7],
-        "centerOfTargetsPosition": 4,
+        "targetPositions": [10, 13, 16],
+        "centerOfTargetsPosition": 13,
         "canTargetThroughUnits": true,
         "canSwitchTargetPosition": false,
         "damage": {"physical": 50}

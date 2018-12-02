@@ -261,7 +261,8 @@ namespace TurnBasedRPG.Controller.Test.AI
             aiC1.Position = 14;
             var aiCharacters = new List<Character>() { aiC1 };
             var ai = new BasicCombatAI();
-            int expectedTargetPosition = 4;
+
+            int expectedTargetPosition = 6;
             var aiDecisionData = ai.GetAIDecision(aiC1, aiCharacters, playerCharacters);
             int actualTargetPosition = aiDecisionData.TargetPosition;
 
