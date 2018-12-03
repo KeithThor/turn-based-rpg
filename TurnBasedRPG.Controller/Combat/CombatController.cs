@@ -11,6 +11,7 @@ using TurnBasedRPG.Controller.EventArgs;
 using TurnBasedRPG.Controller.AI.Interfaces;
 using TurnBasedRPG.Controller.AI;
 using TurnBasedRPG.Shared;
+using TurnBasedRPG.Shared.Combat;
 
 namespace TurnBasedRPG.Controller.Combat
 {
@@ -173,24 +174,38 @@ namespace TurnBasedRPG.Controller.Combat
         /// <param name="commandType">The type of command that is being performed, such as Attack or Spells.</param>
         /// <param name="category">The category of the action being performed, may be left blank if the action has no categories.</param>
         /// <param name="index">The index of the action being performed.</param>
-        /// <param name="actionTargetPositions">The list of positions the action is targeting.</param>
-        public void StartAction(Commands commandType, string category, int index, IReadOnlyList<int> actionTargetPositions)
+        /// <param name="targetPosition">The target position of the action being performed.</param>
+        public void StartAction(Commands commandType, string category, int index, int targetPosition)
         {
             bool isInvalidAction = false;
+            ActionBase action;
+            IReadOnlyList<int> targets;
             switch (commandType)
             {
                 case Commands.Attack:
-                    var attack = DisplayManager.GetActionsFromCategory<Attack>(commandType, category)[index];
-                    _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], attack, actionTargetPositions);
+                    action = DisplayManager.GetActionsFromCategory<Attack>(commandType, category)[index];
+                    targets = CombatTargeter.GetTranslatedTargetPositions(action.TargetPositions,
+                                                                          action.CenterOfTargetsPosition,
+                                                                          action.CanSwitchTargetPosition,
+                                                                          targetPosition);
+                    _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], action, targets);
                     break;
                 case Commands.Spells:
-                    var spell = DisplayManager.GetActionsFromCategory<Spell>(commandType, category)[index];
-                    _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], spell, actionTargetPositions);
+                    action = DisplayManager.GetActionsFromCategory<Spell>(commandType, category)[index];
+                    targets = CombatTargeter.GetTranslatedTargetPositions(action.TargetPositions,
+                                                                          action.CenterOfTargetsPosition,
+                                                                          action.CanSwitchTargetPosition,
+                                                                          targetPosition);
+                    _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], action, targets);
                     break;
                 case Commands.Items:
                     var item = DisplayManager.GetConsumablesFromCategory(category)[index];
-                    item.Charges--;
-                    _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], item.ItemSpell, actionTargetPositions);
+                    _consumablesHandler.UseConsumable(item, CombatStateHandler.CurrentRoundOrder[0]);
+                    targets = CombatTargeter.GetTranslatedTargetPositions(item.ItemSpell.TargetPositions,
+                                                                          item.ItemSpell.CenterOfTargetsPosition,
+                                                                          item.ItemSpell.CanSwitchTargetPosition,
+                                                                          targetPosition);
+                    _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], item.ItemSpell, targets);
                     break;
                 case Commands.Wait:
                     if (CombatStateHandler.CurrentRoundOrder.Count() == 1)

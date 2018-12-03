@@ -12,6 +12,6 @@ namespace TurnBasedRPG.UI.Combat.EventArgs
         public Commands ActionType { get; set; }
         public string CategoryName { get; set; }
         public int ActionIndex { get; set; }
-        public IReadOnlyList<int> TargetPositions { get; set; }
+        public int TargetPosition { get; set; }
     }
 }

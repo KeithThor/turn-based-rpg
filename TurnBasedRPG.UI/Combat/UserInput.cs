@@ -184,7 +184,7 @@ namespace TurnBasedRPG.UI.Combat
                             ActionType = Commands.Wait,
                             CategoryName = "",
                             ActionIndex = -1,
-                            TargetPositions = null
+                            TargetPosition = 0
                         });
                         break;
                 }
@@ -193,18 +193,14 @@ namespace TurnBasedRPG.UI.Combat
             else if (_defaultsHandler.IsInFormationPanel)
             {
 
-                var targets = CombatTargeter.GetTranslatedTargetPositions(_defaultsHandler.ActiveAction.TargetPositions,
-                                                                          _defaultsHandler.ActiveAction.CenterOfTargets,
-                                                                          _defaultsHandler.ActiveAction.CanSwitchTargetPosition
-                                                                              || !_uiContainer.IsPlayerTurn,
-                                                                          _defaultsHandler.CurrentTargetPosition);
+                var target = _defaultsHandler.CurrentTargetPosition;
 
                 ActionStartedEvent?.Invoke(this, new ActionStartedEventArgs()
                 {
                     ActionType = (Commands)_defaultsHandler.CommandFocusNumber,
                     CategoryName = _defaultsHandler.ActiveCategory,
                     ActionIndex = _defaultsHandler.ActionFocusNumber - 1,
-                    TargetPositions = targets
+                    TargetPosition = target
                 });
             }
             // If the player is in the action panel, switch to the formation panel

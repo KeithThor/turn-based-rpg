@@ -181,7 +181,7 @@ namespace TurnBasedRPG.UI.Combat
             _combatInstance.StartAction(args.ActionType,
                                         args.CategoryName,
                                         args.ActionIndex,
-                                        args.TargetPositions);
+                                        args.TargetPosition);
         }
 
         /// <summary>
