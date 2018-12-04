@@ -7,6 +7,9 @@ using TurnBasedRPG.Shared;
 
 namespace TurnBasedRPG.UI.Combat
 {
+    /// <summary>
+    /// UI component responsible for rendering out a combat log panel that displays what happened in combat.
+    /// </summary>
     public class CombatLogPanel
     {
         public int MaxHeight { get; set; }
@@ -17,13 +20,21 @@ namespace TurnBasedRPG.UI.Combat
             MaxHeight = 16;
             MaxWidth = 40;
             _combatLog = new List<string>();
+            _dataChanged = true;
         }
 
         private List<string> _combatLog;
+        private bool _dataChanged;
+        private IReadOnlyList<string> _cachedRender;
 
+        /// <summary>
+        /// Renders out the combat log panel with the newest combat log messages that can fit within it's size.
+        /// </summary>
+        /// <returns>A list of string containing the render.</returns>
         public IReadOnlyList<string> Render()
         {
             var render = new List<string>();
+            if (!_dataChanged) return _cachedRender;
 
             render.Add("╔" + new string('═', MaxWidth - 2) + "╗");
             for (int i = 0; i < MaxHeight - 2; i++)
@@ -45,13 +56,21 @@ namespace TurnBasedRPG.UI.Combat
                 }
             }
             render.Add("╚" + new string('═', MaxWidth - 2) + "╝");
+
+            _dataChanged = false;
+            _cachedRender = render;
             return render;
         }
 
+        /// <summary>
+        /// Adds a message to the log, to be displayed in future renders.
+        /// </summary>
+        /// <param name="logMessage">The message to add to the log.</param>
         public void AddToLog(string logMessage)
         {
             var logList = logMessage.GetStringAsList(MaxWidth - 4);
             _combatLog.AddRange(logList);
+            _dataChanged = true;
         }
     }
 }
