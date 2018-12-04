@@ -51,6 +51,7 @@ namespace TurnBasedRPG.UI.Combat
                                            new ActionDetailsPanel(),
                                            new CharacterDetailsPanel(),
                                            new CategoryDetailsPanel(),
+                                           new CombatLogPanel(),
                                            _defaultsHandler,
                                            _uiCharacterManager,
                                            _combatInstance.ViewModelController,
@@ -69,6 +70,9 @@ namespace TurnBasedRPG.UI.Combat
         private void BindEvents()
         {
             _combatInstance.CharactersHealthChanged += OnCharactersHealthChanged;
+            _combatInstance.CharactersHealthChanged += _uiContainer.OnCombatLoggableEvent;
+            _combatInstance.CharactersDied += _uiContainer.OnCombatLoggableEvent;
+            _combatInstance.StatusEffectApplied += _uiContainer.OnCombatLoggableEvent;
 
             _userInput.ActionSelectedEvent += OnActionSelected;
             _userInput.ActionStartedEvent += OnActionStarted;

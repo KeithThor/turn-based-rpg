@@ -48,6 +48,21 @@ namespace TurnBasedRPG.Controller.Combat
         /// </summary>
         public event EventHandler<CharactersHealthChangedEventArgs> CharactersHealthChanged;
 
+        /// <summary>
+        /// Event triggered whenever one or more characters die.
+        /// </summary>
+        public event EventHandler<CharactersDiedEventArgs> CharactersDied;
+
+        /// <summary>
+        /// Event triggered whenever a status effect is applied to one or more characters.
+        /// </summary>
+        public event EventHandler<StatusEffectAppliedEventArgs> StatusEffectApplied;
+
+        /// <summary>
+        /// Event triggered whenever a character has it's speed changed.
+        /// </summary>
+        public event EventHandler<CharacterSpeedChangedEventArgs> CharacterSpeedChanged;
+
         public CombatController(ActionController actionController,
                                 CombatStateHandler combatStateHandler,
                                 ConsumablesHandler consumablesHandler,
@@ -69,11 +84,13 @@ namespace TurnBasedRPG.Controller.Combat
             _actionController.CharactersDied += OnCharactersDying;
             _actionController.CharactersHealthChanged += OnCharactersHealthChanged;
             _actionController.CharacterSpeedChanged += OnCharacterSpeedChanged;
+            _actionController.StatusEffectController.StatusEffectApplied += OnStatusEffectsApplied;
         }
 
         private void OnCharactersDying(object sender, CharactersDiedEventArgs args)
         {
             CombatStateHandler.CharactersDied(args);
+            CharactersDied?.Invoke(sender, args);
         }
 
         private void OnCharactersHealthChanged(object sender, CharactersHealthChangedEventArgs args)
@@ -84,6 +101,12 @@ namespace TurnBasedRPG.Controller.Combat
         private void OnCharacterSpeedChanged(object sender, CharacterSpeedChangedEventArgs args)
         {
             CombatStateHandler.OnCharacterSpeedChanged(sender, args);
+            CharacterSpeedChanged?.Invoke(sender, args);
+        }
+
+        private void OnStatusEffectsApplied(object sender, StatusEffectAppliedEventArgs args)
+        {
+            StatusEffectApplied?.Invoke(sender, args);
         }
 
         /// <summary>

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TurnBasedRPG.Controller;
 using TurnBasedRPG.Controller.Combat;
+using TurnBasedRPG.Controller.EventArgs;
 using TurnBasedRPG.Shared.Combat;
 using TurnBasedRPG.Shared.Enums;
 using TurnBasedRPG.Shared.Interfaces;
@@ -31,6 +32,7 @@ namespace TurnBasedRPG.UI.Combat
         private readonly CombatStateHandler _combatStateHandler;
         private readonly CharacterDetailsPanel _characterDetailsPanel;
         private readonly CategoryDetailsPanel _categoryDetailsPanel;
+        private readonly CombatLogPanel _combatLogPanel;
 
         public UIContainer(FormationPanel formationPanel,
                            TargetPanel targetPanel,
@@ -40,6 +42,7 @@ namespace TurnBasedRPG.UI.Combat
                            ActionDetailsPanel actionDetailsPanel,
                            CharacterDetailsPanel characterDetailsPanel,
                            CategoryDetailsPanel categoryDetailsPanel,
+                           CombatLogPanel combatLogPanel,
                            DefaultsHandler defaultsHandler,
                            UICharacterManager uiCharacterManager,
                            ViewModelController viewModelController,
@@ -54,12 +57,13 @@ namespace TurnBasedRPG.UI.Combat
             _actionDetailsPanel = actionDetailsPanel;
             _characterDetailsPanel = characterDetailsPanel;
             _categoryDetailsPanel = categoryDetailsPanel;
+            _combatLogPanel = combatLogPanel;
             _defaultsHandler = defaultsHandler;
             _uiCharacterManager = uiCharacterManager;
             _viewModelController = viewModelController;
             _displayManager = displayManager;
             _combatStateHandler = combatStateHandler;
-
+            
             BindEvents();
         }
         
@@ -71,6 +75,16 @@ namespace TurnBasedRPG.UI.Combat
         public bool IsPlayerTurn
         {
             get { return _combatStateHandler.IsPlayerTurn(); }
+        }
+
+        /// <summary>
+        /// Whenever a combat loggable event is invoked, add the log message to the combat log panel.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        public void OnCombatLoggableEvent(object sender, CombatLoggableEventArgs args)
+        {
+            _combatLogPanel.AddToLog(args.LogMessage);
         }
 
         /// <summary>
@@ -239,10 +253,12 @@ namespace TurnBasedRPG.UI.Combat
                                                      || _defaultsHandler.IsInFormationPanel 
                                                      || _defaultsHandler.IsInCategoryPanel,
                                                   offsetModifiedFocus);
+            
+            var combatLogPanel = _combatLogPanel.Render();
 
             for (int i = 0; i < commandPanel.Count; i++)
             {
-                Console.WriteLine(commandPanel[i] + actionPanel[i] + detailsPanel[i]);
+                Console.WriteLine(commandPanel[i] + actionPanel[i] + detailsPanel[i] + combatLogPanel[i]);
             }
         }
 

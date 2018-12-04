@@ -7,7 +7,7 @@ using TurnBasedRPG.Shared.Interfaces;
 
 namespace TurnBasedRPG.Controller.EventArgs
 {
-    public class CharactersHealthChangedEventArgs
+    public class CharactersHealthChangedEventArgs : CombatLoggableEventArgs
     {
         public IReadOnlyDictionary<int, int> PostCharactersChanged;
         public IReadOnlyDictionary<int, int> PreCharactersChanged;

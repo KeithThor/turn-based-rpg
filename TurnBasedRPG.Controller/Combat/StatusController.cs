@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TurnBasedRPG.Model.Entities;
 using TurnBasedRPG.Shared;
 using TurnBasedRPG.Controller.EventArgs;
+using TurnBasedRPG.Shared.Combat;
 
 namespace TurnBasedRPG.Controller.Combat
 {
@@ -69,6 +70,11 @@ namespace TurnBasedRPG.Controller.Combat
         /// </summary>
         public event EventHandler<CharacterSpeedChangedEventArgs> CharacterSpeedChanged;
 
+        /// <summary>
+        /// Event invoked whenever one or more characters have a status effect applied onto them.
+        /// </summary>
+        public event EventHandler<StatusEffectAppliedEventArgs> StatusEffectApplied;
+
         public StatusController(ThreatController threatController)
         {
             _threatController = threatController;
@@ -80,7 +86,7 @@ namespace TurnBasedRPG.Controller.Combat
         /// <param name="applicator">The character that is applying the status effect.</param>
         /// <param name="status">The status effect being applied.</param>
         /// <param name="character">The character the status effect is being applied on.</param>
-        public void ApplyStatus(Character applicator, StatusEffect status, Character character)
+        public void ApplyStatus(Character applicator, StatusEffect status, Character character, bool invokeAppliedStatusEvent = true)
         {
             if (!_appliedStatuses.ContainsKey(character)) _appliedStatuses[character] = new List<AppliedStatus>();
             // If the the same type of status is already on a character
@@ -125,6 +131,14 @@ namespace TurnBasedRPG.Controller.Combat
                 else
                     character.Buffs.Add(status);
             }
+
+            if (invokeAppliedStatusEvent)
+            {
+                StatusEffectApplied?.Invoke(this, new StatusEffectAppliedEventArgs()
+                {
+                    LogMessage = CombatMessenger.GetAffectedByStatusMessage(status.Name, character.Name)
+                });
+            }
         }
 
         /// <summary>
@@ -137,8 +151,13 @@ namespace TurnBasedRPG.Controller.Combat
         {
             foreach (var character in characters)
             {
-                ApplyStatus(applicator, status, character);
+                ApplyStatus(applicator, status, character, false);
             }
+            
+            StatusEffectApplied?.Invoke(this, new StatusEffectAppliedEventArgs()
+            {
+                LogMessage = CombatMessenger.GetAffectedByStatusMessage(status.Name, characters.Select(chr => chr.Name).ToList())
+            });
         }
 
         /// <summary>

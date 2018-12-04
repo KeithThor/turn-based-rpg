@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TurnBasedRPG.Controller.EventArgs;
 using TurnBasedRPG.Model.Entities;
 using TurnBasedRPG.Shared;
+using TurnBasedRPG.Shared.Combat;
 
 namespace TurnBasedRPG.Controller.Combat
 {
@@ -32,7 +33,7 @@ namespace TurnBasedRPG.Controller.Combat
         private Dictionary<Character, List<DelayedAction>> _delayedActions = new Dictionary<Character, List<DelayedAction>>();
 
         private CharacterController _characterController;
-        private StatusController _statusController;
+        internal StatusController StatusEffectController;
         private ThreatController _threatController;
         private IReadOnlyList<Character> _allCharacters;
         private Random _random;
@@ -41,7 +42,7 @@ namespace TurnBasedRPG.Controller.Combat
             get { return _allCharacters; }
             set
             {
-                _statusController.AllCharacters = value;
+                StatusEffectController.AllCharacters = value;
                 _allCharacters = value;
             }
         }
@@ -67,7 +68,7 @@ namespace TurnBasedRPG.Controller.Combat
                                 ThreatController threatController)
         {
             _characterController = characterController;
-            _statusController = statusController;
+            StatusEffectController = statusController;
             _threatController = threatController;
             _random = new Random();
 
@@ -76,9 +77,9 @@ namespace TurnBasedRPG.Controller.Combat
 
         private void BindEvents()
         {
-            _statusController.CharacterSpeedChanged += OnCharacterSpeedChanged;
-            _statusController.CharactersDied += OnCharactersDying;
-            _statusController.CharactersHealthChanged += OnCharactersHealthChanged;
+            StatusEffectController.CharacterSpeedChanged += OnCharacterSpeedChanged;
+            StatusEffectController.CharactersDied += OnCharactersDying;
+            StatusEffectController.CharactersHealthChanged += OnCharactersHealthChanged;
         }
 
         /// <summary>
@@ -137,7 +138,7 @@ namespace TurnBasedRPG.Controller.Combat
         /// <param name="character">The character whose turn is starting.</param>
         public void StartTurn(Character character)
         {
-            _statusController.StartTurn(character);
+            StatusEffectController.StartTurn(character);
             if (_delayedActions.ContainsKey(character))
             {
                 var removeActions = new List<DelayedAction>();
@@ -198,9 +199,17 @@ namespace TurnBasedRPG.Controller.Combat
         /// <param name="targets">The list of characters to check.</param>
         private void CheckForDeadTargets(IReadOnlyList<Character> targets)
         {
-            var deadCharacters = targets.Where(target => target.CurrentHealth <= 0);
+            var deadCharacters = targets.Where(target => target.CurrentHealth <= 0).ToList();
             if (deadCharacters.Count() > 0)
-                CharactersDied?.Invoke(this, new CharactersDiedEventArgs() { DyingCharacters = deadCharacters.ToList() });
+            {
+                var logMessage = CombatMessenger.GetCharactersDiedMessage(deadCharacters.Select(chr => chr.Name).ToList());
+
+                CharactersDied?.Invoke(this, new CharactersDiedEventArgs()
+                {
+                    DyingCharacters = deadCharacters.ToList(),
+                    LogMessage = logMessage
+                });
+            }
         }
 
         /// <summary>
@@ -215,6 +224,7 @@ namespace TurnBasedRPG.Controller.Combat
             int[] damage = damageTypes.AsArray();
             var postHealthChangedDict = new Dictionary<int, int>();
             var changeAmount = new Dictionary<int, int>();
+            var loggableData = new List<KeyValuePair<string, int>>();
             var preHealthChangedDict = new Dictionary<int, int>();
 
             for (int i = 0; i < targets.Count(); i++)
@@ -247,17 +257,26 @@ namespace TurnBasedRPG.Controller.Combat
                                               percentHealAmount + modifiedHealAmount + totalDamage,
                                               action.Threat,
                                               action.ThreatMultiplier);
+
+                // Prepare event data
                 int healthChange = targets[i].CurrentHealth - startHealth;
                 changeAmount.Add(targets[i].Id, healthChange);
+                loggableData.Add(new KeyValuePair<string, int>(targets[i].Name, healthChange));
                 postHealthChangedDict.Add(targets[i].Id, targets[i].CurrentHealth);
             }
+
             if (changeAmount.Values.Any(val => val != 0))
             {
+                string logMessage = CombatMessenger.GetHealthChangedMessage(actor.Name,
+                                                                            action.Name,
+                                                                            loggableData);
+
                 CharactersHealthChanged?.Invoke(this, new CharactersHealthChangedEventArgs()
                 {
                     PostCharactersChanged = postHealthChangedDict,
                     PreCharactersChanged = preHealthChangedDict,
-                    ChangeAmount = changeAmount
+                    ChangeAmount = changeAmount,
+                    LogMessage = logMessage
                 });
             }
         }
@@ -274,6 +293,7 @@ namespace TurnBasedRPG.Controller.Combat
 
             var postHealthChangedDict = new Dictionary<int, int>();
             var changeAmount = new Dictionary<int, int>();
+            var loggableData = new List<KeyValuePair<string, int>>();
             var preHealthChangedDict = new Dictionary<int, int>();
 
             for (int i = 0; i < targets.Count(); i++)
@@ -293,16 +313,22 @@ namespace TurnBasedRPG.Controller.Combat
                                               action.BaseAction.ThreatMultiplier);
                 int modifiedHealth = targets[i].CurrentHealth - startingHealth;
                 changeAmount.Add(targets[i].Id, modifiedHealth);
+                loggableData.Add(new KeyValuePair<string, int>(targets[i].Name, modifiedHealth));
                 postHealthChangedDict.Add(targets[i].Id, targets[i].CurrentHealth);
             }
 
             if (changeAmount.Values.Any(val => val != 0))
             {
+                string logMessage = CombatMessenger.GetHealthChangedMessage(action.Actor.Name,
+                                                                            action.BaseAction.Name,
+                                                                            loggableData);
+
                 CharactersHealthChanged?.Invoke(this, new CharactersHealthChangedEventArgs()
                 {
                     PostCharactersChanged = postHealthChangedDict,
                     PreCharactersChanged = preHealthChangedDict,
-                    ChangeAmount = changeAmount
+                    ChangeAmount = changeAmount,
+                    LogMessage = logMessage
                 });
             }
 
@@ -322,7 +348,7 @@ namespace TurnBasedRPG.Controller.Combat
 
             foreach (var status in action.BuffsToApply)
             {
-                _statusController.ApplyStatus(actor, status, livingTargets);
+                StatusEffectController.ApplyStatus(actor, status, livingTargets);
             }
         }
 
@@ -336,7 +362,7 @@ namespace TurnBasedRPG.Controller.Combat
         {
             foreach (var status in action.BuffsToApply)
             {
-                _statusController.CreateDelayedStatus(actor, status, targets, action.Delay);
+                StatusEffectController.CreateDelayedStatus(actor, status, targets, action.Delay);
             }
         }
     }

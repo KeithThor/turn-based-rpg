@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Combat\ActionDetailsPanel.cs" />
     <Compile Include="Combat\CategoryDetailsPanel.cs" />
+    <Compile Include="Combat\CombatLogPanel.cs" />
     <Compile Include="Combat\DefaultsHandler.cs" />
     <Compile Include="Combat\CharacterDetailsPanel.cs" />
     <Compile Include="Combat\EventArgs\ActionSelectedEventArgs.cs" />

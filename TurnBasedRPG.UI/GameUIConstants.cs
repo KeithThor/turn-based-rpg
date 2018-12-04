@@ -11,7 +11,7 @@ namespace TurnBasedRPG.UI
         /// <summary>
         /// Controls the width of the game console window.
         /// </summary>
-        public readonly int ScreenWidth = (120 > Console.LargestWindowWidth) ? Console.LargestWindowWidth : 120;
+        public readonly int ScreenWidth = (160 > Console.LargestWindowWidth) ? Console.LargestWindowWidth : 160;
 
         /// <summary>
         /// Controls the height of the game console window.

@@ -60,6 +60,8 @@
     <Compile Include="EventArgs\CharacterSpeedChangedEventArgs.cs" />
     <Compile Include="EventArgs\EndOfTurnEventArgs.cs" />
     <Compile Include="EventArgs\StartOfTurnEventArgs.cs" />
+    <Compile Include="EventArgs\CombatLoggableEventArgs.cs" />
+    <Compile Include="EventArgs\StatusEffectAppliedEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Combat\StatusController.cs" />
     <Compile Include="ViewModelController.cs" />

@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Combat\CombatMessenger.cs" />
     <Compile Include="Combat\CombatTargeter.cs" />
     <Compile Include="DamageStatModifier.cs" />
     <Compile Include="DamageTypes.cs" />
