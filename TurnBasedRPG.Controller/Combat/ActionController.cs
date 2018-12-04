@@ -114,21 +114,46 @@ namespace TurnBasedRPG.Controller.Combat
             if (action.Delay > 0)
             {
                 CreateDelayedAction(actor, action, targets);
-                ApplyDelayedStatus(actor, action, targets);
+                CreateDelayedStatus(actor, action, targets);
             }
             else
             {
                 var targetCharacters = new List<Character>();
+                // Check if character matches conditions to apply healing and damage to and exists in the target positions
                 foreach (var character in AllCharacters)
                 {
-                    if (targets.Contains(character.Position)) targetCharacters.Add(character);
+                    if (IsTargetableCharacter(character, action, targets))
+                    {
+                        targetCharacters.Add(character);
+                    }
                 }
 
                 ApplyHealingAndDamage(actor, action, targetCharacters);
-                ApplyStatusEffects(actor, action, targetCharacters);
-
                 CheckForDeadTargets(targetCharacters);
+
+                targetCharacters.RemoveAll(chr => chr.CurrentHealth <= 0);
+                ApplyStatusEffects(actor, action, targetCharacters);
             }
+        }
+
+        /// <summary>
+        /// Gets whether or not a character can be targetable by an action and it's target positions. Filters our dead
+        /// characters if the target cannot resurrect.
+        /// </summary>
+        /// <param name="character">The character to check if it is targetable.</param>
+        /// <param name="action">The action to check targetability.</param>
+        /// <param name="targetPositions">The target positions the action is affecting.</param>
+        /// <returns>Returns whether or not a character can be targetted by an action.</returns>
+        private bool IsTargetableCharacter(Character character, ActionBase action, IReadOnlyList<int> targetPositions)
+        {
+            bool includeDead = action.CanResurrect && character.CurrentHealth <= 0;
+            bool isCharacterAlive = character.CurrentHealth > 0;
+            if (targetPositions.Contains(character.Position) && (includeDead || isCharacterAlive))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -138,7 +163,7 @@ namespace TurnBasedRPG.Controller.Combat
         /// <param name="character">The character whose turn is starting.</param>
         public void StartTurn(Character character)
         {
-            StatusEffectController.StartTurn(character);
+            StatusEffectController.BeginStartTurn(character);
             if (_delayedActions.ContainsKey(character))
             {
                 var removeActions = new List<DelayedAction>();
@@ -156,6 +181,7 @@ namespace TurnBasedRPG.Controller.Combat
                     _delayedActions[character].Remove(action);
                 }
             }
+            StatusEffectController.FinishStartTurn(character);
         }
 
         /// <summary>
@@ -229,9 +255,6 @@ namespace TurnBasedRPG.Controller.Combat
 
             for (int i = 0; i < targets.Count(); i++)
             {
-                // Target is dead, skip
-                if (targets[i].CurrentHealth == 0)
-                    continue;
                 int startHealth = targets[i].CurrentHealth;
                 preHealthChangedDict.Add(targets[i].Id, startHealth);
                 // Calculate and apply healing
@@ -287,9 +310,8 @@ namespace TurnBasedRPG.Controller.Combat
         /// <param name="action">The delayed action causing the healing and damage.</param>
         private void ApplyHealingAndDamage(DelayedAction action)
         {
-            var targets = new List<Character>(
-                                              AllCharacters.Where(
-                                                  character => action.Targets.Contains(character.Position)));
+            var targets = new List<Character>(AllCharacters.Where(
+                                                  character => IsTargetableCharacter(character, action.BaseAction, action.Targets)));
 
             var postHealthChangedDict = new Dictionary<int, int>();
             var changeAmount = new Dictionary<int, int>();
@@ -346,9 +368,12 @@ namespace TurnBasedRPG.Controller.Combat
             var livingTargets = new List<Character>(targets);
             livingTargets.RemoveAll(character => character.CurrentHealth <= 0);
 
-            foreach (var status in action.BuffsToApply)
+            if (livingTargets.Count() > 0)
             {
-                StatusEffectController.ApplyStatus(actor, status, livingTargets);
+                foreach (var status in action.BuffsToApply)
+                {
+                    StatusEffectController.ApplyStatus(actor, status, livingTargets);
+                }
             }
         }
 
@@ -358,7 +383,7 @@ namespace TurnBasedRPG.Controller.Combat
         /// <param name="actor">The character applying the delayed status effects.</param>
         /// <param name="action">The action applying the delayed status effects.</param>
         /// <param name="targets">The target positions of the delayed status effects.</param>
-        private void ApplyDelayedStatus(Character actor, ActionBase action, IReadOnlyList<int> targets)
+        private void CreateDelayedStatus(Character actor, ActionBase action, IReadOnlyList<int> targets)
         {
             foreach (var status in action.BuffsToApply)
             {

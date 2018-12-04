@@ -216,6 +216,12 @@ namespace TurnBasedRPG.Controller.Combat
                         target.Buffs.Add(status.BaseStatus);
                 }
             }
+
+            StatusEffectApplied?.Invoke(this, new StatusEffectAppliedEventArgs()
+            {
+                LogMessage = CombatMessenger.GetAffectedByStatusMessage(status.BaseStatus.Name,
+                                                                        livingTargets.Select(target => target.Name).ToList())
+            });
         }
 
         /// <summary>
@@ -224,12 +230,22 @@ namespace TurnBasedRPG.Controller.Combat
         /// character died event if a character dies as a result of damage from a status effect.
         /// </summary>
         /// <param name="character">The character whose turn is starting.</param>
-        public void StartTurn(Character character)
+        public void BeginStartTurn(Character character)
         {
             if (_appliedStatuses.ContainsKey(character))
             {
                 StartOfTurnEffects(character);
             }
+            
+        }
+
+        /// <summary>
+        /// Finishes the start of the turn for a character by activating any delayed status effects after a delayed action
+        /// has already been activated.
+        /// </summary>
+        /// <param name="character">The character whose turn is starting.</param>
+        public void FinishStartTurn(Character character)
+        {
             if (_delayedStatuses.ContainsKey(character))
             {
                 HandleDelayedStatuses(character);

@@ -21,6 +21,7 @@ namespace TurnBasedRPG.Model.Entities
 
         public bool CanTargetThroughUnits { get; set; }
         public bool CanSwitchTargetPosition { get; set; }
+        public bool CanResurrect { get; set; }
         public IReadOnlyList<int> TargetPositions { get; } = new List<int>();
         public int CenterOfTargetsPosition { get; set; } = 5;
         public string Description { get; set; }
