@@ -127,5 +127,26 @@ namespace TurnBasedRPG.Shared.Combat
             }
             return "";
         }
+
+        /// <summary>
+        /// Constructs and returns a message whenever a character is preparing a delayed action.
+        /// </summary>
+        /// <param name="channelerName">The name of the character preparing the delayed action.</param>
+        /// <param name="actionName">The name of the action being channeled.</param>
+        /// <returns>A message containing the channeler's name and the action it is channeling.</returns>
+        public static string GetBeginChannelMessage(string channelerName, string actionName)
+        {
+            return $"{channelerName} prepares to use {actionName}.";
+        }
+
+        /// <summary>
+        /// Constructs and returns a message whenever a character waits for it's turn.
+        /// </summary>
+        /// <param name="characterName">The name of the character waiting.</param>
+        /// <returns></returns>
+        public static string GetBeginWaitMessage(string characterName)
+        {
+            return $"{characterName} is waiting until later to act.";
+        }
     }
 }

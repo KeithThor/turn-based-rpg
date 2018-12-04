@@ -63,6 +63,11 @@ namespace TurnBasedRPG.Controller.Combat
         /// </summary>
         public event EventHandler<CharacterSpeedChangedEventArgs> CharacterSpeedChanged;
 
+        /// <summary>
+        /// Event inboked whenever a character has begun channeling a delayed action.
+        /// </summary>
+        public event EventHandler<CombatLoggableEventArgs> DelayedActionBeginChannel;
+
         public ActionController(CharacterController characterController,
                                 StatusController statusController,
                                 ThreatController threatController)
@@ -216,6 +221,11 @@ namespace TurnBasedRPG.Controller.Combat
                 HealPercentage = percentageHealing,
                 TurnsRemaining = action.Delay,
                 Targets = targets
+            });
+
+            DelayedActionBeginChannel?.Invoke(this, new CombatLoggableEventArgs()
+            {
+                LogMessage = CombatMessenger.GetBeginChannelMessage(actor.Name, action.Name)
             });
         }
 

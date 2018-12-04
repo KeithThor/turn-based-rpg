@@ -59,6 +59,16 @@ namespace TurnBasedRPG.Controller.Combat
         public event EventHandler<StatusEffectAppliedEventArgs> StatusEffectApplied;
 
         /// <summary>
+        /// Event triggered whenever a character has begun to channel a delayed action.
+        /// </summary>
+        public event EventHandler<CombatLoggableEventArgs> DelayedActionBeginChannel;
+
+        /// <summary>
+        /// Event triggered whenever a character waits in combat.
+        /// </summary>
+        public event EventHandler<CombatLoggableEventArgs> CharacterBeginWait;
+
+        /// <summary>
         /// Event triggered whenever a character has it's speed changed.
         /// </summary>
         public event EventHandler<CharacterSpeedChangedEventArgs> CharacterSpeedChanged;
@@ -85,6 +95,7 @@ namespace TurnBasedRPG.Controller.Combat
             _actionController.CharactersHealthChanged += OnCharactersHealthChanged;
             _actionController.CharacterSpeedChanged += OnCharacterSpeedChanged;
             _actionController.StatusEffectController.StatusEffectApplied += OnStatusEffectsApplied;
+            _actionController.DelayedActionBeginChannel += OnDelayedActionBeginChannel;
         }
 
         private void OnCharactersDying(object sender, CharactersDiedEventArgs args)
@@ -107,6 +118,11 @@ namespace TurnBasedRPG.Controller.Combat
         private void OnStatusEffectsApplied(object sender, StatusEffectAppliedEventArgs args)
         {
             StatusEffectApplied?.Invoke(sender, args);
+        }
+
+        private void OnDelayedActionBeginChannel(object sender, CombatLoggableEventArgs args)
+        {
+            DelayedActionBeginChannel?.Invoke(sender, args);
         }
 
         /// <summary>
@@ -234,7 +250,13 @@ namespace TurnBasedRPG.Controller.Combat
                     if (CombatStateHandler.CurrentRoundOrder.Count() == 1)
                         isInvalidAction = true;
                     else
+                    {
                         CombatStateHandler.BeginWait();
+                        CharacterBeginWait?.Invoke(this, new CombatLoggableEventArgs()
+                        {
+                            LogMessage = CombatMessenger.GetBeginWaitMessage(CombatStateHandler.CurrentRoundOrder[0].Name)
+                        });
+                    }
                     break;
                 default:
                     isInvalidAction = true;
