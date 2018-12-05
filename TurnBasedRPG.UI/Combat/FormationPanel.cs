@@ -14,7 +14,7 @@ namespace TurnBasedRPG.UI.Combat
         private const int _paddingMiddle = 18;
         private const int _numberInRow = 3;
         private IReadOnlyList<IDisplayCharacter> _characters;
-        public bool RenderFocus;
+        public bool RenderFocus { get; set; }
         private IReadOnlyList<int> TargetPositions;
         private CachedData _cachedData;
         private IReadOnlyList<string> _cachedRender;
@@ -53,6 +53,7 @@ namespace TurnBasedRPG.UI.Combat
             public int ActiveCharacterId;
             public IReadOnlyList<int> Targets;
             public Dictionary<int, CachedCharacter> CachedCharacters;
+            public bool RenderFocus;
         }
 
         private class CachedCharacter
@@ -81,7 +82,8 @@ namespace TurnBasedRPG.UI.Combat
                 {
                     ActiveCharacterId = activeCharacterId,
                     Targets = targets,
-                    CachedCharacters = CacheCharacters(characters)
+                    CachedCharacters = CacheCharacters(characters),
+                    RenderFocus = this.RenderFocus
                 };
             }
 
@@ -128,6 +130,7 @@ namespace TurnBasedRPG.UI.Combat
         {
             if (_cachedData == null) return false;
             if (activeCharacterId != _cachedData.ActiveCharacterId) return false;
+            if (_cachedData.RenderFocus != RenderFocus) return false;
             if (characters.Count() != _cachedData.CachedCharacters.Count()) return false;
             if (!targets.SequenceEqual(_cachedData.Targets)) return false;
             foreach (var character in characters)

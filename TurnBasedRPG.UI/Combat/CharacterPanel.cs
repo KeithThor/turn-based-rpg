@@ -64,28 +64,34 @@ namespace TurnBasedRPG.UI.Combat
             }
 
             var characterDetails = new List<string>();
-            characterDetails.AddRange(RenderAllStats(character));
-
+            characterDetails.AddRange(RenderCharacter(character));
             
-
             _cachedRender = characterDetails;
             return characterDetails;
         }
 
+        /// <summary>
+        /// Renders a character panel with a group of characters and a focused character target that will show
+        /// more stats.
+        /// </summary>
+        /// <param name="characters">The list of characters to render to the character panel.</param>
+        /// <param name="focusedTarget">The character that is focused and will show more stats.</param>
+        /// <returns>A list of string containing the rendered character panel.</returns>
         public IReadOnlyList<string> Render(IReadOnlyList<IDisplayCharacter> characters, IDisplayCharacter focusedTarget)
         {
-            if (characters.Count == 1) return Render(characters[0]);
+            if (characters.Count == 1) return Render(focusedTarget);
 
             // Prevent target from being rendered twice
             var modifiedList = new List<IDisplayCharacter>(characters);
             modifiedList.Remove(focusedTarget);
 
             var render = new List<string>();
-            var otherCharacters = RenderMany(characters);
-            var targetDetails = RenderAllStats(focusedTarget);
+            var otherCharacters = RenderMany(modifiedList);
+            var targetDetails = RenderCharacter(focusedTarget);
 
-            int removeIndex = MaxHeight - otherCharacters.Count() - 1;
-            targetDetails.RemoveRange(removeIndex, targetDetails.Count() - removeIndex - 1);
+            // Remove extra details from the focusedTarget render depending on how much space there is left to fit the max height
+            int removeIndex = MaxHeight - otherCharacters.Count();
+            targetDetails.RemoveRange(removeIndex, targetDetails.Count() - removeIndex);
 
             render.AddRange(targetDetails);
             render.AddRange(otherCharacters);
@@ -93,6 +99,11 @@ namespace TurnBasedRPG.UI.Combat
             return render;
         }
 
+        /// <summary>
+        /// Renders many small character blocks inside the panel.
+        /// </summary>
+        /// <param name="characters">A list containing the characters to render inside the panel.</param>
+        /// <returns>A list containing the render.</returns>
         private List<string> RenderMany(IReadOnlyList<IDisplayCharacter> characters)
         {
             // 1 to account for top border, 5 for size of each block
@@ -125,7 +136,12 @@ namespace TurnBasedRPG.UI.Combat
             return characterBlock;
         }
 
-        private List<string> RenderAllStats(IDisplayCharacter character)
+        /// <summary>
+        /// Renders a character's name and all it's stats wrapped in a panel.
+        /// </summary>
+        /// <param name="character">The character to render in the panel.</param>
+        /// <returns>A list of strings containing the panel render.</returns>
+        private List<string> RenderCharacter(IDisplayCharacter character)
         {
             var characterDetails = new List<string>();
             characterDetails.Add("╔" + new string('═', MaxWidth - 2) + "╗");
@@ -140,8 +156,7 @@ namespace TurnBasedRPG.UI.Combat
             {
                 characterDetails.Add("║" + new string(' ', MaxWidth - 2) + "║");
             }
-            // characterDetails.Add("╚" + new string('═', MaxWidth - 2) + "╝");
-            characterDetails.Add("║" + new string(' ', MaxWidth - 2) + "║");
+            characterDetails.Add("╚" + new string('═', MaxWidth - 2) + "╝");
 
             return characterDetails;
         }
