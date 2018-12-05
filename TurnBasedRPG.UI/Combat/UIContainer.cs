@@ -33,6 +33,7 @@ namespace TurnBasedRPG.UI.Combat
         private readonly CharacterDetailsPanel _characterDetailsPanel;
         private readonly CategoryDetailsPanel _categoryDetailsPanel;
         private readonly CombatLogPanel _combatLogPanel;
+        private readonly CharacterPanel _characterPanel;
 
         public UIContainer(FormationPanel formationPanel,
                            TargetPanel targetPanel,
@@ -43,6 +44,7 @@ namespace TurnBasedRPG.UI.Combat
                            CharacterDetailsPanel characterDetailsPanel,
                            CategoryDetailsPanel categoryDetailsPanel,
                            CombatLogPanel combatLogPanel,
+                           CharacterPanel characterPanel,
                            DefaultsHandler defaultsHandler,
                            UICharacterManager uiCharacterManager,
                            ViewModelController viewModelController,
@@ -58,6 +60,8 @@ namespace TurnBasedRPG.UI.Combat
             _characterDetailsPanel = characterDetailsPanel;
             _categoryDetailsPanel = categoryDetailsPanel;
             _combatLogPanel = combatLogPanel;
+            _characterPanel = characterPanel;
+            _characterPanel.MaxHeight = _formationPanel.MaxHeight;
             _defaultsHandler = defaultsHandler;
             _uiCharacterManager = uiCharacterManager;
             _viewModelController = viewModelController;
@@ -107,7 +111,7 @@ namespace TurnBasedRPG.UI.Combat
         {
             Console.Clear();
             PrintTargetAndTurnOrder();
-            PrintCombatFormations();
+            PrintFormationsAndCharacterPanel();
             PrintUserPanels();
         }
 
@@ -180,14 +184,60 @@ namespace TurnBasedRPG.UI.Combat
         /// <summary>
         /// Renders and prints the battlefield, containing all the characters in combat as well as their healthbars.
         /// </summary>
-        private void PrintCombatFormations()
+        private void PrintFormationsAndCharacterPanel()
         {
             var formations = _formationPanel.Render(_uiCharacterManager.Characters, 
                                                     _defaultsHandler.ActiveCharacterId,
                                                     _defaultsHandler.CurrentTargetPositions);
-            foreach (var item in formations)
+
+
+            IReadOnlyList<string> characterPanel;
+
+            // Display the current target character's details if in the formation panel
+            if (_defaultsHandler.IsInFormationPanel || !IsPlayerTurn)
             {
-                Console.WriteLine(item);
+                IDisplayCharacter focusedTarget;
+                IReadOnlyList<IDisplayCharacter> otherTargets = new List<IDisplayCharacter>();
+                var targets = _defaultsHandler.CurrentTargetPositions;
+
+                // If there are no characters within any of our target positions, return the current turn character
+                if (!targets.Any(targetPosition =>
+                                 _uiCharacterManager.GetCharacterFromPosition(targetPosition) != null))
+                {
+                    focusedTarget = _uiCharacterManager.GetCurrentTurnCharacter();
+                }
+                // If our main target position is occupied, display that target
+                else if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition)
+                         && targets.Contains(_defaultsHandler.CurrentTargetPosition))
+                {
+                    focusedTarget = _uiCharacterManager.GetCharacterFromPosition(_defaultsHandler.CurrentTargetPosition);
+                    otherTargets = _uiCharacterManager.GetCharactersFromPositions(targets);
+                }
+                // If our main target position isn't occupied, display any target that occupies a spot in our target list
+                else
+                {
+                    focusedTarget = _uiCharacterManager.Characters.First(
+                                            character => targets.Contains(character.Position));
+                    otherTargets = _uiCharacterManager.GetCharactersFromPositions(targets);
+                }
+                if (otherTargets.Count() > 0)
+                {
+                    characterPanel = _characterPanel.Render(otherTargets, focusedTarget);
+                }
+                else
+                {
+                    characterPanel = _characterPanel.Render(focusedTarget);
+                }
+            }
+            // Display the current turn character if not in the formation panel
+            else
+            {
+                characterPanel = _characterPanel.Render(_uiCharacterManager.GetCurrentTurnCharacter());
+            }
+
+            for (int i = 0; i < formations.Count(); i++)
+            {
+                Console.WriteLine(formations[i] + characterPanel[i]);
             }
         }
 
@@ -270,35 +320,15 @@ namespace TurnBasedRPG.UI.Combat
         private IReadOnlyList<string> StartRenderDetailsPanels()
         {
             IReadOnlyList<string> detailsPanel;
-            // Display the current target character's details if in the formation panel
-            if (_defaultsHandler.IsInFormationPanel || !IsPlayerTurn)
-            {
-                IDisplayCharacter display;
-                var targets = _defaultsHandler.CurrentTargetPositions;
-
-                // If there are no characters within any of our target positions, return null
-                if (!targets.Any(targetPosition => 
-                                 _uiCharacterManager.GetCharacterFromPosition(targetPosition) != null))
-                {
-                    display = null;
-                }
-                // If our main target position is occupied, display that target
-                else if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition) 
-                         && targets.Contains(_defaultsHandler.CurrentTargetPosition))
-                    display = _uiCharacterManager.GetCharacterFromPosition(_defaultsHandler.CurrentTargetPosition);
-                // If our main target position isn't occupied, display any target that occupies a spot in our target list
-                else
-                    display = _uiCharacterManager.Characters.First(
-                                            character => targets.Contains(character.Position));
-                detailsPanel = _characterDetailsPanel.RenderCharacterDetails(display);
-            }
-
+            
             // Display category information if in categories subpanel
-            else if (_defaultsHandler.IsInCategoryPanel)
+            if (_defaultsHandler.IsInCategoryPanel)
+            {
                 detailsPanel = _categoryDetailsPanel.RenderCategoryDetails(
                                     _defaultsHandler.ActionCategories[_defaultsHandler.CategoryFocusNumber - 1]);
+            }
             // Display action details if the current selection is an action
-            else if (_defaultsHandler.IsInActionPanel)
+            else if (_defaultsHandler.IsInActionPanel || _defaultsHandler.IsInFormationPanel)
             {
                 var data = _viewModelController.GetActionViewData((Commands)_defaultsHandler.CommandFocusNumber, 
                                                                   _defaultsHandler.ActiveCategory, 
@@ -311,10 +341,11 @@ namespace TurnBasedRPG.UI.Combat
                                                         _defaultsHandler.ActionFocusNumber - 1),
                                                     data);
             }
-
             else
-                detailsPanel = _characterDetailsPanel.RenderCharacterDetails(
-                                                    _uiCharacterManager.GetCharacterFromId(_defaultsHandler.ActiveCharacterId));
+            {
+                detailsPanel = _categoryDetailsPanel.RenderBlankPanel();
+            }
+
             return detailsPanel;
         }
 

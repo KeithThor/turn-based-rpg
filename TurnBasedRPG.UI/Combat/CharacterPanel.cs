@@ -7,18 +7,33 @@ using TurnBasedRPG.Shared.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat
 {
-    [Obsolete]
-    public class CharacterDetailsPanel
+    public class CharacterPanel
     {
-        public int MaxWidth { get; set; }
-        public int MaxHeight { get; set; }
+        /// <summary>
+        /// The minimum possible height of the formation panel.
+        /// </summary>
+        public const int Min_Height = 18;
 
-        public CharacterDetailsPanel()
+        public int MaxWidth { get; set; }
+        public int MinPrimaryBlockSize { get; set; }
+        private int _maxHeight;
+        public int MaxHeight
         {
-            MaxWidth = 55;
-            MaxHeight = 16;
+            get { return _maxHeight; }
+            set
+            {
+                if (value < Min_Height) _maxHeight = Min_Height;
+                else _maxHeight = value;
+            }
         }
-        
+
+        public CharacterPanel()
+        {
+            MaxHeight = 31;
+            MaxWidth = 40;
+            MinPrimaryBlockSize = 6;
+        }
+
         private struct CachedCharacter
         {
             public int Id;
@@ -34,9 +49,9 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         /// <param name="character">The character whose data will be used to fill the details panel.</param>
         /// <returns>A read-only list of string that contains the details panel.</returns>
-        public IReadOnlyList<string> RenderCharacterDetails(IDisplayCharacter character)
+        public IReadOnlyList<string> Render(IDisplayCharacter character)
         {
-            if (character == null) return RenderBlankPanel();
+            if (character == null) throw new NullReferenceException();
             if (IsCachedData(character)) return _cachedRender;
             else
             {
@@ -49,6 +64,70 @@ namespace TurnBasedRPG.UI.Combat
             }
 
             var characterDetails = new List<string>();
+            characterDetails.AddRange(RenderAllStats(character));
+
+            
+
+            _cachedRender = characterDetails;
+            return characterDetails;
+        }
+
+        public IReadOnlyList<string> Render(IReadOnlyList<IDisplayCharacter> characters, IDisplayCharacter focusedTarget)
+        {
+            if (characters.Count == 1) return Render(characters[0]);
+
+            // Prevent target from being rendered twice
+            var modifiedList = new List<IDisplayCharacter>(characters);
+            modifiedList.Remove(focusedTarget);
+
+            var render = new List<string>();
+            var otherCharacters = RenderMany(characters);
+            var targetDetails = RenderAllStats(focusedTarget);
+
+            int removeIndex = MaxHeight - otherCharacters.Count() - 1;
+            targetDetails.RemoveRange(removeIndex, targetDetails.Count() - removeIndex - 1);
+
+            render.AddRange(targetDetails);
+            render.AddRange(otherCharacters);
+
+            return render;
+        }
+
+        private List<string> RenderMany(IReadOnlyList<IDisplayCharacter> characters)
+        {
+            // 1 to account for top border, 5 for size of each block
+            int maxBlocks = (MaxHeight - 1 - MinPrimaryBlockSize) / 5;
+            int totalBlocks = (characters.Count() > maxBlocks) ? maxBlocks : characters.Count();
+
+            var characterBlock = new List<string>();
+            for (int i = 0; i < totalBlocks; i++)
+            {
+                characterBlock.Add("║" + new string('═', MaxWidth - 2) + "║");
+                int headerLength = characters[i].GetName().Count() + 7;
+                characterBlock.Add("║ " + characters[i].GetName() 
+                                    + " (" + characters[i].GetSymbol() + ")" 
+                                    + new string(' ', MaxWidth - headerLength) 
+                                    + "║");
+                characterBlock.Add("║" + new string('─', MaxWidth - 2) + "║");
+                characterBlock.Add(GetStatDisplay("Health",
+                                                    characters[i].GetCurrenthealth().ToString(),
+                                                    characters[i].GetMaxHealth().ToString()));
+                // Last iteration
+                if (i == totalBlocks - 1)
+                {
+                    characterBlock.Add("╚" + new string('═', MaxWidth - 2) + "╝");
+                }
+                else
+                {
+                    characterBlock.Add("║" + new string('─', MaxWidth - 2) + "║");
+                }
+            }
+            return characterBlock;
+        }
+
+        private List<string> RenderAllStats(IDisplayCharacter character)
+        {
+            var characterDetails = new List<string>();
             characterDetails.Add("╔" + new string('═', MaxWidth - 2) + "╗");
             int headerLength = character.GetName().Count() + 7;
             characterDetails.Add("║ " + character.GetName() + " (" + character.GetSymbol() + ")" + new string(' ', MaxWidth - headerLength) + "║");
@@ -56,32 +135,15 @@ namespace TurnBasedRPG.UI.Combat
             characterDetails.Add(GetStatDisplay("Health",
                                                 character.GetCurrenthealth().ToString(),
                                                 character.GetMaxHealth().ToString()));
-
             // Fill empty spaces 
             for (int i = 0; i < MaxHeight - 5; i++)
             {
                 characterDetails.Add("║" + new string(' ', MaxWidth - 2) + "║");
             }
-            characterDetails.Add("╚" + new string('═', MaxWidth - 2) + "╝");
+            // characterDetails.Add("╚" + new string('═', MaxWidth - 2) + "╝");
+            characterDetails.Add("║" + new string(' ', MaxWidth - 2) + "║");
 
-            _cachedRender = characterDetails;
             return characterDetails;
-        }
-
-        /// <summary>
-        /// In case of null objects, renders a panel with no data.
-        /// </summary>
-        /// <returns>A panel with no data.</returns>
-        private List<string> RenderBlankPanel()
-        {
-            var detailsPanel = new List<string>();
-            detailsPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
-            for (int i = 0; i < MaxHeight - 2; i++)
-            {
-                detailsPanel.Add("║ " + new string(' ', MaxWidth - 3) + "║");
-            }
-            detailsPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
-            return detailsPanel;
         }
 
         /// <summary>

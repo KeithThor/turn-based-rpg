@@ -18,7 +18,36 @@ namespace TurnBasedRPG.UI.Combat
         private IReadOnlyList<int> TargetPositions;
         private CachedData _cachedData;
         private IReadOnlyList<string> _cachedRender;
-        
+
+        private bool AddRowSpaces { get { return MaxHeight >= Min_Height + 3; } }
+        private bool AddHealthBarSpaces { get { return MaxHeight >= Min_Height + 6; } }
+        private int VerticalPadding { get { return (MaxHeight - (Min_Height + 6)) / 2; } }
+        private int ExtraPadding { get { return (MaxHeight - (Min_Height + 6)) % 2; } }
+
+        /// <summary>
+        /// Gets or sets the maximum width of the formation panel.
+        /// </summary>
+        public int MaxWidth { get; set; }
+
+        private int _maxHeight;
+        /// <summary>
+        /// Gets or sets the max height of the formation panel.
+        /// </summary>
+        public int MaxHeight
+        {
+            get { return _maxHeight; }
+            set
+            {
+                if (value < Min_Height) _maxHeight = Min_Height;
+                else _maxHeight = value;
+            }
+        }
+
+        /// <summary>
+        /// The minimum possible height of the formation panel.
+        /// </summary>
+        public const int Min_Height = 18;
+
         private class CachedData
         {
             public int ActiveCharacterId;
@@ -37,6 +66,8 @@ namespace TurnBasedRPG.UI.Combat
         {
             TargetPositions = new List<int>();
             _characters = new List<IDisplayCharacter>();
+            MaxWidth = 119;
+            MaxHeight = 31;
         }
 
         public IReadOnlyList<string> Render(IReadOnlyList<IDisplayCharacter> characters, 
@@ -57,7 +88,13 @@ namespace TurnBasedRPG.UI.Combat
             TargetPositions = targets;
             _characters = characters;
             var completeCombatFormations = new List<string>();
-            completeCombatFormations.Add("\n\n\n");
+            
+            // Construct top padding
+            for (int i = 0; i < VerticalPadding + ExtraPadding; i++)
+            {
+                completeCombatFormations.Add(new string(' ', MaxWidth));
+            }
+
             // For each row on the battlefield
             for (int i = 0; i < 3; i++)
             {
@@ -65,7 +102,13 @@ namespace TurnBasedRPG.UI.Combat
                 completeCombatFormations.Add(RenderFormationNames(charInLine));
                 completeCombatFormations.AddRange(RenderFormations(charInLine, activeCharacterId));
                 completeCombatFormations.Add(RenderFormationTargets(i));
-                completeCombatFormations.Add("\n");
+                if (AddRowSpaces) completeCombatFormations.Add(new string(' ', MaxWidth));
+            }
+
+            // Construct bottom padding, plus extra in case of odd numbers
+            for (int i = 0; i < VerticalPadding; i++)
+            {
+                completeCombatFormations.Add(new string(' ', MaxWidth));
             }
 
             _cachedRender = completeCombatFormations;
@@ -163,14 +206,29 @@ namespace TurnBasedRPG.UI.Combat
         // Render one row of formation boxes
         private List<string> RenderFormations(IReadOnlyList<IDisplayCharacter> charactersToRender, int activeCharacterId)
         {
-            var rowOfFormationBoxes = new List<string>
+            if (AddHealthBarSpaces)
             {
-                RenderHealthBars(charactersToRender),
-                RenderTopPanel(charactersToRender, activeCharacterId),
-                RenderMiddlePanel(charactersToRender, activeCharacterId),
-                RenderBottomPanel(charactersToRender, activeCharacterId)
-            };
-            return rowOfFormationBoxes;
+                var rowOfFormationBoxes = new List<string>
+                {
+                    RenderHealthBars(charactersToRender),
+                    new string(' ', MaxWidth),
+                    RenderTopPanel(charactersToRender, activeCharacterId),
+                    RenderMiddlePanel(charactersToRender, activeCharacterId),
+                    RenderBottomPanel(charactersToRender, activeCharacterId)
+                };
+                return rowOfFormationBoxes;
+            }
+            else
+            {
+                var rowOfFormationBoxes = new List<string>
+                {
+                    RenderHealthBars(charactersToRender),
+                    RenderTopPanel(charactersToRender, activeCharacterId),
+                    RenderMiddlePanel(charactersToRender, activeCharacterId),
+                    RenderBottomPanel(charactersToRender, activeCharacterId)
+                };
+                return rowOfFormationBoxes;
+            }
         }
 
         // Renders one row of formation target triangles below the formation boxes
@@ -178,7 +236,7 @@ namespace TurnBasedRPG.UI.Combat
         {
             if (TargetPositions.Count == 0)
             {
-                return "";
+                return new string(' ', MaxWidth);
             }
             else
             {
@@ -202,7 +260,7 @@ namespace TurnBasedRPG.UI.Combat
                         sb.Append(" ");
                     }
                 }
-                return sb.ToString();
+                return sb.ToString() + new string(' ', MaxWidth - sb.Length);
             }
         }
 
@@ -231,7 +289,7 @@ namespace TurnBasedRPG.UI.Combat
                     bottomPanelSB.Append("└─┘");
                 }
             }
-            return bottomPanelSB.ToString();
+            return bottomPanelSB.ToString() + new string(' ', MaxWidth - bottomPanelSB.Length);
         }
 
         // Render healthbars under characters depending on their current health percentage
@@ -271,7 +329,7 @@ namespace TurnBasedRPG.UI.Combat
                     healthBarSB.Append(' ', 7);
                 }
             }
-            return healthBarSB + "\n";
+            return healthBarSB + new string(' ', MaxWidth - healthBarSB.Length);
         }
 
         // Render middle part of formation boxes along with the symbols for each character
@@ -300,7 +358,7 @@ namespace TurnBasedRPG.UI.Combat
                     }
                 }
             }
-            return middlePanelSB.ToString();
+            return middlePanelSB.ToString() + new string(' ', MaxWidth - middlePanelSB.Length);
         }
 
         // Render top part of formation boxes
@@ -328,7 +386,7 @@ namespace TurnBasedRPG.UI.Combat
                     topPanelSB.Append("┌─┐");
                 }
             }
-            return topPanelSB.ToString();
+            return topPanelSB.ToString() + new string(' ', MaxWidth - topPanelSB.Length);
         }
         
         // Render the names of up to 6 characters on one line in the formation, 3 from player's side and 3 from enemy's side
@@ -354,7 +412,7 @@ namespace TurnBasedRPG.UI.Combat
                     nameSB.Append(' ', maxNameLength - charactersToRender[i].GetName().Length - namePaddingLeft + 1);
                 }
             }
-            return nameSB.ToString();
+            return nameSB.ToString() + new string(' ', MaxWidth - nameSB.Length);
         }
     }
 }

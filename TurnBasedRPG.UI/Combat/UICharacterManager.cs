@@ -16,6 +16,11 @@ namespace TurnBasedRPG.UI.Combat
         public IReadOnlyList<int> CurrentRoundOrderIds { get; set; }
         public IReadOnlyList<int> NextRoundOrderIds { get; set; }
 
+        /// <summary>
+        /// Retrieves a character given it's id. May return null if no character with a given id exists.
+        /// </summary>
+        /// <param name="id">The id of the character to retrieve.</param>
+        /// <returns>A UI displayable version of a character retrieved by id.</returns>
         public DisplayCharacter GetCharacterFromId(int id)
         {
             var target = Characters.FirstOrDefault(character => character.Id == id);
@@ -24,6 +29,11 @@ namespace TurnBasedRPG.UI.Combat
             return target;
         }
 
+        /// <summary>
+        /// Gets a group of characters, given a set of ids.
+        /// </summary>
+        /// <param name="ids">The ids of the characters to retrieve.</param>
+        /// <returns>A list of UI displayable characters retrieved by Id.</returns>
         public List<DisplayCharacter> GetCharactersFromIds(IEnumerable<int> ids)
         {
             return Characters.Where(chara => ids.Contains(chara.Id)).ToList();
@@ -53,12 +63,36 @@ namespace TurnBasedRPG.UI.Combat
             return displayCharacters;
         }
 
+        /// <summary>
+        /// Gets the character whose turn is now.
+        /// </summary>
+        /// <returns>The displayable version of the character who is acting now.</returns>
+        public DisplayCharacter GetCurrentTurnCharacter()
+        {
+            return Characters.First(chr => CurrentRoundOrderIds[0] == chr.Id);
+        }
+
+        /// <summary>
+        /// Gets a character who occupies a position on the field. Will return null if no character is found.
+        /// </summary>
+        /// <param name="targetPosition">The position to check for the character.</param>
+        /// <returns>A UI displayable version of a character that exists in a position.</returns>
         public DisplayCharacter GetCharacterFromPosition(int targetPosition)
         {
             var target = Characters.FirstOrDefault(character => character.Position == targetPosition);
             if (target == null)
                 return null;
             return target;
+        }
+
+        /// <summary>
+        /// Gets a list of characters who occupies a list of target positions.
+        /// </summary>
+        /// <param name="targetPositions">A list of target positions to check if characters exist.</param>
+        /// <returns>A list of UI displayable characters that exists in a set of positions.</returns>
+        public IReadOnlyList<DisplayCharacter> GetCharactersFromPositions(IEnumerable<int> targetPositions)
+        {
+            return Characters.Where(chr => targetPositions.Contains(chr.Position)).ToList();
         }
 
         /// <summary>

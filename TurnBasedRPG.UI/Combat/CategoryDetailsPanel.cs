@@ -52,7 +52,7 @@ namespace TurnBasedRPG.UI.Combat
         /// In case of null objects, renders a panel with no data.
         /// </summary>
         /// <returns>A panel with no data.</returns>
-        private List<string> RenderBlankPanel()
+        public IReadOnlyList<string> RenderBlankPanel()
         {
             var detailsPanel = new List<string>();
             detailsPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");

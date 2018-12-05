@@ -45,10 +45,12 @@
     <Compile Include="Combat\CombatLogPanel.cs" />
     <Compile Include="Combat\DefaultsHandler.cs" />
     <Compile Include="Combat\CharacterDetailsPanel.cs" />
+    <Compile Include="Combat\CharacterPanel.cs" />
     <Compile Include="Combat\EventArgs\ActionSelectedEventArgs.cs" />
     <Compile Include="Combat\EventArgs\KeyPressedEventArgs.cs" />
     <Compile Include="Combat\EventArgs\UpdateActionListEventArgs.cs" />
     <Compile Include="Combat\EventArgs\UpdateCategoriesEventArgs.cs" />
+    <Compile Include="Combat\Interfaces\IReceiveInputPanel.cs" />
     <Compile Include="Combat\UICharacterManager.cs" />
     <Compile Include="Combat\EventArgs\ActionStartedEventArgs.cs" />
     <Compile Include="Combat\UIContainer.cs" />
@@ -73,8 +75,6 @@
       <Name>TurnBasedRPG.Shared</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Combat\Interfaces\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
