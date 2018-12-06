@@ -11,5 +11,7 @@ namespace TurnBasedRPG.Controller.EventArgs
     {
         public int CharacterId { get; set; }
         public bool IsPlayerTurn { get; set; }
+        public IReadOnlyList<int> CurrentRoundOrderIds { get; set; }
+        public IReadOnlyList<int> NextRoundOrderIds { get; set; }
     }
 }

@@ -7,33 +7,22 @@ using TurnBasedRPG.Shared;
 using TurnBasedRPG.Shared.Interfaces;
 using TurnBasedRPG.Shared.Viewmodel;
 
-namespace TurnBasedRPG.UI.Combat
+namespace TurnBasedRPG.UI.Combat.Panels
 {
-    [Obsolete]
-    /// <summary>
-    /// A UI component responsible for rendering more information about a selected action, character, or category.
-    /// </summary>
-    public class InformationPanelUI
+    public class ActionDetailsPanel
     {
-        private int _maxWidth;
-        public int MaxWidth
-        {
-            get { return _maxWidth; }
-            set { _maxWidth = value; }
-        }
-        private int _maxHeight;
+        public int MaxWidth { get; set; }
+        public int MaxHeight { get; set; }
 
-        public int MaxHeight
-        {
-            get { return _maxHeight; }
-            set { _maxHeight = value; }
-        }
-
-        public InformationPanelUI()
+        public ActionDetailsPanel()
         {
             MaxWidth = 55;
             MaxHeight = 16;
         }
+
+        private int _cachedActionId = 0;
+        private ActionData _cachedActionData;
+        private IReadOnlyList<string> _cachedRender;
 
         /// <summary>
         /// Returns a read-only list containing the information panel injected with data from the a
@@ -46,40 +35,53 @@ namespace TurnBasedRPG.UI.Combat
         {
             if (action == null) return RenderBlankPanel();
 
-            var informationPanel = new List<string>();
-            informationPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
+            // If data is the same as previous render, use cached render instead of rerendering
+            if (action.GetId() == _cachedActionId && data == _cachedActionData)
+            {
+                return _cachedRender;
+            }
+            else
+            {
+                _cachedActionId = action.GetId();
+                _cachedActionData = data;
+            }
+
+            var actionPanel = new List<string>();
+            actionPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
             int spaces = MaxWidth - 2 - action.GetDisplayName().Count();
-            informationPanel.Add("║ " + action.GetDisplayName() + new string(' ', spaces - 1) + "║");
-            informationPanel.Add("║" + new string('─', MaxWidth - 2) + "║");
+            actionPanel.Add("║ " + action.GetDisplayName() + new string(' ', spaces - 1) + "║");
+            actionPanel.Add("║" + new string('─', MaxWidth - 2) + "║");
             var actionTargetBoxes = RenderActionTargets(action);
             var actionDescription = RenderActionDescription(action, data);
             for (int i = 0; i < actionTargetBoxes.Count(); i++)
             {
-                informationPanel.Add(actionDescription.ElementAt(i) + actionTargetBoxes.ElementAt(i));
+                actionPanel.Add(actionDescription.ElementAt(i) + actionTargetBoxes.ElementAt(i));
             }
-            int size = informationPanel.Count();
+            int size = actionPanel.Count();
             for (int i = 0; i < MaxHeight - size - 1; i++)
             {
-                informationPanel.Add("║" + new string(' ', MaxWidth - 2) + "║");
+                actionPanel.Add("║" + new string(' ', MaxWidth - 2) + "║");
             }
-            informationPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
-            return informationPanel;
+            actionPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
+
+            _cachedRender = actionPanel;
+            return actionPanel;
         }
-        
+
         /// <summary>
         /// In case of null objects, renders a panel with no data.
         /// </summary>
         /// <returns>A panel with no data.</returns>
         private List<string> RenderBlankPanel()
         {
-            var informationPanel = new List<string>();
-            informationPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
+            var actionPanel = new List<string>();
+            actionPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
             for (int i = 0; i < MaxHeight - 2; i++)
             {
-                informationPanel.Add("║ " + new string(' ', MaxWidth - 3) + "║");
+                actionPanel.Add("║ " + new string(' ', MaxWidth - 3) + "║");
             }
-            informationPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
-            return informationPanel;
+            actionPanel.Add("╚" + new string('═', MaxWidth - 2) + "╝");
+            return actionPanel;
         }
 
         /// <summary>
@@ -143,48 +145,6 @@ namespace TurnBasedRPG.UI.Combat
                 actionTargets.Add("│ " + item + new string(' ', maxWidth - item.Count() - 4) + " ║");
             }
             return actionTargets;
-        }
-
-        /// <summary>
-        /// Returns a list of string containing the description of an action's category.
-        /// </summary>
-        /// <param name="category">A string array containing the category name and the category description.</param>
-        /// <returns>Contains the description of an action's category.</returns>
-        private List<string> RenderCategoryDescription(string[] category)
-        {
-            List<string> descriptionFull = new List<string>();
-            int maxLineWidth = MaxWidth - 3;
-            var descriptionAsArr = category[1].GetStringAsList(maxLineWidth);
-            for (int i = 0; i < MaxHeight - 4; i++)
-            {
-                if(i < descriptionAsArr.Count())
-                {
-                    string description = descriptionAsArr.ElementAt(i);
-                    description = description + new string(' ', maxLineWidth - description.Count());
-                    descriptionFull.Add("║ " + description + "║");
-                }
-                else
-                {
-                    descriptionFull.Add("║" + new string(' ', MaxWidth - 2) + "║");
-                }
-            }
-            return descriptionFull;
-        }
-
-        /// <summary>
-        /// Returns a string containing the display information for a single stat.
-        /// </summary>
-        /// <param name="statName">The name of the stat to display.</param>
-        /// <param name="statAmount1">The amount of the stat.</param>
-        /// <param name="statAmount2">If the stat is modified, this is the modified stat amount.</param>
-        /// <returns>Contains the display information for a single stat.</returns>
-        private string GetStatDisplay(string statName, string statAmount1, string statAmount2 = "")
-        {
-            int length = statName.Count() + statAmount1.Count() + statAmount2.Count() + 6;
-            if(statAmount2.Count() == 0)
-                return "║ " + statName + ": " + statAmount1 + new string(' ', MaxWidth - length + 1) + "║";
-            else
-                return "║ " + statName + ": " + statAmount1 + "/" + statAmount2 + new string(' ', MaxWidth - length) + "║";
         }
 
         /// <summary>

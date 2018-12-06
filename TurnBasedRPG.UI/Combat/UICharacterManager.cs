@@ -134,6 +134,17 @@ namespace TurnBasedRPG.UI.Combat
         }
 
         /// <summary>
+        /// Replaces the currently stored display characters with another set of those characters with updated stats.
+        /// </summary>
+        /// <param name="characters">The new characters to replace the original.</param>
+        public void RefreshCharacters(IReadOnlyList<DisplayCharacter> characters)
+        {
+            var ids = characters.Select(chr => chr.Id);
+            Characters.RemoveAll(chr => ids.Contains(chr.Id));
+            Characters.AddRange(characters);
+        }
+
+        /// <summary>
         /// Sets the current health of a character to a new number, given the character's Id.
         /// </summary>
         /// <param name="chrId">The Id of the character whose health is being set.</param>

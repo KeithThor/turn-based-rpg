@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Shared.Interfaces;
 
-namespace TurnBasedRPG.UI.Combat
+namespace TurnBasedRPG.UI.Combat.Panels
 {
     [Obsolete]
     public class CharacterDetailsPanel
@@ -42,20 +42,20 @@ namespace TurnBasedRPG.UI.Combat
             {
                 _cachedCharacter = new CachedCharacter()
                 {
-                    Id = character.GetId(),
-                    CurrentHealth = character.GetCurrenthealth(),
-                    MaxHealth = character.GetMaxHealth()
+                    Id = character.Id,
+                    CurrentHealth = character.CurrentHealth,
+                    MaxHealth = character.MaxHealth
                 };
             }
 
             var characterDetails = new List<string>();
             characterDetails.Add("╔" + new string('═', MaxWidth - 2) + "╗");
-            int headerLength = character.GetName().Count() + 7;
-            characterDetails.Add("║ " + character.GetName() + " (" + character.GetSymbol() + ")" + new string(' ', MaxWidth - headerLength) + "║");
+            int headerLength = character.Name.Count() + 7;
+            characterDetails.Add("║ " + character.Name + " (" + character.Symbol + ")" + new string(' ', MaxWidth - headerLength) + "║");
             characterDetails.Add("║" + new string('─', MaxWidth - 2) + "║");
             characterDetails.Add(GetStatDisplay("Health",
-                                                character.GetCurrenthealth().ToString(),
-                                                character.GetMaxHealth().ToString()));
+                                                character.CurrentHealth.ToString(),
+                                                character.MaxHealth.ToString()));
 
             // Fill empty spaces 
             for (int i = 0; i < MaxHeight - 5; i++)
@@ -107,9 +107,9 @@ namespace TurnBasedRPG.UI.Combat
         /// <returns>Returns whether or not the stats of the character being passed in is the same as the cached data.</returns>
         private bool IsCachedData(IDisplayCharacter character)
         {
-            if (character.GetId() != _cachedCharacter.Id) return false;
-            if (character.GetCurrenthealth() != _cachedCharacter.CurrentHealth) return false;
-            if (character.GetMaxHealth() != _cachedCharacter.MaxHealth) return false;
+            if (character.Id != _cachedCharacter.Id) return false;
+            if (character.CurrentHealth != _cachedCharacter.CurrentHealth) return false;
+            if (character.MaxHealth != _cachedCharacter.MaxHealth) return false;
 
             return true;
         }

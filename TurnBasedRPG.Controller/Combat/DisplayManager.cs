@@ -48,6 +48,21 @@ namespace TurnBasedRPG.Controller.Combat
         }
 
         /// <summary>
+        /// Gets and returns a list of display characters containing the ids passed in.
+        /// </summary>
+        /// <param name="ids">The list of character ids to get characters from.</param>
+        /// <returns>A list of UI displayable characters retrieved by id.</returns>
+        public List<DisplayCharacter> GetDisplayCharactersFromIds(IEnumerable<int> ids)
+        {
+            var displayList = new List<DisplayCharacter>();
+            foreach (var character in _combatStateHandler.AllCharacters.Where(chr => ids.Contains(chr.Id)))
+            {
+                displayList.Add(_displayCharacterFactory.Create(character));
+            }
+            return displayList;
+        }
+
+        /// <summary>
         /// Given an action type, returns all the categories that exist for that character.
         /// </summary>
         /// <param name="commandType">The command type to return categories for.</param>

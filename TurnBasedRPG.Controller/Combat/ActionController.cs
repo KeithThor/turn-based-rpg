@@ -33,7 +33,7 @@ namespace TurnBasedRPG.Controller.Combat
         private Dictionary<Character, List<DelayedAction>> _delayedActions = new Dictionary<Character, List<DelayedAction>>();
 
         private CharacterController _characterController;
-        internal StatusController StatusEffectController;
+        private StatusController StatusEffectController;
         private ThreatController _threatController;
         private IReadOnlyList<Character> _allCharacters;
         private Random _random;
@@ -64,9 +64,14 @@ namespace TurnBasedRPG.Controller.Combat
         public event EventHandler<CharacterSpeedChangedEventArgs> CharacterSpeedChanged;
 
         /// <summary>
-        /// Event inboked whenever a character has begun channeling a delayed action.
+        /// Event invoked whenever a character has begun channeling a delayed action.
         /// </summary>
         public event EventHandler<CombatLoggableEventArgs> DelayedActionBeginChannel;
+
+        /// <summary>
+        /// Event invoked whenever a status effect is applied.
+        /// </summary>
+        public event EventHandler<StatusEffectAppliedEventArgs> StatusEffectApplied;
 
         public ActionController(CharacterController characterController,
                                 StatusController statusController,
@@ -85,6 +90,7 @@ namespace TurnBasedRPG.Controller.Combat
             StatusEffectController.CharacterSpeedChanged += OnCharacterSpeedChanged;
             StatusEffectController.CharactersDied += OnCharactersDying;
             StatusEffectController.CharactersHealthChanged += OnCharactersHealthChanged;
+            StatusEffectController.StatusEffectApplied += OnStatusEffectApplied;
         }
 
         /// <summary>
@@ -105,6 +111,11 @@ namespace TurnBasedRPG.Controller.Combat
         private void OnCharacterSpeedChanged(object sender, CharacterSpeedChangedEventArgs args)
         {
             CharacterSpeedChanged?.Invoke(sender, args);
+        }
+
+        private void OnStatusEffectApplied(object sender, StatusEffectAppliedEventArgs args)
+        {
+            StatusEffectApplied?.Invoke(sender, args);
         }
 
         /// <summary>

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Shared.Enums;
 
-namespace TurnBasedRPG.UI.Combat
+namespace TurnBasedRPG.UI.Combat.Panels
 {
     /// <summary>
     /// Responsible for rendering the command panel for the UI, containing the commands a player can use such as

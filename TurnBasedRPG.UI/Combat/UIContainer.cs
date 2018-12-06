@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using TurnBasedRPG.Controller;
 using TurnBasedRPG.Controller.Combat;
 using TurnBasedRPG.Controller.EventArgs;
-using TurnBasedRPG.Shared.Combat;
 using TurnBasedRPG.Shared.Enums;
 using TurnBasedRPG.Shared.Interfaces;
-using TurnBasedRPG.UI.Combat.EventArgs;
+using TurnBasedRPG.UI.Combat.Panels;
 
 namespace TurnBasedRPG.UI.Combat
 {
@@ -30,7 +27,6 @@ namespace TurnBasedRPG.UI.Combat
         private readonly ViewModelController _viewModelController;
         private readonly DisplayManager _displayManager;
         private readonly CombatStateHandler _combatStateHandler;
-        private readonly CharacterDetailsPanel _characterDetailsPanel;
         private readonly CategoryDetailsPanel _categoryDetailsPanel;
         private readonly CombatLogPanel _combatLogPanel;
         private readonly CharacterPanel _characterPanel;
@@ -41,7 +37,6 @@ namespace TurnBasedRPG.UI.Combat
                            ActionPanel actionPanel,
                            TurnOrderPanel turnOrderPanel,
                            ActionDetailsPanel actionDetailsPanel,
-                           CharacterDetailsPanel characterDetailsPanel,
                            CategoryDetailsPanel categoryDetailsPanel,
                            CombatLogPanel combatLogPanel,
                            CharacterPanel characterPanel,
@@ -57,7 +52,6 @@ namespace TurnBasedRPG.UI.Combat
             _actionPanel = actionPanel;
             _turnOrderPanel = turnOrderPanel;
             _actionDetailsPanel = actionDetailsPanel;
-            _characterDetailsPanel = characterDetailsPanel;
             _categoryDetailsPanel = categoryDetailsPanel;
             _combatLogPanel = combatLogPanel;
             _characterPanel = characterPanel;
@@ -359,7 +353,7 @@ namespace TurnBasedRPG.UI.Combat
             {
                 IDisplayCharacter renderTarget = null;
                 // If there is a character in the player's default target position, render that target's details
-                if (_uiCharacterManager.Characters.Any(chr => chr.GetPosition() == _defaultsHandler.CurrentTargetPosition))
+                if (_uiCharacterManager.Characters.Any(chr => chr.Position == _defaultsHandler.CurrentTargetPosition))
                     renderTarget = _uiCharacterManager.GetCharacterFromPosition(_defaultsHandler.CurrentTargetPosition);
                 // Finds any character that is in the player's target list and render that target's details
                 else

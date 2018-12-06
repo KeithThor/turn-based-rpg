@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Shared.Interfaces;
 
-namespace TurnBasedRPG.UI.Combat
+namespace TurnBasedRPG.UI.Combat.Panels
 {
     /// <summary>
     /// UI component that is responsible for rendering a target's name and
@@ -69,15 +69,15 @@ namespace TurnBasedRPG.UI.Combat
             {
                 _cachedData = new CachedData()
                 {
-                    Id = target.GetId(),
-                    CurrentHealth = target.GetCurrenthealth(),
-                    MaxHealth = target.GetMaxHealth()
+                    Id = target.Id,
+                    CurrentHealth = target.CurrentHealth,
+                    MaxHealth = target.MaxHealth
                 };
             }
 
             var targetDetails = new List<string>();
             // Calculate healthbar string
-            int healthBars = target.GetCurrenthealth() * 100 / target.GetMaxHealth() * WidthOfHealthBar / 100;
+            int healthBars = target.CurrentHealth * 100 / target.MaxHealth * WidthOfHealthBar / 100;
             if (healthBars > WidthOfHealthBar) healthBars = WidthOfHealthBar;
             if (healthBars < 0) healthBars = 0;
             StringBuilder healthString = new StringBuilder("│");
@@ -87,10 +87,10 @@ namespace TurnBasedRPG.UI.Combat
 
             // Calculate enemy name and health numbers
             StringBuilder enemyDetails = new StringBuilder("  ");
-            enemyDetails.Append(target.GetName() + " (" + target.GetSymbol() + ")");
-            enemyDetails.Append(' ', MaxDetailsLength - target.GetName().Length - 
-                                        target.GetMaxHealth().ToString().Length - target.GetCurrenthealth().ToString().Length);
-            enemyDetails.Append("HP " + target.GetCurrenthealth().ToString() + "/" + target.GetMaxHealth().ToString());
+            enemyDetails.Append(target.Name + " (" + target.Symbol + ")");
+            enemyDetails.Append(' ', MaxDetailsLength - target.Name.Length - 
+                                        target.MaxHealth.ToString().Length - target.CurrentHealth.ToString().Length);
+            enemyDetails.Append("HP " + target.CurrentHealth.ToString() + "/" + target.MaxHealth.ToString());
             
             targetDetails.Add(enemyDetails.ToString());
             targetDetails.Add("┌" + new string('─', WidthOfHealthBar) + "┐");
@@ -109,9 +109,9 @@ namespace TurnBasedRPG.UI.Combat
         private bool IsCacheData(IDisplayCharacter character)
         {
             if (_cachedData == null) return false;
-            if (character.GetId() != _cachedData.Id) return false;
-            if (character.GetCurrenthealth() != _cachedData.CurrentHealth) return false;
-            if (character.GetMaxHealth() != _cachedData.MaxHealth) return false;
+            if (character.Id != _cachedData.Id) return false;
+            if (character.CurrentHealth != _cachedData.CurrentHealth) return false;
+            if (character.MaxHealth != _cachedData.MaxHealth) return false;
 
             return true;
         }

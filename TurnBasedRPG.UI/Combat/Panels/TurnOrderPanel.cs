@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Shared.Interfaces;
 
-namespace TurnBasedRPG.UI.Combat
+namespace TurnBasedRPG.UI.Combat.Panels
 {
     // Handles the rendering of turn order boxes
     public class TurnOrderPanel
@@ -45,8 +45,8 @@ namespace TurnBasedRPG.UI.Combat
                     Targets = targetPositions,
                     CharacterIds = new IReadOnlyList<int>[]
                     {
-                        new List<int>(characters[0].Select(chr => chr.GetId())),
-                        new List<int>(characters[1].Select(chr => chr.GetId()))
+                        new List<int>(characters[0].Select(chr => chr.Id)),
+                        new List<int>(characters[1].Select(chr => chr.Id))
                     }
                 };
             }
@@ -71,7 +71,7 @@ namespace TurnBasedRPG.UI.Combat
             {
                 for (int i = 0; i < characters[0].Count(); i++)
                 {
-                    if (characters[j][i].GetId() != _cachedData.CharacterIds[j][i]) return false;
+                    if (characters[j][i].Id != _cachedData.CharacterIds[j][i]) return false;
                 }
             }
             return true;
@@ -87,7 +87,7 @@ namespace TurnBasedRPG.UI.Combat
             var currentTurnOrder = characters[0];
             var nextTurnOrder = characters[1];
 
-            turnOrderLabel.Append($"Current Turn: {currentTurnOrder[0].GetName()} ({currentTurnOrder[0].GetSymbol()})");
+            turnOrderLabel.Append($"Current Turn: {currentTurnOrder[0].Name} ({currentTurnOrder[0].Symbol})");
 
             int limit = GetMaxBoxes(characters);
 
@@ -97,7 +97,7 @@ namespace TurnBasedRPG.UI.Combat
                 if (i == 0)
                 {
                     topTurnOrder.Append("╔═╗");
-                    middleTurnOrder.Append($"║{currentTurnOrder[i].GetSymbol()}║");
+                    middleTurnOrder.Append($"║{currentTurnOrder[i].Symbol}║");
                     bottomTurnOrder.Append("╚═╝");
                 }
                 // Render the next round's turn order
@@ -113,14 +113,14 @@ namespace TurnBasedRPG.UI.Combat
 
                     int offset = i - currentTurnOrder.Count;
                     topTurnOrder.Append("┌─┐");
-                    middleTurnOrder.Append($"│{nextTurnOrder[offset].GetSymbol()}│");
+                    middleTurnOrder.Append($"│{nextTurnOrder[offset].Symbol}│");
                     bottomTurnOrder.Append("└─┘");
                 }
                 // Render current round's turn order
                 else
                 {
                     topTurnOrder.Append("┌─┐");
-                    middleTurnOrder.Append($"│{currentTurnOrder[i].GetSymbol()}│");
+                    middleTurnOrder.Append($"│{currentTurnOrder[i].Symbol}│");
                     bottomTurnOrder.Append("└─┘");
                 }
             }
@@ -147,7 +147,7 @@ namespace TurnBasedRPG.UI.Combat
                 var sb = new StringBuilder(" ");
                 for (int i = 0; i < currentTurnOrder.Count && iterations <= limit; i++)
                 {
-                    if (targetPositions.Contains(currentTurnOrder[i].GetPosition()))
+                    if (targetPositions.Contains(currentTurnOrder[i].Position))
                         sb.Append("▲");
                     else
                         sb.Append(" ");
@@ -157,7 +157,7 @@ namespace TurnBasedRPG.UI.Combat
                 sb.Append(" ");
                 for (int i = 0; i < nextTurnOrder.Count && iterations <= limit; i++)
                 {
-                    if (targetPositions.Contains(nextTurnOrder[i].GetPosition()))
+                    if (targetPositions.Contains(nextTurnOrder[i].Position))
                         sb.Append("▲");
                     else
                         sb.Append(" ");

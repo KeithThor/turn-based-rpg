@@ -11,6 +11,7 @@ using TurnBasedRPG.Controller.EventArgs;
 using System.Threading;
 using TurnBasedRPG.UI.Combat.EventArgs;
 using TurnBasedRPG.Shared.Combat;
+using TurnBasedRPG.UI.Combat.Panels;
 
 namespace TurnBasedRPG.UI.Combat
 {
@@ -51,10 +52,9 @@ namespace TurnBasedRPG.UI.Combat
                                            new ActionPanel(),
                                            new TurnOrderPanel(),
                                            new ActionDetailsPanel(),
-                                           new CharacterDetailsPanel(),
                                            new CategoryDetailsPanel(),
                                            new CombatLogPanel(),
-                                           new CharacterPanel(),
+                                           new CharacterPanel(new StatsSubPanel(), new DamageTypesSubPanel(), new DamageTypesSubPanel(), new DamageTypesSubPanel(), new DamageTypesSubPanel(), new OffensiveSubPanel()),
                                            _defaultsHandler,
                                            _uiCharacterManager,
                                            _combatInstance.ViewModelController,
@@ -76,8 +76,10 @@ namespace TurnBasedRPG.UI.Combat
             _combatInstance.CharactersHealthChanged += _uiContainer.OnCombatLoggableEvent;
             _combatInstance.CharactersDied += _uiContainer.OnCombatLoggableEvent;
             _combatInstance.StatusEffectApplied += _uiContainer.OnCombatLoggableEvent;
+            _combatInstance.StatusEffectApplied += OnStatusEffectApplied;
             _combatInstance.DelayedActionBeginChannel += _uiContainer.OnCombatLoggableEvent;
             _combatInstance.CharacterBeginWait += _uiContainer.OnCombatLoggableEvent;
+            _combatInstance.StartOfTurn += OnStartOfTurn;
 
             _userInput.ActionSelectedEvent += OnActionSelected;
             _userInput.ActionStartedEvent += OnActionStarted;
@@ -86,6 +88,17 @@ namespace TurnBasedRPG.UI.Combat
 
             _combatInstance.EndOfTurn += EndOfTurnTriggered;
             _combatInstance.AIChoseTarget += OnAIChoseTarget;
+        }
+
+        /// <summary>
+        /// Provides the UI character manager with an updated set of round order ids at the start of a new turn.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void OnStartOfTurn(object sender, StartOfTurnEventArgs args)
+        {
+            _uiCharacterManager.CurrentRoundOrderIds = args.CurrentRoundOrderIds;
+            _uiCharacterManager.NextRoundOrderIds = args.NextRoundOrderIds;
         }
 
         /// <summary>
@@ -102,9 +115,6 @@ namespace TurnBasedRPG.UI.Combat
             _defaultsHandler.IsInCategoryPanel = false;
             _defaultsHandler.IsInFormationPanel = false;
             _defaultsHandler.CurrentTargetPositions = new List<int>();
-
-            //_uiCharacterManager.CurrentRoundOrderIds = args.CurrentRoundOrderIds;
-            //_uiCharacterManager.NextRoundOrderIds = args.NextRoundOrderIds;
 
             RefreshActionPanelList();
             _uiContainer.PrintUI();
@@ -236,6 +246,18 @@ namespace TurnBasedRPG.UI.Combat
             task.Wait();
         }
         
+        /// <summary>
+        /// Invoked whenever a status effect is applied. Replaces the affected characters with a fresh set of display characters
+        /// that represent the status applied characters.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void OnStatusEffectApplied(object sender, StatusEffectAppliedEventArgs args)
+        {
+            var replacements = _displayManager.GetDisplayCharactersFromIds(args.AffectedCharacterIds);
+            _uiCharacterManager.RefreshCharacters(replacements);
+        }
+
         /// <summary>
         /// Called whenever an AI has chosen an action and it's target. Refreshes the UI to visualize
         /// the selection.

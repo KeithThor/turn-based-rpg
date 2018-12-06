@@ -28,7 +28,23 @@ namespace TurnBasedRPG.Controller.Combat
                 CurrentHealth = character.CurrentHealth,
                 MaxHealth = character.CurrentMaxHealth,
                 Position = character.Position,
-                HealthChange = 0
+                HealthChange = 0,
+                Armor = character.Armor,
+                ArmorPercentage = character.ArmorPercentage,
+                CritChance = character.CritChance,
+                CritMultiplier = character.CritMultiplier,
+                CurrentMana = character.CurrentMana,
+                CurrentStats = character.CurrentStats,
+                DamageModifier = character.DamageModifier,
+                DamagePercentageModifier = character.DamagePercentageModifier,
+                Level = character.Level,
+                MaxMana = character.CurrentMaxMana,
+                ResistAll = character.ResistAll,
+                ResistAllPercentage = character.ResistAllPercentage,
+                SpellDamageModifier = character.SpellDamageModifier,
+                SpellDamagePercentageModifier = character.SpellDamagePercentageModifier,
+                Threat = character.Threat,
+                ThreatMultiplier = character.ThreatMultiplier
             };
         }
     }

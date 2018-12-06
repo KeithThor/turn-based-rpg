@@ -94,7 +94,7 @@ namespace TurnBasedRPG.Controller.Combat
             _actionController.CharactersDied += OnCharactersDying;
             _actionController.CharactersHealthChanged += OnCharactersHealthChanged;
             _actionController.CharacterSpeedChanged += OnCharacterSpeedChanged;
-            _actionController.StatusEffectController.StatusEffectApplied += OnStatusEffectsApplied;
+            _actionController.StatusEffectApplied += OnStatusEffectsApplied;
             _actionController.DelayedActionBeginChannel += OnDelayedActionBeginChannel;
         }
 
@@ -148,13 +148,15 @@ namespace TurnBasedRPG.Controller.Combat
         /// </summary>
         private void StartTurn()
         {
-            _actionController.StartTurn(CombatStateHandler.CurrentRoundOrder[0]);
-            
             StartOfTurn?.Invoke(this, new StartOfTurnEventArgs()
             {
                 CharacterId = CombatStateHandler.GetActiveCharacterID(),
-                IsPlayerTurn = CombatStateHandler.IsPlayerTurn()
+                IsPlayerTurn = CombatStateHandler.IsPlayerTurn(),
+                CurrentRoundOrderIds = CombatStateHandler.CurrentRoundOrder.Select(chr => chr.Id).ToList(),
+                NextRoundOrderIds = CombatStateHandler.NextRoundOrder.Select(chr => chr.Id).ToList()
             });
+
+            _actionController.StartTurn(CombatStateHandler.CurrentRoundOrder[0]);
 
             // Currently Ai's turn
             if (CombatStateHandler.EnemyCharacters.Contains(CombatStateHandler.CurrentRoundOrder[0]))

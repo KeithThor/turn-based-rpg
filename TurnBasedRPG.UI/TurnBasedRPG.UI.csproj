@@ -40,30 +40,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Combat\ActionDetailsPanel.cs" />
-    <Compile Include="Combat\CategoryDetailsPanel.cs" />
-    <Compile Include="Combat\CombatLogPanel.cs" />
+    <Compile Include="Combat\Panels\ActionDetailsPanel.cs" />
+    <Compile Include="Combat\Panels\DamageTypesSubPanel.cs" />
+    <Compile Include="Combat\Panels\CategoryDetailsPanel.cs" />
+    <Compile Include="Combat\Panels\CombatLogPanel.cs" />
     <Compile Include="Combat\DefaultsHandler.cs" />
-    <Compile Include="Combat\CharacterDetailsPanel.cs" />
-    <Compile Include="Combat\CharacterPanel.cs" />
+    <Compile Include="Combat\Panels\CharacterDetailsPanel.cs" />
+    <Compile Include="Combat\Panels\CharacterPanel.cs" />
     <Compile Include="Combat\EventArgs\ActionSelectedEventArgs.cs" />
     <Compile Include="Combat\EventArgs\KeyPressedEventArgs.cs" />
     <Compile Include="Combat\EventArgs\UpdateActionListEventArgs.cs" />
     <Compile Include="Combat\EventArgs\UpdateCategoriesEventArgs.cs" />
     <Compile Include="Combat\Interfaces\IReceiveInputPanel.cs" />
+    <Compile Include="Combat\Panels\OffensiveSubPanel.cs" />
+    <Compile Include="Combat\Panels\StatsSubPanel.cs" />
     <Compile Include="Combat\UICharacterManager.cs" />
     <Compile Include="Combat\EventArgs\ActionStartedEventArgs.cs" />
     <Compile Include="Combat\UIContainer.cs" />
     <Compile Include="Combat\UserInput.cs" />
     <Compile Include="GameUIConstants.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Combat\CommandPanel.cs" />
-    <Compile Include="Combat\FormationPanel.cs" />
+    <Compile Include="Combat\Panels\CommandPanel.cs" />
+    <Compile Include="Combat\Panels\FormationPanel.cs" />
     <Compile Include="Combat\CombatUI.cs" />
-    <Compile Include="Combat\InformationPanelUI.cs" />
-    <Compile Include="Combat\ActionPanel.cs" />
-    <Compile Include="Combat\TargetPanel.cs" />
-    <Compile Include="Combat\TurnOrderPanel.cs" />
+    <Compile Include="Combat\Panels\InformationPanelUI.cs" />
+    <Compile Include="Combat\Panels\ActionPanel.cs" />
+    <Compile Include="Combat\Panels\TargetPanel.cs" />
+    <Compile Include="Combat\Panels\TurnOrderPanel.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TurnBasedRPG.Controller\TurnBasedRPG.Controller.csproj">

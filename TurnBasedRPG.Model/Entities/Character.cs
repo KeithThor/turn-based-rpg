@@ -16,6 +16,9 @@ namespace TurnBasedRPG.Model.Entities
         // The character that represents this unit on the battlefield
         public char Symbol { get; set; }
 
+        public int Level { get; set; }
+        public int Experience { get; set; }
+
         // Resource stats
         public int MaxHealth { get; set; }
         // Temporary max health

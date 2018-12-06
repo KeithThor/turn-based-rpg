@@ -74,7 +74,7 @@ namespace TurnBasedRPG.Controller.Combat
         /// Event invoked whenever one or more characters have a status effect applied onto them.
         /// </summary>
         public event EventHandler<StatusEffectAppliedEventArgs> StatusEffectApplied;
-
+        
         public StatusController(ThreatController threatController)
         {
             _threatController = threatController;
@@ -136,6 +136,7 @@ namespace TurnBasedRPG.Controller.Combat
             {
                 StatusEffectApplied?.Invoke(this, new StatusEffectAppliedEventArgs()
                 {
+                    AffectedCharacterIds = new List<int>() { character.Id },
                     LogMessage = CombatMessenger.GetAffectedByStatusMessage(status.Name, character.Name)
                 });
             }
@@ -153,9 +154,10 @@ namespace TurnBasedRPG.Controller.Combat
             {
                 ApplyStatus(applicator, status, character, false);
             }
-            
+
             StatusEffectApplied?.Invoke(this, new StatusEffectAppliedEventArgs()
             {
+                AffectedCharacterIds = new List<int>(characters.Select(chr => chr.Id)),
                 LogMessage = CombatMessenger.GetAffectedByStatusMessage(status.Name, characters.Select(chr => chr.Name).ToList())
             });
         }
@@ -219,6 +221,7 @@ namespace TurnBasedRPG.Controller.Combat
 
             StatusEffectApplied?.Invoke(this, new StatusEffectAppliedEventArgs()
             {
+                AffectedCharacterIds = new List<int>(livingTargets.Select(chr => chr.Id)),
                 LogMessage = CombatMessenger.GetAffectedByStatusMessage(status.BaseStatus.Name,
                                                                         livingTargets.Select(target => target.Name).ToList())
             });

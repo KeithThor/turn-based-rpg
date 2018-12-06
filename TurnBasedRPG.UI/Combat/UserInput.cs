@@ -304,7 +304,7 @@ namespace TurnBasedRPG.UI.Combat
             {
                 var character = _uiCharacterManager.GetCharacterFromPosition(_defaultsHandler.CurrentTargetPosition + 2);
                 // Action can only be blocked if there is a character in front of the spot the player is trying to reach
-                isBlocked = isBlocked && !(character == null || character.GetCurrenthealth() == 0);
+                isBlocked = isBlocked && !(character == null || character.CurrentHealth == 0);
             }
                 
             return isBlocked;
@@ -392,7 +392,7 @@ namespace TurnBasedRPG.UI.Combat
 
             var character = _uiCharacterManager.GetCharacterFromPosition(_defaultsHandler.CurrentTargetPosition);
             // If there is no character or a dead character in that position, the target is not blocked
-            if (character == null || character.GetCurrenthealth() == 0) return false;
+            if (character == null || character.CurrentHealth == 0) return false;
 
             return true;
         }

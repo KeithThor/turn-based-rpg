@@ -8,5 +8,6 @@ namespace TurnBasedRPG.Controller.EventArgs
 {
     public class StatusEffectAppliedEventArgs : CombatLoggableEventArgs
     {
+        public IReadOnlyList<int> AffectedCharacterIds { get; set; }
     }
 }

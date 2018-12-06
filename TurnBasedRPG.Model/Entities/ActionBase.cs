@@ -14,7 +14,7 @@ namespace TurnBasedRPG.Model.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; }
-
+        public int ManaCost { get; set; }
         // AI Data
         public int AiWeight { get; set; }
         public bool IsOffensive { get; set; } = true;

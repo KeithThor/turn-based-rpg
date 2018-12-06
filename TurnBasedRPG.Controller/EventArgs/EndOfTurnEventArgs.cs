@@ -10,7 +10,5 @@ namespace TurnBasedRPG.Controller.EventArgs
     {
         public int EndOfTurnCharacterId { get; set; }
         public int CurrentTurnNumber { get; set; }
-        public IReadOnlyList<int> CurrentRoundOrderIds { get; set; }
-        public IReadOnlyList<int> NextRoundOrderIds { get; set; }
     }
 }

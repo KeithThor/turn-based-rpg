@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Shared.Interfaces;
 
-namespace TurnBasedRPG.UI.Combat
+namespace TurnBasedRPG.UI.Combat.Panels
 {
     // Handles the rendering of player and enemy formations in battle
     public class FormationPanel
@@ -135,11 +135,11 @@ namespace TurnBasedRPG.UI.Combat
             if (!targets.SequenceEqual(_cachedData.Targets)) return false;
             foreach (var character in characters)
             {
-                int id = character.GetId();
-                if (!_cachedData.CachedCharacters.ContainsKey(character.GetId())) return false;
-                if (_cachedData.CachedCharacters[id].CurrentHealth != character.GetCurrenthealth()) return false;
-                if (_cachedData.CachedCharacters[id].MaxHealth != character.GetMaxHealth()) return false;
-                if (_cachedData.CachedCharacters[id].Position != character.GetPosition()) return false;
+                int id = character.Id;
+                if (!_cachedData.CachedCharacters.ContainsKey(character.Id)) return false;
+                if (_cachedData.CachedCharacters[id].CurrentHealth != character.CurrentHealth) return false;
+                if (_cachedData.CachedCharacters[id].MaxHealth != character.MaxHealth) return false;
+                if (_cachedData.CachedCharacters[id].Position != character.Position) return false;
             }
             return true;
         }
@@ -154,12 +154,12 @@ namespace TurnBasedRPG.UI.Combat
             var cache = new Dictionary<int, CachedCharacter>();
             foreach (var character in characters)
             {
-                int id = character.GetId();
+                int id = character.Id;
                 cache[id] = new CachedCharacter()
                 {
-                    Position = character.GetPosition(),
-                    CurrentHealth = character.GetCurrenthealth(),
-                    MaxHealth = character.GetMaxHealth()
+                    Position = character.Position,
+                    CurrentHealth = character.CurrentHealth,
+                    MaxHealth = character.MaxHealth
                 };
             }
             return cache;
@@ -176,7 +176,7 @@ namespace TurnBasedRPG.UI.Combat
                 // Find the player character that occupies this formation slot
                 foreach (var character in _characters)
                 {
-                    if (character.GetPosition() == j + (offset * _numberInRow))
+                    if (character.Position == j + (offset * _numberInRow))
                     {
                         charInLine.Add(character);
                         foundChar = true;
@@ -193,7 +193,7 @@ namespace TurnBasedRPG.UI.Combat
                 int k = 0;
                 while (!foundChar && k < _characters.Count)
                 {
-                    if (_characters[k].GetPosition() == j + 9 + (offset * _numberInRow))
+                    if (_characters[k].Position == j + 9 + (offset * _numberInRow))
                     {
                         charInLine.Add(_characters[k]);
                         foundChar = true;
@@ -279,11 +279,11 @@ namespace TurnBasedRPG.UI.Combat
                 {
                     bottomPanelSB.Append(' ', _paddingMiddle);
                 }
-                if (charactersToRender[i] != null && charactersToRender[i].GetId() == activeCharacterID)
+                if (charactersToRender[i] != null && charactersToRender[i].Id == activeCharacterID)
                 {
                     bottomPanelSB.Append("╚═╝");
                 }
-                else if (charactersToRender[i] != null && charactersToRender[i].GetCurrenthealth() <= 0)
+                else if (charactersToRender[i] != null && charactersToRender[i].CurrentHealth <= 0)
                 {
                     bottomPanelSB.Append("/ \\");
                 }
@@ -313,9 +313,9 @@ namespace TurnBasedRPG.UI.Combat
                 }
                 if (charactersToRender[i] != null)
                 {
-                    int healthPercentage = charactersToRender[i].GetCurrenthealth() * 100 / charactersToRender[i].GetMaxHealth();
+                    int healthPercentage = charactersToRender[i].CurrentHealth * 100 / charactersToRender[i].MaxHealth;
                     int totalHealthBars = healthPercentage * 5 / 100;
-                    if (totalHealthBars == 0 && charactersToRender[i].GetCurrenthealth() != 0)
+                    if (totalHealthBars == 0 && charactersToRender[i].CurrentHealth != 0)
                         totalHealthBars = 1;
                     healthBarSB.Append(charactersToRender[i] != null ? "│" : " ");
                     for (int j = 0; j < 5; j++)
@@ -346,9 +346,9 @@ namespace TurnBasedRPG.UI.Combat
                 {
                     middlePanelSB.Append(' ', _paddingMiddle);
                 }
-                if (charactersToRender[i] != null && charactersToRender[i].GetId() == activeCharacterId)
+                if (charactersToRender[i] != null && charactersToRender[i].Id == activeCharacterId)
                 {
-                    middlePanelSB.Append("║" + charactersToRender[i].GetSymbol() + "║");
+                    middlePanelSB.Append("║" + charactersToRender[i].Symbol + "║");
                 }
                 else
                 {
@@ -356,8 +356,8 @@ namespace TurnBasedRPG.UI.Combat
                         middlePanelSB.Append("│ │");
                     else
                     {
-                        string sidebar = charactersToRender[i].GetCurrenthealth() <= 0 ? " " : "│";
-                        middlePanelSB.Append(sidebar + charactersToRender[i].GetSymbol() + sidebar);
+                        string sidebar = charactersToRender[i].CurrentHealth <= 0 ? " " : "│";
+                        middlePanelSB.Append(sidebar + charactersToRender[i].Symbol + sidebar);
                     }
                 }
             }
@@ -376,11 +376,11 @@ namespace TurnBasedRPG.UI.Combat
                 {
                     topPanelSB.Append(' ', _paddingMiddle);
                 }
-                if (charactersToRender[i] != null && charactersToRender[i].GetId() == activeCharacterId)
+                if (charactersToRender[i] != null && charactersToRender[i].Id == activeCharacterId)
                 {
                     topPanelSB.Append("╔═╗");
                 }
-                else if (charactersToRender[i] != null && charactersToRender[i].GetCurrenthealth() <= 0)
+                else if (charactersToRender[i] != null && charactersToRender[i].CurrentHealth <= 0)
                 {
                     topPanelSB.Append("\\ /");
                 }
@@ -409,10 +409,10 @@ namespace TurnBasedRPG.UI.Combat
                     nameSB.Append(' ', maxNameLength + 1);
                 else
                 {
-                    int namePaddingLeft = (maxNameLength - charactersToRender[i].GetName().Length) / 2;
+                    int namePaddingLeft = (maxNameLength - charactersToRender[i].Name.Length) / 2;
                     nameSB.Append(' ', namePaddingLeft);
-                    nameSB.Append(charactersToRender[i].GetName());
-                    nameSB.Append(' ', maxNameLength - charactersToRender[i].GetName().Length - namePaddingLeft + 1);
+                    nameSB.Append(charactersToRender[i].Name);
+                    nameSB.Append(' ', maxNameLength - charactersToRender[i].Name.Length - namePaddingLeft + 1);
                 }
             }
             return nameSB.ToString() + new string(' ', MaxWidth - nameSB.Length);
