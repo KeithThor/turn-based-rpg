@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Combat\CombatTargeterTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StringExtensionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

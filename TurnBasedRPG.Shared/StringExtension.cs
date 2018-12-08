@@ -18,20 +18,26 @@ namespace TurnBasedRPG.Shared
         public static IReadOnlyList<string> GetStringAsList(this string str, int maxLength)
         {
             var reducedLengthList = new List<string>();
+            if (str[0] == ' ') str = str.Remove(0, 1);
             int iterations = 0;
             int startIndex = 0;
-            for (int i = 0; i <= str.Count() / maxLength; i++)
+            int totalListLength = 0;
+            for (int i = 0; str.Count() - 1 != startIndex; i++)
             {
                 string reducedStr = "";
                 // If the unrendered parts of the category description has more characters than fits in the next line
-                if (str.Count() > (i + 1) * maxLength)
+                if (str.Count() > maxLength + totalListLength)
                 {
                     reducedStr = str.Substring(startIndex, maxLength);
                     int tempIndex = 0;
-                    // If the line ends in a letter, find the space or . character closest to the end of the array and make it
-                    // the start index for the next iteration and the end point for this line
-                    if (reducedStr.Last() == '.' || reducedStr.Last() == ' '
-                        || str[startIndex + maxLength] == '.' || str[startIndex + maxLength] == ' ')
+                    // If the line ends in a period or space
+                    if (reducedStr.Last() == '.' || reducedStr.Last() == ' ')
+                    {
+                        tempIndex = maxLength + startIndex;
+                    }
+                    // If the next line starts in a space
+                    else if (str.Count() > startIndex + maxLength && 
+                            str[startIndex + maxLength] == ' ')
                     {
                         tempIndex = maxLength + startIndex;
                     }
@@ -46,11 +52,13 @@ namespace TurnBasedRPG.Shared
                 else
                 {
                     reducedStr = str.Substring(startIndex);
+                    startIndex = str.Count() - 1;
                 }
                 // Remove spaces at the beginning of the new line
                 if (reducedStr.Count() > 0 && reducedStr[0] == ' ') reducedStr = reducedStr.Remove(0, 1);
                 // Add spaces to the end of the description line if there are extra spaces left
                 reducedLengthList.Add(reducedStr);
+                totalListLength += reducedStr.Length;
                 iterations++;
             }
             return reducedLengthList;
