@@ -422,7 +422,7 @@ namespace TurnBasedRPG.UI.Combat
                 detailsPanel = _statusEffectsPanel.Render(data);
             }
             // Display action details if the current selection is an action
-            else if (_defaultsHandler.IsInActionPanel || _defaultsHandler.IsInFormationPanel)
+            else if ((_defaultsHandler.IsInActionPanel || _defaultsHandler.IsInFormationPanel) && !_defaultsHandler.IsInStatusCommand)
             {
                 var data = _viewModelController.GetActionViewData((Commands)_defaultsHandler.CommandFocusNumber, 
                                                                   _defaultsHandler.ActiveCategory, 

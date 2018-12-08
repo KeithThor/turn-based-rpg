@@ -181,5 +181,17 @@ namespace TurnBasedRPG.UI.Combat
             if (target != null)
                 target.Position = position;
         }
+
+        /// <summary>
+        /// Gets the position of a character given the character's id. Returns null if no character with that id exists.
+        /// </summary>
+        /// <param name="chrId">The id of the character to get the position from.</param>
+        /// <returns>The id of the character to get the position from. May be null if no character with that id exists.</returns>
+        public int? GetPositionOfCharacter(int chrId)
+        {
+            var character = Characters.First(chr => chr.Id == chrId);
+            if (character == null) return null;
+            else return character.Position;
+        }
     }
 }

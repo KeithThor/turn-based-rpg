@@ -95,6 +95,16 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         public bool IsInCategoryPanel { get; set; }
 
+        /// <summary>
+        /// Gets or sets whether the player is in the status command.
+        /// </summary>
+        public bool IsInStatusCommand { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the player is in the character panel.
+        /// </summary>
+        public bool IsInCharacterPanel { get; set; }
+
         private bool isInFormationPanel;
 
         /// <summary>

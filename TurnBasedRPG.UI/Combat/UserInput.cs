@@ -149,7 +149,7 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         private void EscapeKeyPressed()
         {
-            if (_defaultsHandler.IsInFormationPanel)
+            if (_defaultsHandler.IsInFormationPanel && !_defaultsHandler.IsInStatusCommand)
             {
                 _defaultsHandler.IsInFormationPanel = false;
                 _defaultsHandler.IsInActionPanel = true;
@@ -158,6 +158,18 @@ namespace TurnBasedRPG.UI.Combat
                     InActionPanel = true,
                     InCategoryPanel = false,
                     InCommandPanel = false,
+                    InFormationPanel = false
+                });
+            }
+            else if (_defaultsHandler.IsInStatusCommand)
+            {
+                _defaultsHandler.IsInStatusCommand = false;
+                _defaultsHandler.IsInFormationPanel = false;
+                ActivePanelChanged?.Invoke(this, new ActivePanelChangedEventArgs()
+                {
+                    InActionPanel = false,
+                    InCategoryPanel = false,
+                    InCommandPanel = true,
                     InFormationPanel = false
                 });
             }
@@ -240,6 +252,30 @@ namespace TurnBasedRPG.UI.Combat
                             InFormationPanel = false
                         });
                         break;
+                    case Commands.Status:
+                        _defaultsHandler.IsInFormationPanel = true;
+                        int? position = _uiCharacterManager.GetPositionOfCharacter(_defaultsHandler.ActiveCharacterId);
+
+                        if (position == null) throw new Exception("Active character was not found in UICharacterManager.");
+                        else
+                        {
+                            _defaultsHandler.CurrentTargetPosition = position.GetValueOrDefault();
+                            _defaultsHandler.CurrentTargetPositions = new List<int>() { position.GetValueOrDefault() };
+                            _defaultsHandler.ActiveAction.CanSwitchTargetPosition = true;
+                            _defaultsHandler.ActiveAction.CanTargetThroughUnits = true;
+                            _defaultsHandler.ActiveAction.CenterOfTargets = 5;
+                            _defaultsHandler.ActiveAction.TargetPositions = new List<int>() { 5 };
+                            _defaultsHandler.IsInStatusCommand = true;
+
+                            ActivePanelChanged?.Invoke(this, new ActivePanelChangedEventArgs()
+                            {
+                                InActionPanel = false,
+                                InCategoryPanel = false,
+                                InCommandPanel = false,
+                                InFormationPanel = true
+                            });
+                        }
+                        break;
                     case Commands.Wait:
                         ActionStartedEvent?.Invoke(this, new ActionStartedEventArgs()
                         {
@@ -252,7 +288,7 @@ namespace TurnBasedRPG.UI.Combat
                 }
             }
             // If the player is in the formation panel, start an action
-            else if (_defaultsHandler.IsInFormationPanel)
+            else if (_defaultsHandler.IsInFormationPanel && !_defaultsHandler.IsInStatusCommand)
             {
 
                 var target = _defaultsHandler.CurrentTargetPosition;
@@ -272,6 +308,13 @@ namespace TurnBasedRPG.UI.Combat
                     InCommandPanel = true,
                     InFormationPanel = false
                 });
+            }
+            else if (_defaultsHandler.IsInStatusCommand)
+            {
+                if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition))
+                {
+                    _defaultsHandler.IsInCharacterPanel = true;
+                }
             }
             // If the player is in the action panel, switch to the formation panel
             else if (_defaultsHandler.IsInActionPanel)
