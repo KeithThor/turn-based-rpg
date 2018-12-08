@@ -23,12 +23,6 @@ namespace TurnBasedRPG
             Game game = kernel.Get<Game>();
 
             game.Start();
-
-            //var spells = kernel.Get<SpellRepository>();
-            //foreach (var spell in spells.GetAll())
-            //{
-            //    Console.WriteLine($"{spell.Name} : {spell.Category} - {spell.Damage.Shadow} Shadow Damage");
-            //}
         }
     }
 }

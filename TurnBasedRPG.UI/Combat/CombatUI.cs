@@ -55,6 +55,7 @@ namespace TurnBasedRPG.UI.Combat
                                            new CategoryDetailsPanel(),
                                            new CombatLogPanel(),
                                            new CharacterPanel(new StatsSubPanel(), new DamageTypesSubPanel(), new DamageTypesSubPanel(), new DamageTypesSubPanel(), new DamageTypesSubPanel(), new OffensiveSubPanel()),
+                                           new StatusEffectsPanel(),
                                            _defaultsHandler,
                                            _uiCharacterManager,
                                            _combatInstance.ViewModelController,

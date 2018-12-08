@@ -7,6 +7,7 @@ using TurnBasedRPG.Controller.Combat;
 using TurnBasedRPG.Controller.EventArgs;
 using TurnBasedRPG.Shared.Enums;
 using TurnBasedRPG.Shared.Interfaces;
+using TurnBasedRPG.UI.Combat.EventArgs;
 using TurnBasedRPG.UI.Combat.Panels;
 
 namespace TurnBasedRPG.UI.Combat
@@ -30,6 +31,7 @@ namespace TurnBasedRPG.UI.Combat
         private readonly CategoryDetailsPanel _categoryDetailsPanel;
         private readonly CombatLogPanel _combatLogPanel;
         private readonly CharacterPanel _characterPanel;
+        private readonly StatusEffectsPanel _statusEffectsPanel;
 
         public UIContainer(FormationPanel formationPanel,
                            TargetPanel targetPanel,
@@ -40,6 +42,7 @@ namespace TurnBasedRPG.UI.Combat
                            CategoryDetailsPanel categoryDetailsPanel,
                            CombatLogPanel combatLogPanel,
                            CharacterPanel characterPanel,
+                           StatusEffectsPanel statusEffectsPanel,
                            DefaultsHandler defaultsHandler,
                            UICharacterManager uiCharacterManager,
                            ViewModelController viewModelController,
@@ -55,6 +58,7 @@ namespace TurnBasedRPG.UI.Combat
             _categoryDetailsPanel = categoryDetailsPanel;
             _combatLogPanel = combatLogPanel;
             _characterPanel = characterPanel;
+            _statusEffectsPanel = statusEffectsPanel;
             _characterPanel.MaxHeight = _formationPanel.MaxHeight;
             _defaultsHandler = defaultsHandler;
             _uiCharacterManager = uiCharacterManager;
@@ -64,7 +68,7 @@ namespace TurnBasedRPG.UI.Combat
             
             BindEvents();
         }
-        
+
         private void BindEvents()
         {
             _defaultsHandler.InFormationPanelChanged += (obj, args) => RenderFormationTargets = _defaultsHandler.IsInFormationPanel;
@@ -73,6 +77,69 @@ namespace TurnBasedRPG.UI.Combat
         public bool IsPlayerTurn
         {
             get { return _combatStateHandler.IsPlayerTurn(); }
+        }
+
+        /// <summary>
+        /// Assigns an event listener to the given eventhandler.
+        /// Must pass by ref because delegate removes itself from eventhandler when going out of method scope??? Weird..
+        /// </summary>
+        public void RegisterPanelChangeEvent(ref EventHandler<ActivePanelChangedEventArgs> eventHandler)
+        {
+            eventHandler += OnActivePanelChanged;
+        }
+
+        /// <summary>
+        /// Assigns an event listener to the given eventhandler.
+        /// </summary>
+        /// <param name="eventHandler"></param>
+        public void RegisterKeyPressEvent(ref EventHandler<KeyPressedEventArgs> eventHandler)
+        {
+            eventHandler += OnKeyPressed;
+        }
+
+        private void OnActivePanelChanged(object sender, ActivePanelChangedEventArgs args)
+        {
+            if (args.InActionPanel)
+            {
+                _actionDetailsPanel.IsActive = true;
+            }
+            if (!args.InActionPanel)
+            {
+                _actionDetailsPanel.IsActive = false;
+                _canDisplayStatusPanel = false;
+                IsStatusPanelActive = false;
+            }
+        }
+
+        private void OnKeyPressed(object sender, KeyPressedEventArgs args)
+        {
+            if (_actionDetailsPanel.IsActive 
+                && _canDisplayStatusPanel
+                && args.PressedKey.Key == ConsoleKey.Tab)
+            {
+                IsStatusPanelActive = !IsStatusPanelActive;
+                PrintUI();
+            }
+            if (args.PressedKey.Key == ConsoleKey.LeftArrow)
+            {
+                _canDisplayStatusPanel = false;
+                IsStatusPanelActive = false;
+            }
+            if (args.PressedKey.Key == ConsoleKey.RightArrow)
+            {
+                _canDisplayStatusPanel = false;
+                IsStatusPanelActive = false;
+            }
+            if (args.PressedKey.Key == ConsoleKey.DownArrow)
+            {
+                _canDisplayStatusPanel = false;
+                IsStatusPanelActive = false;
+            }
+            if (args.PressedKey.Key == ConsoleKey.UpArrow)
+            {
+                _canDisplayStatusPanel = false;
+                IsStatusPanelActive = false;
+            }
         }
 
         /// <summary>
@@ -97,6 +164,8 @@ namespace TurnBasedRPG.UI.Combat
         public bool IsUIUpdating { get; set; } = false;
         public bool IsUIUpdatingFinished { get; private set; } = false;
         public bool SkipUIUpdating { get; set; } = false;
+        public bool IsStatusPanelActive { get; private set; }
+        private bool _canDisplayStatusPanel;
 
         /// <summary>
         /// Called on updates to print the UI.
@@ -261,7 +330,7 @@ namespace TurnBasedRPG.UI.Combat
         }
 
         /// <summary>
-        /// Renders and then prints the action panel, subpanel, and information panel.
+        /// Renders and then prints the action panel, subpanel, and details panel.
         /// </summary>
         private void PrintUserPanels()
         {
@@ -314,12 +383,24 @@ namespace TurnBasedRPG.UI.Combat
         private IReadOnlyList<string> StartRenderDetailsPanels()
         {
             IReadOnlyList<string> detailsPanel;
-            
+
+            bool inStatusPanel = _defaultsHandler.IsInActionPanel && IsStatusPanelActive && _canDisplayStatusPanel;
+
             // Display category information if in categories subpanel
             if (_defaultsHandler.IsInCategoryPanel)
             {
                 detailsPanel = _categoryDetailsPanel.RenderCategoryDetails(
                                     _defaultsHandler.ActionCategories[_defaultsHandler.CategoryFocusNumber - 1]);
+            }
+            // Display status details if currently in status panel
+            else if (inStatusPanel)
+            {
+                var data = _viewModelController.GetStatusViewData((Commands)_defaultsHandler.CommandFocusNumber,
+                                                                  _defaultsHandler.ActiveCategory,
+                                                                  _defaultsHandler.ActionFocusNumber - 1,
+                                                                  0);
+
+                detailsPanel = _statusEffectsPanel.Render(data);
             }
             // Display action details if the current selection is an action
             else if (_defaultsHandler.IsInActionPanel || _defaultsHandler.IsInFormationPanel)
@@ -327,6 +408,8 @@ namespace TurnBasedRPG.UI.Combat
                 var data = _viewModelController.GetActionViewData((Commands)_defaultsHandler.CommandFocusNumber, 
                                                                   _defaultsHandler.ActiveCategory, 
                                                                   _defaultsHandler.ActionFocusNumber - 1);
+
+                _canDisplayStatusPanel = data.StatusEffects.Any();
 
                 detailsPanel = _actionDetailsPanel.RenderActionDetails(
                                                     _displayManager.GetActionFromCategory(

@@ -4,7 +4,8 @@
         "name": "Burning",
         "symbol": "B",
         "damage": { "fire": 25},
-        "damageIntellectModifier": { "fire": 2 },
+        "description": "The target is ablaze, dealing fire damage every turn and making it more vulnerable to fire damage.",
+        "damageStatModifier": {"intellect": {"fire": 2}},
         "armorPercentage": { "fire": -20 },
         "duration": 2,
         "isDebuff": true
@@ -13,6 +14,7 @@
         "id": 2,
         "name": "Chilled",
         "symbol": "C",
+        "description": "The target is chilled to the bone, reducing it's speed and making it more vulnerable to frost damage.",
         "armorPercentage": { "frost": -20 },
         "modifyStats": { "speed": -5 },
         "duration": 2,
@@ -22,6 +24,7 @@
         "id": 3,
         "name": "Blessing of Haste",
         "symbol": "H",
+        "description": "The target is affected by a blessing, increasing it's speed.",
         "modifyStats": { "speed": 10 },
         "duration": 2,
         "isDebuff": false

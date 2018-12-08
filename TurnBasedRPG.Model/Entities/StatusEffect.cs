@@ -40,11 +40,12 @@ namespace TurnBasedRPG.Model.Entities
         public int ResistAllPercentage { get; }
         public int ThreatMultiplier { get; set; }
         public int Threat { get; set; }
-        public int Duration { get; }
-        public bool Stackable { get; }
-        public int StackSize { get; }
-        public bool IsDebuff { get; } = false;
+        public int Duration { get; set; }
+        public bool Stackable { get; set; }
+        public int StackSize { get; set; }
+        public bool IsDebuff { get; set; } = false;
         public bool IsPermanent { get; set; } = false;
         public bool IsMagical { get; set; }
+        public string Description { get; set; }
     }
 }

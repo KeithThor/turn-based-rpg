@@ -28,32 +28,45 @@ namespace TurnBasedRPG.UI.Combat
             _uiContainer = uiContainer;
             _uiCharacterManager = uiCharacterManager;
             _gameUIConstants = gameUIConstants;
+
+            BindEvents();
         }
         
+        private void BindEvents()
+        {
+            _uiContainer.RegisterPanelChangeEvent(ref ActivePanelChanged);
+            _uiContainer.RegisterKeyPressEvent(ref KeyPressEvent);
+        }
+
         /// <summary>
         /// Event called whenever the player selects an action from an action list.
         /// </summary>
-        public EventHandler<ActionSelectedEventArgs> ActionSelectedEvent;
+        public event EventHandler<ActionSelectedEventArgs> ActionSelectedEvent;
 
         /// <summary>
         /// Event called whenever the UI should update the action list.
         /// </summary>
-        public EventHandler<UpdateActionListEventArgs> UpdateActionListEvent;
+        public event EventHandler<UpdateActionListEventArgs> UpdateActionListEvent;
 
         /// <summary>
         /// Event called whenever the UI should update the categories list.
         /// </summary>
-        public EventHandler<UpdateCategoriesEventArgs> UpdateCategoriesEvent;
+        public event EventHandler<UpdateCategoriesEventArgs> UpdateCategoriesEvent;
 
         /// <summary>
         /// Event called whenever the player has chosen an action with its targets.
         /// </summary>
-        public EventHandler<ActionStartedEventArgs> ActionStartedEvent;
+        public event EventHandler<ActionStartedEventArgs> ActionStartedEvent;
 
         /// <summary>
         /// Event called whenever the player presses any key.
         /// </summary>
-        public EventHandler<KeyPressedEventArgs> KeyPressEvent;
+        public event EventHandler<KeyPressedEventArgs> KeyPressEvent;
+
+        /// <summary>
+        /// Event called whenever the active panel is changed by the player.
+        /// </summary>
+        public event EventHandler<ActivePanelChangedEventArgs> ActivePanelChanged;
 
         /// <summary>
         /// Starts an infinite loop to listen for key presses.
@@ -120,6 +133,9 @@ namespace TurnBasedRPG.UI.Combat
             ClearInputBuffer();
         }
 
+        /// <summary>
+        /// Clears the input buffer, preventing the Console from reading spammed keys.
+        /// </summary>
         internal void ClearInputBuffer()
         {
             while (Console.KeyAvailable)
@@ -137,18 +153,48 @@ namespace TurnBasedRPG.UI.Combat
             {
                 _defaultsHandler.IsInFormationPanel = false;
                 _defaultsHandler.IsInActionPanel = true;
+                ActivePanelChanged?.Invoke(this, new ActivePanelChangedEventArgs()
+                {
+                    InActionPanel = true,
+                    InCategoryPanel = false,
+                    InCommandPanel = false,
+                    InFormationPanel = false
+                });
             }
             else if (_defaultsHandler.IsInActionPanel && (Commands)_defaultsHandler.CommandFocusNumber != Commands.Attack)
             {
                 _defaultsHandler.IsInActionPanel = false;
                 _defaultsHandler.IsInCategoryPanel = true;
+                ActivePanelChanged?.Invoke(this, new ActivePanelChangedEventArgs()
+                {
+                    InActionPanel = false,
+                    InCategoryPanel = true,
+                    InCommandPanel = false,
+                    InFormationPanel = false
+                });
             }
             else if (_defaultsHandler.IsInActionPanel && (Commands)_defaultsHandler.CommandFocusNumber == Commands.Attack)
             {
                 _defaultsHandler.IsInActionPanel = false;
+                ActivePanelChanged?.Invoke(this, new ActivePanelChangedEventArgs()
+                {
+                    InActionPanel = false,
+                    InCategoryPanel = false,
+                    InCommandPanel = true,
+                    InFormationPanel = false
+                });
             }
             else
+            {
                 _defaultsHandler.IsInCategoryPanel = false;
+                ActivePanelChanged?.Invoke(this, new ActivePanelChangedEventArgs()
+                {
+                    InActionPanel = false,
+                    InCategoryPanel = false,
+                    InCommandPanel = true,
+                    InFormationPanel = false
+                });
+            }
             _uiContainer.PrintUI();
         }
 
@@ -171,12 +217,28 @@ namespace TurnBasedRPG.UI.Combat
                             CommandFocus = (Commands)_defaultsHandler.CommandFocusNumber,
                             CategoryName = _defaultsHandler.ActiveCategory
                         });
+
+                        ActivePanelChanged?.Invoke(this, new ActivePanelChangedEventArgs()
+                        {
+                            InActionPanel = true,
+                            InCategoryPanel = false,
+                            InCommandPanel = false,
+                            InFormationPanel = false
+                        });
                         break;
                     case Commands.Spells:
                     case Commands.Skills:
                     case Commands.Items:
                         if (_defaultsHandler.CategoryItemCount > 0)
                             _defaultsHandler.IsInCategoryPanel = true;
+
+                        ActivePanelChanged?.Invoke(this, new ActivePanelChangedEventArgs()
+                        {
+                            InActionPanel = false,
+                            InCategoryPanel = true,
+                            InCommandPanel = false,
+                            InFormationPanel = false
+                        });
                         break;
                     case Commands.Wait:
                         ActionStartedEvent?.Invoke(this, new ActionStartedEventArgs()
@@ -202,6 +264,14 @@ namespace TurnBasedRPG.UI.Combat
                     ActionIndex = _defaultsHandler.ActionFocusNumber - 1,
                     TargetPosition = target
                 });
+
+                ActivePanelChanged?.Invoke(this, new ActivePanelChangedEventArgs()
+                {
+                    InActionPanel = false,
+                    InCategoryPanel = false,
+                    InCommandPanel = true,
+                    InFormationPanel = false
+                });
             }
             // If the player is in the action panel, switch to the formation panel
             else if (_defaultsHandler.IsInActionPanel)
@@ -219,6 +289,14 @@ namespace TurnBasedRPG.UI.Combat
                             CategoryName = _defaultsHandler.ActiveCategory,
                             ActionFocusNumber = _defaultsHandler.ActionFocusNumber
                         });
+
+                        ActivePanelChanged?.Invoke(this, new ActivePanelChangedEventArgs()
+                        {
+                            InActionPanel = false,
+                            InCategoryPanel = false,
+                            InCommandPanel = false,
+                            InFormationPanel = true
+                        });
                         break;
                     default:
                         break;
@@ -235,6 +313,14 @@ namespace TurnBasedRPG.UI.Combat
 
                 _defaultsHandler.IsInActionPanel = true;
                 _defaultsHandler.IsInCategoryPanel = false;
+
+                ActivePanelChanged?.Invoke(this, new ActivePanelChangedEventArgs()
+                {
+                    InActionPanel = true,
+                    InCategoryPanel = false,
+                    InCommandPanel = false,
+                    InFormationPanel = false
+                });
             }
 
             _uiContainer.PrintUI();

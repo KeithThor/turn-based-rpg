@@ -63,6 +63,7 @@
     <Compile Include="StatDefinition.cs" />
     <Compile Include="StringExtension.cs" />
     <Compile Include="Viewmodel\ActionData.cs" />
+    <Compile Include="Viewmodel\StatusData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

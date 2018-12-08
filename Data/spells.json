@@ -171,5 +171,17 @@
         "statusIds": [3],
         "canTargetThroughUnits": true,
         "canSwitchTargetPosition": true
+    },
+    {
+        "name": "Ice Shard",
+        "id": 14,
+        "description": "Hurls a shard of ice at the target.",
+        "categoryId": 1,
+        "targetPositions": [5],
+        "centerOfTargetsPosition": 5,
+        "damage": {"frost": 10},
+        "damageStatModifier": {"intellect": {"frost": 3}},
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": true
     }
 ]

@@ -13,6 +13,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
     {
         public int MaxWidth { get; set; }
         public int MaxHeight { get; set; }
+        public bool IsActive { get; set; }
 
         public ActionDetailsPanel()
         {
@@ -46,10 +47,13 @@ namespace TurnBasedRPG.UI.Combat.Panels
                 _cachedActionData = data;
             }
 
+            string navTriangle = "";
+            if (data.StatusEffects.Any() && IsActive) navTriangle = "Tab ► ";
+
             var actionPanel = new List<string>();
             actionPanel.Add("╔" + new string('═', MaxWidth - 2) + "╗");
-            int spaces = MaxWidth - 2 - action.GetDisplayName().Count();
-            actionPanel.Add("║ " + action.GetDisplayName() + new string(' ', spaces - 1) + "║");
+            int spaces = MaxWidth - 2 - action.GetDisplayName().Count() - navTriangle.Length;
+            actionPanel.Add("║ " + action.GetDisplayName() + new string(' ', spaces - 1)+ navTriangle + "║");
             actionPanel.Add("║" + new string('─', MaxWidth - 2) + "║");
             var actionTargetBoxes = RenderActionTargets(action);
             var actionDescription = RenderActionDescription(action, data);
