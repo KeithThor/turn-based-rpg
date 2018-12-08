@@ -81,6 +81,7 @@ namespace TurnBasedRPG.UI.Combat
             _combatInstance.DelayedActionBeginChannel += _uiContainer.OnCombatLoggableEvent;
             _combatInstance.CharacterBeginWait += _uiContainer.OnCombatLoggableEvent;
             _combatInstance.StartOfTurn += OnStartOfTurn;
+            _combatInstance.StatusEffectsRemoved += _uiContainer.OnCombatLoggableEvent;
 
             _userInput.ActionSelectedEvent += OnActionSelected;
             _userInput.ActionStartedEvent += OnActionStarted;

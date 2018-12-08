@@ -211,8 +211,8 @@ namespace TurnBasedRPG.Controller.Combat
                 // If damage is greater than the target's armor, calculate total damage by deducting target's armor values from damage
                 else if (damage[j] > character.Armor.AsArray()[j])
                     totalDamage -= (damage[j] - character.Armor.AsArray()[j])
-                                    * (100 + character.ArmorPercentage.AsArray()[j]) / 100
-                                    * (100 + character.ResistAllPercentage) / 100;
+                                    * (100 - character.ArmorPercentage.AsArray()[j]) / 100
+                                    * (100 - character.ResistAllPercentage) / 100;
             }
             return totalDamage;
         }

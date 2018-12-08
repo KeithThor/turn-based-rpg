@@ -183,5 +183,18 @@
         "damageStatModifier": {"intellect": {"frost": 3}},
         "canTargetThroughUnits": true,
         "canSwitchTargetPosition": true
+    },
+    {
+        "name": "Frostfire Bolt",
+        "id": 15,
+        "description": "Hurls a bolt of ice and fire at the target, simulataneously chilling and burning it.",
+        "categoryId": 1,
+        "targetPositions": [5],
+        "centerOfTargetsPosition": 5,
+        "damage": {"frost": 10, "fire": 10},
+        "damageStatModifier": {"intellect": {"frost": 2, "fire": 2}},
+        "statusIds": [1, 2],
+        "canTargetThroughUnits": true,
+        "canSwitchTargetPosition": true
     }
 ]

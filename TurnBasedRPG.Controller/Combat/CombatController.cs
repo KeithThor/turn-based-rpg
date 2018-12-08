@@ -59,6 +59,11 @@ namespace TurnBasedRPG.Controller.Combat
         public event EventHandler<StatusEffectAppliedEventArgs> StatusEffectApplied;
 
         /// <summary>
+        /// Event triggered whenever one or many status effects are removed from a character.
+        /// </summary>
+        public event EventHandler<CombatLoggableEventArgs> StatusEffectsRemoved;
+
+        /// <summary>
         /// Event triggered whenever a character has begun to channel a delayed action.
         /// </summary>
         public event EventHandler<CombatLoggableEventArgs> DelayedActionBeginChannel;

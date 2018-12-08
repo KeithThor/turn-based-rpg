@@ -129,6 +129,67 @@ namespace TurnBasedRPG.Shared.Combat
         }
 
         /// <summary>
+        /// Constructs and returns a message whenever a character has its health changed by a status effect.
+        /// </summary>
+        /// <param name="statusNames">The names of the status effect affecting the character.</param>
+        /// <param name="characterName">The name of the character affected by the status effect.</param>
+        /// <param name="healthChange">The amount of health the status effect changed.</param>
+        /// <returns>A string containing the message that a character had its health changed by a status effect.</returns>
+        public static string GetHealthChangedByStatusMessage(IReadOnlyList<string> statusNames, string characterName, int healthChange)
+        {
+            string message = $"{characterName}({healthChange}) is affected by ";
+            if (statusNames.Count() == 1)
+            {
+                return message + $"{statusNames[0]}.";
+            }
+            else if (statusNames.Count() == 2)
+            {
+                return message + $"{statusNames[0]} and {statusNames[1]}.";
+            }
+            else
+            {
+                for (int i = 0; i < statusNames.Count(); i++)
+                {
+                    if (i == statusNames.Count() - 1)
+                        message += $"and {statusNames[i]}.";
+                    else
+                        message += $"{statusNames[i]}, ";
+                }
+                return message;
+            }
+        }
+
+        /// <summary>
+        /// Constructs and returns a message whenever a character loses the effects of a status effect.
+        /// </summary>
+        /// <param name="statusNames">The names of the status effects the character lost.</param>
+        /// <param name="characterName">The name of the character losing the status effects.</param>
+        /// <returns>A string containing a message of whenever a character loses the effects of a status effect.</returns>
+        public static string GetRemoveStatusMessage(IReadOnlyList<string> statusNames, string characterName)
+        {
+            string message = $"{characterName} is no longer affected by ";
+            if (statusNames.Count() == 1)
+            {
+                return message + $"{statusNames[0]}.";
+            }
+            else if (statusNames.Count() == 2)
+            {
+                return message + $"{statusNames[0]} and {statusNames[1]}.";
+            }
+            else
+            {
+                for (int i = 0; i < statusNames.Count(); i++)
+                {
+                    if (i == statusNames.Count() - 1)
+                        message += $"and {statusNames[i]}.";
+                    else
+                        message += $"{statusNames[i]}, ";
+                }
+                return message;
+            }
+        }
+
+        /// <summary>
         /// Constructs and returns a message whenever a character is preparing a delayed action.
         /// </summary>
         /// <param name="channelerName">The name of the character preparing the delayed action.</param>

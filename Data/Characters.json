@@ -25,7 +25,7 @@
             "intellect": 25,
             "agility": 30
         },
-        "spellIdList": [1, 2, 3, 4, 5, 6, 9]
+        "spellIdList": [1, 2, 3, 4, 5, 6, 9, 15]
     },
     {
         "id": 3,

@@ -73,6 +73,11 @@ namespace TurnBasedRPG.Controller.Combat
         /// </summary>
         public event EventHandler<StatusEffectAppliedEventArgs> StatusEffectApplied;
 
+        /// <summary>
+        /// Event invoked whenever one or many status effects are removed.
+        /// </summary>
+        public event EventHandler<CombatLoggableEventArgs> StatusEffectsRemoved;
+
         public ActionController(CharacterController characterController,
                                 StatusController statusController,
                                 ThreatController threatController)
@@ -91,6 +96,7 @@ namespace TurnBasedRPG.Controller.Combat
             StatusEffectController.CharactersDied += OnCharactersDying;
             StatusEffectController.CharactersHealthChanged += OnCharactersHealthChanged;
             StatusEffectController.StatusEffectApplied += OnStatusEffectApplied;
+            StatusEffectController.StatusEffectsRemoved += OnStatusEffectsRemoved;
         }
 
         /// <summary>
@@ -116,6 +122,11 @@ namespace TurnBasedRPG.Controller.Combat
         private void OnStatusEffectApplied(object sender, StatusEffectAppliedEventArgs args)
         {
             StatusEffectApplied?.Invoke(sender, args);
+        }
+
+        private void OnStatusEffectsRemoved(object sender, CombatLoggableEventArgs args)
+        {
+            StatusEffectsRemoved?.Invoke(sender, args);
         }
 
         /// <summary>

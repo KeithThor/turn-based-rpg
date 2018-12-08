@@ -117,7 +117,24 @@ namespace TurnBasedRPG.UI.Combat
                 && _canDisplayStatusPanel
                 && args.PressedKey.Key == ConsoleKey.Tab)
             {
-                IsStatusPanelActive = !IsStatusPanelActive;
+                // If more than one status, toggle through the statuses
+                if (_maxStatusPanels > 1)
+                {
+                    if (!IsStatusPanelActive)
+                        IsStatusPanelActive = true;
+                    else if (_currentStatusPanelIndex != _maxStatusPanels)
+                        _currentStatusPanelIndex++;
+                    else
+                    {
+                        _currentStatusPanelIndex = 1;
+                        IsStatusPanelActive = false;
+                    }
+                }
+                // If only one status, toggle between active and disabled
+                else
+                {
+                    IsStatusPanelActive = !IsStatusPanelActive;
+                }
                 PrintUI();
             }
             if (args.PressedKey.Key == ConsoleKey.LeftArrow)
@@ -165,6 +182,8 @@ namespace TurnBasedRPG.UI.Combat
         public bool IsUIUpdatingFinished { get; private set; } = false;
         public bool SkipUIUpdating { get; set; } = false;
         public bool IsStatusPanelActive { get; private set; }
+        private int _maxStatusPanels;
+        private int _currentStatusPanelIndex = 1;
         private bool _canDisplayStatusPanel;
 
         /// <summary>
@@ -398,7 +417,7 @@ namespace TurnBasedRPG.UI.Combat
                 var data = _viewModelController.GetStatusViewData((Commands)_defaultsHandler.CommandFocusNumber,
                                                                   _defaultsHandler.ActiveCategory,
                                                                   _defaultsHandler.ActionFocusNumber - 1,
-                                                                  0);
+                                                                  _currentStatusPanelIndex - 1);
 
                 detailsPanel = _statusEffectsPanel.Render(data);
             }
@@ -410,6 +429,7 @@ namespace TurnBasedRPG.UI.Combat
                                                                   _defaultsHandler.ActionFocusNumber - 1);
 
                 _canDisplayStatusPanel = data.StatusEffects.Any();
+                if (_canDisplayStatusPanel) _maxStatusPanels = data.StatusEffects.Count();
 
                 detailsPanel = _actionDetailsPanel.RenderActionDetails(
                                                     _displayManager.GetActionFromCategory(

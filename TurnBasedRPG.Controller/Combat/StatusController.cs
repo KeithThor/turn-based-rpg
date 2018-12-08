@@ -74,6 +74,11 @@ namespace TurnBasedRPG.Controller.Combat
         /// Event invoked whenever one or more characters have a status effect applied onto them.
         /// </summary>
         public event EventHandler<StatusEffectAppliedEventArgs> StatusEffectApplied;
+
+        /// <summary>
+        /// Event invoked whenever a character has one or many status effects removed.
+        /// </summary>
+        public event EventHandler<CombatLoggableEventArgs> StatusEffectsRemoved;
         
         public StatusController(ThreatController threatController)
         {
@@ -346,15 +351,19 @@ namespace TurnBasedRPG.Controller.Combat
             character.CurrentHealth += totalDamage;
 
             int modifiedHealth = character.CurrentHealth - startingHealth;
+            var names = _appliedStatuses[character].Select(status => status.BaseStatus.Name).ToList();
             if (modifiedHealth != 0)
             {
                 CharactersHealthChanged?.Invoke(this, new CharactersHealthChangedEventArgs()
                 {
                     PostCharactersChanged = new Dictionary<int, int>() { { character.Id, character.CurrentHealth } },
                     PreCharactersChanged = new Dictionary<int, int>() { { character.Id, startingHealth } },
-                    ChangeAmount = new Dictionary<int, int>() { { character.Id, modifiedHealth } }
+                    ChangeAmount = new Dictionary<int, int>() { { character.Id, modifiedHealth } },
+                    LogMessage = CombatMessenger.GetHealthChangedByStatusMessage(names, character.Name, modifiedHealth)
                 });
             }
+
+            var statusNames = removeStatuses.Select(st => st.BaseStatus.Name).ToList();
 
             // If a status is queued for removal, remove from the character's buff and debuff lists
             foreach (var status in removeStatuses)
@@ -366,6 +375,14 @@ namespace TurnBasedRPG.Controller.Combat
                 RemoveStatusEffects(status, character);
             }
             _appliedStatuses[character].RemoveAll(status => removeStatuses.Contains(status));
+
+            if (removeStatuses.Any())
+            {
+                StatusEffectsRemoved?.Invoke(this, new CombatLoggableEventArgs()
+                {
+                    LogMessage = CombatMessenger.GetRemoveStatusMessage(statusNames, character.Name)
+                });
+            }
 
             // Invoke characters dying event if a character died as a result of this status effect.
             if (character.CurrentHealth <= 0)
