@@ -122,7 +122,7 @@ namespace TurnBasedRPG.UI.Combat
                 {
                     if (!IsStatusPanelActive)
                         IsStatusPanelActive = true;
-                    else if (_currentStatusPanelIndex != _maxStatusPanels)
+                    else if (_currentStatusPanelIndex != _maxStatusPanels - 1)
                         _currentStatusPanelIndex++;
                     else
                     {
@@ -183,7 +183,7 @@ namespace TurnBasedRPG.UI.Combat
         public bool SkipUIUpdating { get; set; } = false;
         public bool IsStatusPanelActive { get; private set; }
         private int _maxStatusPanels;
-        private int _currentStatusPanelIndex = 1;
+        private int _currentStatusPanelIndex = 0;
         private bool _canDisplayStatusPanel;
 
         /// <summary>
@@ -417,7 +417,7 @@ namespace TurnBasedRPG.UI.Combat
                 var data = _viewModelController.GetStatusViewData((Commands)_defaultsHandler.CommandFocusNumber,
                                                                   _defaultsHandler.ActiveCategory,
                                                                   _defaultsHandler.ActionFocusNumber - 1,
-                                                                  _currentStatusPanelIndex - 1);
+                                                                  _currentStatusPanelIndex);
 
                 detailsPanel = _statusEffectsPanel.Render(data);
             }
@@ -429,7 +429,12 @@ namespace TurnBasedRPG.UI.Combat
                                                                   _defaultsHandler.ActionFocusNumber - 1);
 
                 _canDisplayStatusPanel = data.StatusEffects.Any();
-                if (_canDisplayStatusPanel) _maxStatusPanels = data.StatusEffects.Count();
+                if (_canDisplayStatusPanel)
+                {
+                    _maxStatusPanels = data.StatusEffects.Count();
+                    _currentStatusPanelIndex = 0;
+                }
+
 
                 detailsPanel = _actionDetailsPanel.RenderActionDetails(
                                                     _displayManager.GetActionFromCategory(
