@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Model.Entities;
 using TurnBasedRPG.Shared.Interfaces;
-using TurnBasedRPG.UI.Combat;
+using TurnBasedRPG.UI.Combat.Panels;
 
 namespace TurnBasedRPG.UI.Test.Combat
 {

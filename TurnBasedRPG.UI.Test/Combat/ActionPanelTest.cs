@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TurnBasedRPG.Shared.Enums;
 using System.Collections.Generic;
-using TurnBasedRPG.UI.Combat;
+using TurnBasedRPG.UI.Combat.Panels;
 
 namespace TurnBasedRPG.UI.Test.Combat
 {
