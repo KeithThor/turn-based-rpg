@@ -12,7 +12,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
     /// <summary>
     /// Panel responsible for rendering the amount of stats a character has for all stats.
     /// </summary>
-    public class StatsSubPanel : IReceiveInputPanel
+    public class StatsSubPanel
     {
         public bool IsActive { get; set; }
         public int FocusNumber { get; set; }

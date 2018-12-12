@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TurnBasedRPG.Controller.Combat;
 using TurnBasedRPG.Shared.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat.Panels
@@ -17,13 +18,22 @@ namespace TurnBasedRPG.UI.Combat.Panels
             set { _maxWidth = value - (value - 1) % 3; }
         }
 
-        public TurnOrderPanel()
+        public TurnOrderPanel(DefaultsHandler defaultsHandler,
+                              CombatStateHandler combatStateHandler,
+                              UICharacterManager uiCharacterManager)
         {
             MaxWidth = 51;
+            _defaultsHandler = defaultsHandler;
+            _combatStateHandler = combatStateHandler;
+            _uiCharacterManager = uiCharacterManager;
         }
 
         private IReadOnlyList<string> _cachedRender;
         private CachedData _cachedData;
+        private readonly DefaultsHandler _defaultsHandler;
+        private readonly CombatStateHandler _combatStateHandler;
+        private readonly UICharacterManager _uiCharacterManager;
+
         private class CachedData
         {
             public bool RenderTargets;
@@ -32,10 +42,13 @@ namespace TurnBasedRPG.UI.Combat.Panels
         }
 
         // Renders the turn order boxes at the top right of the screen. This gets rendered with the target details ui.
-        public IReadOnlyList<string> Render(bool renderTargets, 
-                                            IReadOnlyList<int> targetPositions, 
-                                            IReadOnlyList<IDisplayCharacter>[] characters)
+        public IReadOnlyList<string> Render()
         {
+            var turnOrderIds = _combatStateHandler.GetRoundOrderIds();
+            var characters = _uiCharacterManager.GetTurnOrderCharacters(turnOrderIds[0], turnOrderIds[1]);
+            bool renderTargets = _defaultsHandler.IsInFormationPanel || !_combatStateHandler.IsPlayerTurn();
+            var targetPositions = _defaultsHandler.CurrentTargetPositions;
+
             if (IsCacheData(renderTargets, targetPositions, characters)) return _cachedRender;
             else
             {

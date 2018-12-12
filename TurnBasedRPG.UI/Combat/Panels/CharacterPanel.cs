@@ -41,13 +41,17 @@ namespace TurnBasedRPG.UI.Combat.Panels
         private readonly DamageTypesSubPanel _resistanceSubPanel;
         private readonly DamageTypesSubPanel _damagePercentSubPanel;
         private readonly OffensiveSubPanel _offensiveSubPanel;
+        private readonly DefaultsHandler _defaultsHandler;
+        private readonly UICharacterManager _uiCharacterManager;
 
         public CharacterPanel(StatsSubPanel statsSubPanel,
                               DamageTypesSubPanel armorSubPanel,
                               DamageTypesSubPanel damageSubPanel,
                               DamageTypesSubPanel resistanceSubPanel,
                               DamageTypesSubPanel damagePercentSubPanel,
-                              OffensiveSubPanel offensiveSubPanel)
+                              OffensiveSubPanel offensiveSubPanel,
+                              DefaultsHandler defaultsHandler,
+                              UICharacterManager uiCharacterManager)
         {
             MaxHeight = 31;
             MaxWidth = 40;
@@ -65,6 +69,8 @@ namespace TurnBasedRPG.UI.Combat.Panels
             _damagePercentSubPanel = damagePercentSubPanel;
             _damagePercentSubPanel.PanelName = "Bonus Damage";
             _offensiveSubPanel = offensiveSubPanel;
+            _defaultsHandler = defaultsHandler;
+            _uiCharacterManager = uiCharacterManager;
             _offensiveSubPanel.MaxWidth--;
         }
 
@@ -78,27 +84,59 @@ namespace TurnBasedRPG.UI.Combat.Panels
         private CachedCharacter _cachedCharacter;
         private IReadOnlyList<string> _cachedRender;
 
+        public event EventHandler<ActivePanelChangedEventArgs> ActivePanelChanged;
+
         /// <summary>
         /// Returns a details panel injected with the data from a character.
         /// </summary>
         /// <param name="character">The character whose data will be used to fill the details panel.</param>
         /// <returns>A read-only list of string that contains the details panel.</returns>
-        public IReadOnlyList<string> Render(IDisplayCharacter character)
+        public IReadOnlyList<string> Render()
         {
-            if (character == null) throw new NullReferenceException();
-            if (IsCachedData(character)) return _cachedRender;
+            IDisplayCharacter focusedTarget;
+            IReadOnlyList<IDisplayCharacter> otherTargets = new List<IDisplayCharacter>();
+            var targets = _defaultsHandler.CurrentTargetPositions;
+
+            // If there are no characters within any of our target positions, return the current turn character
+            if (!targets.Any(targetPosition =>
+                             _uiCharacterManager.GetCharacterFromPosition(targetPosition) != null))
+            {
+                focusedTarget = _uiCharacterManager.GetCurrentTurnCharacter();
+            }
+            // If our main target position is occupied, display that target
+            else if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition)
+                     && targets.Contains(_defaultsHandler.CurrentTargetPosition))
+            {
+                focusedTarget = _uiCharacterManager.GetCharacterFromPosition(_defaultsHandler.CurrentTargetPosition);
+                otherTargets = _uiCharacterManager.GetCharactersFromPositions(targets);
+            }
+            // If our main target position isn't occupied, display any target that occupies a spot in our target list
+            else
+            {
+                focusedTarget = _uiCharacterManager.Characters.First(
+                                        character => targets.Contains(character.Position));
+                otherTargets = _uiCharacterManager.GetCharactersFromPositions(targets);
+            }
+
+            if (otherTargets.Count() > 0)
+            {
+                return Render(otherTargets, focusedTarget);
+            }
+
+            if (focusedTarget == null) throw new NullReferenceException();
+            if (IsCachedData(focusedTarget)) return _cachedRender;
             else
             {
                 _cachedCharacter = new CachedCharacter()
                 {
-                    Id = character.Id,
-                    CurrentHealth = character.CurrentHealth,
-                    MaxHealth = character.MaxHealth
+                    Id = focusedTarget.Id,
+                    CurrentHealth = focusedTarget.CurrentHealth,
+                    MaxHealth = focusedTarget.MaxHealth
                 };
             }
 
             var characterDetails = new List<string>();
-            characterDetails.AddRange(RenderCharacter(character));
+            characterDetails.AddRange(RenderCharacter(focusedTarget));
             
             _cachedRender = characterDetails;
             return characterDetails;
@@ -111,10 +149,8 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// <param name="characters">The list of characters to render to the character panel.</param>
         /// <param name="focusedTarget">The character that is focused and will show more stats.</param>
         /// <returns>A list of string containing the rendered character panel.</returns>
-        public IReadOnlyList<string> Render(IReadOnlyList<IDisplayCharacter> characters, IDisplayCharacter focusedTarget)
+        private IReadOnlyList<string> Render(IReadOnlyList<IDisplayCharacter> characters, IDisplayCharacter focusedTarget)
         {
-            if (characters.Count == 1) return Render(focusedTarget);
-
             // Prevent target from being rendered twice
             var modifiedList = new List<IDisplayCharacter>(characters);
             modifiedList.Remove(focusedTarget);

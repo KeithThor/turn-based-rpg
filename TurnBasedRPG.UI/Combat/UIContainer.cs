@@ -25,13 +25,11 @@ namespace TurnBasedRPG.UI.Combat
         private readonly ActionDetailsPanel _actionDetailsPanel;
         private readonly DefaultsHandler _defaultsHandler;
         private readonly UICharacterManager _uiCharacterManager;
-        private readonly ViewModelController _viewModelController;
-        private readonly DisplayManager _displayManager;
-        private readonly CombatStateHandler _combatStateHandler;
         private readonly CategoryDetailsPanel _categoryDetailsPanel;
         private readonly CombatLogPanel _combatLogPanel;
         private readonly CharacterPanel _characterPanel;
         private readonly StatusEffectsPanel _statusEffectsPanel;
+        private readonly CategoryPanel _categoryPanel;
 
         public UIContainer(FormationPanel formationPanel,
                            TargetPanel targetPanel,
@@ -43,6 +41,7 @@ namespace TurnBasedRPG.UI.Combat
                            CombatLogPanel combatLogPanel,
                            CharacterPanel characterPanel,
                            StatusEffectsPanel statusEffectsPanel,
+                           CategoryPanel categoryPanel,
                            DefaultsHandler defaultsHandler,
                            UICharacterManager uiCharacterManager,
                            ViewModelController viewModelController,
@@ -59,34 +58,50 @@ namespace TurnBasedRPG.UI.Combat
             _combatLogPanel = combatLogPanel;
             _characterPanel = characterPanel;
             _statusEffectsPanel = statusEffectsPanel;
+            _categoryPanel = categoryPanel;
             _characterPanel.MaxHeight = _formationPanel.MaxHeight;
             _defaultsHandler = defaultsHandler;
             _uiCharacterManager = uiCharacterManager;
-            _viewModelController = viewModelController;
-            _displayManager = displayManager;
-            _combatStateHandler = combatStateHandler;
-            
+
+            _commandPanel.IsActive = true;
+
             BindEvents();
         }
 
         private void BindEvents()
         {
             _defaultsHandler.InFormationPanelChanged += (obj, args) => RenderFormationTargets = _defaultsHandler.IsInFormationPanel;
-        }
-
-        public bool IsPlayerTurn
-        {
-            get { return _combatStateHandler.IsPlayerTurn(); }
+            _commandPanel.CommandFocusChanged += OnCommandFocusChanged;
+            KeyPressed += _commandPanel.OnKeyPressed;
+            KeyPressed += _categoryPanel.OnKeyPressed;
+            KeyPressed += _actionPanel.OnKeyPressed;
+            KeyPressed += _formationPanel.OnKeyPressed;
         }
 
         /// <summary>
-        /// Assigns an event listener to the given eventhandler.
-        /// Must pass by ref because delegate removes itself from eventhandler when going out of method scope??? Weird..
+        /// Event called whenever the UI should update categories.
         /// </summary>
-        public void RegisterPanelChangeEvent(ref EventHandler<ActivePanelChangedEventArgs> eventHandler)
-        {
-            eventHandler += OnActivePanelChanged;
-        }
+        public event EventHandler<UpdateCategoriesEventArgs> UpdateCategories;
+
+        /// <summary>
+        /// Event called whenever the player presses a key.
+        /// </summary>
+        public event EventHandler<KeyPressedEventArgs> KeyPressed;
+
+        /// <summary>
+        /// Event called whenever the player selects an action from an action list.
+        /// </summary>
+        public event EventHandler<ActionSelectedEventArgs> ActionSelectedEvent;
+
+        /// <summary>
+        /// Event called whenever the UI should update the action list.
+        /// </summary>
+        public event EventHandler<UpdateActionListEventArgs> UpdateActionListEvent;
+
+        /// <summary>
+        /// Event called whenever the player has chosen an action with its targets.
+        /// </summary>
+        public event EventHandler<ActionStartedEventArgs> ActionStartedEvent;
 
         /// <summary>
         /// Assigns an event listener to the given eventhandler.
@@ -97,65 +112,57 @@ namespace TurnBasedRPG.UI.Combat
             eventHandler += OnKeyPressed;
         }
 
-        private void OnActivePanelChanged(object sender, ActivePanelChangedEventArgs args)
-        {
-            if (args.InActionPanel)
-            {
-                _actionDetailsPanel.IsActive = true;
-            }
-            if (!args.InActionPanel)
-            {
-                _actionDetailsPanel.IsActive = false;
-                _canDisplayStatusPanel = false;
-                IsStatusPanelActive = false;
-            }
-        }
-
         private void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
-            if (_actionDetailsPanel.IsActive 
-                && _canDisplayStatusPanel
-                && args.PressedKey.Key == ConsoleKey.Tab)
+            KeyPressed?.Invoke(sender, args);
+            switch (args.PressedKey.Key)
             {
-                // If more than one status, toggle through the statuses
-                if (_maxStatusPanels > 1)
-                {
-                    if (!IsStatusPanelActive)
-                        IsStatusPanelActive = true;
-                    else if (_currentStatusPanelIndex != _maxStatusPanels - 1)
-                        _currentStatusPanelIndex++;
-                    else
-                    {
-                        _currentStatusPanelIndex = 1;
-                        IsStatusPanelActive = false;
-                    }
-                }
-                // If only one status, toggle between active and disabled
+                case ConsoleKey.Tab:
+                    if (_actionDetailsPanel.IsActive && _canDisplayStatusPanel)
+                        ToggleStatusPanel();
+                    break;
+                case ConsoleKey.LeftArrow:
+                case ConsoleKey.RightArrow:
+                case ConsoleKey.UpArrow:
+                case ConsoleKey.DownArrow:
+                    _canDisplayStatusPanel = false;
+                    IsStatusPanelActive = false;
+                    break;
+                case ConsoleKey.Enter:
+                    EnterKeyPressed();
+                    break;
+                case ConsoleKey.Escape:
+                    EscapeKeyPressed();
+                    break;
+                default:
+                    break;
+            }
+            PrintUI();
+        }
+
+        /// <summary>
+        /// Tabs through multiple status effects if the active action has more than one status effect, otherwise
+        /// toggles between on and off.
+        /// </summary>
+        private void ToggleStatusPanel()
+        {
+            // If more than one status, toggle through the statuses
+            if (_maxStatusPanels > 1)
+            {
+                if (!IsStatusPanelActive)
+                    IsStatusPanelActive = true;
+                else if (_statusEffectsPanel.FocusNumber != _maxStatusPanels)
+                    _statusEffectsPanel.FocusNumber++;
                 else
                 {
-                    IsStatusPanelActive = !IsStatusPanelActive;
+                    _statusEffectsPanel.FocusNumber = 1;
+                    IsStatusPanelActive = false;
                 }
-                PrintUI();
             }
-            if (args.PressedKey.Key == ConsoleKey.LeftArrow)
+            // If only one status, toggle between active and disabled
+            else
             {
-                _canDisplayStatusPanel = false;
-                IsStatusPanelActive = false;
-            }
-            if (args.PressedKey.Key == ConsoleKey.RightArrow)
-            {
-                _canDisplayStatusPanel = false;
-                IsStatusPanelActive = false;
-            }
-            if (args.PressedKey.Key == ConsoleKey.DownArrow)
-            {
-                _canDisplayStatusPanel = false;
-                IsStatusPanelActive = false;
-            }
-            if (args.PressedKey.Key == ConsoleKey.UpArrow)
-            {
-                _canDisplayStatusPanel = false;
-                IsStatusPanelActive = false;
+                IsStatusPanelActive = !IsStatusPanelActive;
             }
         }
 
@@ -167,6 +174,15 @@ namespace TurnBasedRPG.UI.Combat
         public void OnCombatLoggableEvent(object sender, CombatLoggableEventArgs args)
         {
             _combatLogPanel.AddToLog(args.LogMessage);
+        }
+
+        public void OnCommandFocusChanged(object sender, CommandFocusChangedEventArgs args)
+        {
+            _defaultsHandler.CommandFocusNumber = (int)args.NewCommand;
+            UpdateCategories?.Invoke(this, new UpdateCategoriesEventArgs()
+            {
+                CommandFocus = args.NewCommand
+            });
         }
 
         /// <summary>
@@ -183,7 +199,6 @@ namespace TurnBasedRPG.UI.Combat
         public bool SkipUIUpdating { get; set; } = false;
         public bool IsStatusPanelActive { get; private set; }
         private int _maxStatusPanels;
-        private int _currentStatusPanelIndex = 0;
         private bool _canDisplayStatusPanel;
 
         /// <summary>
@@ -264,58 +279,160 @@ namespace TurnBasedRPG.UI.Combat
         }
 
         /// <summary>
+        /// Handles any actions that occurs after the enter key is pressed.
+        /// </summary>
+        private void EnterKeyPressed()
+        {
+            // If the player is in the command panel
+            if (!_defaultsHandler.IsInActionPanel
+                && !_defaultsHandler.IsInFormationPanel
+                && !_defaultsHandler.IsInCategoryPanel)
+            {
+                switch ((Commands)_defaultsHandler.CommandFocusNumber)
+                {
+                    case Commands.Attack:
+                        _defaultsHandler.IsInActionPanel = true;
+                        _defaultsHandler.IsInCommandPanel = false;
+                        UpdateActionListEvent?.Invoke(this, new UpdateActionListEventArgs()
+                        {
+                            CommandFocus = (Commands)_defaultsHandler.CommandFocusNumber,
+                            CategoryName = _defaultsHandler.ActiveCategory
+                        });
+                        break;
+                    case Commands.Spells:
+                    case Commands.Skills:
+                    case Commands.Items:
+                        if (_defaultsHandler.CategoryItemCount > 0)
+                        {
+                            _defaultsHandler.IsInCategoryPanel = true;
+                            _defaultsHandler.IsInCommandPanel = false;
+                        }
+                        break;
+                    case Commands.Status:
+                        _defaultsHandler.IsInFormationPanel = true;
+                        _defaultsHandler.IsInCommandPanel = false;
+                        int? position = _uiCharacterManager.GetPositionOfCharacter(_defaultsHandler.ActiveCharacterId);
+
+                        if (position == null) throw new Exception("Active character was not found in UICharacterManager.");
+                        else
+                        {
+                            _defaultsHandler.CurrentTargetPosition = position.GetValueOrDefault();
+                            _defaultsHandler.CurrentTargetPositions = new List<int>() { position.GetValueOrDefault() };
+                            _defaultsHandler.ActiveAction.CanSwitchTargetPosition = true;
+                            _defaultsHandler.ActiveAction.CanTargetThroughUnits = true;
+                            _defaultsHandler.ActiveAction.CenterOfTargets = 5;
+                            _defaultsHandler.ActiveAction.TargetPositions = new List<int>() { 5 };
+                            _defaultsHandler.IsInStatusCommand = true;
+                        }
+                        break;
+                    case Commands.Wait:
+                        ActionStartedEvent?.Invoke(this, new ActionStartedEventArgs()
+                        {
+                            ActionType = Commands.Wait,
+                            CategoryName = "",
+                            ActionIndex = -1,
+                            TargetPosition = 0
+                        });
+                        break;
+                }
+            }
+            // If the player is in the formation panel, start an action
+            else if (_defaultsHandler.IsInFormationPanel && !_defaultsHandler.IsInStatusCommand)
+            {
+                var target = _defaultsHandler.CurrentTargetPosition;
+
+                ActionStartedEvent?.Invoke(this, new ActionStartedEventArgs()
+                {
+                    ActionType = (Commands)_defaultsHandler.CommandFocusNumber,
+                    CategoryName = _defaultsHandler.ActiveCategory,
+                    ActionIndex = _defaultsHandler.ActionFocusNumber - 1,
+                    TargetPosition = target
+                });
+            }
+            else if (_defaultsHandler.IsInStatusCommand)
+            {
+                if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition))
+                {
+                    _defaultsHandler.IsInCharacterPanel = true;
+                }
+            }
+            // If the player is in the action panel, switch to the formation panel
+            else if (_defaultsHandler.IsInActionPanel)
+            {
+                switch ((Commands)_defaultsHandler.CommandFocusNumber)
+                {
+                    case Commands.Attack:
+                    case Commands.Spells:
+                    case Commands.Skills:
+                    case Commands.Items:
+                        _defaultsHandler.IsInFormationPanel = true;
+                        _defaultsHandler.IsInActionPanel = false;
+                        ActionSelectedEvent?.Invoke(this, new ActionSelectedEventArgs()
+                        {
+                            CommandFocus = (Commands)_defaultsHandler.CommandFocusNumber,
+                            CategoryName = _defaultsHandler.ActiveCategory,
+                            ActionFocusNumber = _defaultsHandler.ActionFocusNumber
+                        });
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else if (_defaultsHandler.IsInCategoryPanel)
+            {
+                // Get all spells or skills in category
+                UpdateActionListEvent?.Invoke(this, new UpdateActionListEventArgs()
+                {
+                    CommandFocus = (Commands)_defaultsHandler.CommandFocusNumber,
+                    CategoryName = _defaultsHandler.ActiveCategory
+                });
+
+                _defaultsHandler.IsInActionPanel = true;
+                _defaultsHandler.IsInCategoryPanel = false;
+            }
+        }
+
+        /// <summary>
+        /// Handles any actions that occurs after the escape key is pressed.
+        /// </summary>
+        private void EscapeKeyPressed()
+        {
+            if (_defaultsHandler.IsInFormationPanel && !_defaultsHandler.IsInStatusCommand)
+            {
+                _defaultsHandler.IsInFormationPanel = false;
+                _defaultsHandler.IsInActionPanel = true;
+            }
+            else if (_defaultsHandler.IsInStatusCommand)
+            {
+                _defaultsHandler.IsInStatusCommand = false;
+                _defaultsHandler.IsInFormationPanel = false;
+                _defaultsHandler.IsInCommandPanel = true;
+            }
+            else if (_defaultsHandler.IsInActionPanel && (Commands)_defaultsHandler.CommandFocusNumber != Commands.Attack)
+            {
+                _defaultsHandler.IsInActionPanel = false;
+                _defaultsHandler.IsInCategoryPanel = true;
+            }
+            else if (_defaultsHandler.IsInActionPanel && (Commands)_defaultsHandler.CommandFocusNumber == Commands.Attack)
+            {
+                _defaultsHandler.IsInActionPanel = false;
+                _defaultsHandler.IsInCommandPanel = true;
+            }
+            else
+            {
+                _defaultsHandler.IsInCategoryPanel = false;
+                _defaultsHandler.IsInCommandPanel = true;
+            }
+        }
+
+        /// <summary>
         /// Renders and prints the battlefield, containing all the characters in combat as well as their healthbars.
         /// </summary>
         private void PrintFormationsAndCharacterPanel()
         {
-            var formations = _formationPanel.Render(_uiCharacterManager.Characters, 
-                                                    _defaultsHandler.ActiveCharacterId,
-                                                    _defaultsHandler.CurrentTargetPositions);
+            var formations = _formationPanel.Render();
 
-
-            IReadOnlyList<string> characterPanel;
-
-            // Display the current target character's details if in the formation panel
-            if (_defaultsHandler.IsInFormationPanel || !IsPlayerTurn)
-            {
-                IDisplayCharacter focusedTarget;
-                IReadOnlyList<IDisplayCharacter> otherTargets = new List<IDisplayCharacter>();
-                var targets = _defaultsHandler.CurrentTargetPositions;
-
-                // If there are no characters within any of our target positions, return the current turn character
-                if (!targets.Any(targetPosition =>
-                                 _uiCharacterManager.GetCharacterFromPosition(targetPosition) != null))
-                {
-                    focusedTarget = _uiCharacterManager.GetCurrentTurnCharacter();
-                }
-                // If our main target position is occupied, display that target
-                else if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition)
-                         && targets.Contains(_defaultsHandler.CurrentTargetPosition))
-                {
-                    focusedTarget = _uiCharacterManager.GetCharacterFromPosition(_defaultsHandler.CurrentTargetPosition);
-                    otherTargets = _uiCharacterManager.GetCharactersFromPositions(targets);
-                }
-                // If our main target position isn't occupied, display any target that occupies a spot in our target list
-                else
-                {
-                    focusedTarget = _uiCharacterManager.Characters.First(
-                                            character => targets.Contains(character.Position));
-                    otherTargets = _uiCharacterManager.GetCharactersFromPositions(targets);
-                }
-                if (otherTargets.Count() > 0)
-                {
-                    characterPanel = _characterPanel.Render(otherTargets, focusedTarget);
-                }
-                else
-                {
-                    characterPanel = _characterPanel.Render(focusedTarget);
-                }
-            }
-            // Display the current turn character if not in the formation panel
-            else
-            {
-                characterPanel = _characterPanel.Render(_uiCharacterManager.GetCurrentTurnCharacter());
-            }
+            var characterPanel = _characterPanel.Render();
 
             for (int i = 0; i < formations.Count(); i++)
             {
@@ -330,20 +447,13 @@ namespace TurnBasedRPG.UI.Combat
         {
             // Must have 2 spaces extra to correctly print out boxes to console
             int spaces = Console.WindowWidth - _targetPanel.MaxWidth - _turnOrderPanel.MaxWidth;
-            var targetUI = StartRenderTarget();
-            var turnOrderIds = _combatStateHandler.GetRoundOrderIds();
-            var turnOrderCharacters = _uiCharacterManager.GetTurnOrderCharacters(turnOrderIds[0], turnOrderIds[1]);
-            bool renderTargets = _defaultsHandler.IsInFormationPanel || !IsPlayerTurn;
 
-            var correctedTargets = _defaultsHandler.CurrentTargetPositions;
+            var targetPanel = _targetPanel.Render();
+            var turnOrderUI = _turnOrderPanel.Render();
 
-            var turnOrderUI = _turnOrderPanel.Render(renderTargets,
-                                                correctedTargets,
-                                                turnOrderCharacters);
-
-            for (int i = 0; i < targetUI.Count; i++)
+            for (int i = 0; i < targetPanel.Count; i++)
             {
-                Console.WriteLine(targetUI[i] + new string(' ', spaces) + turnOrderUI[i]);
+                Console.WriteLine(targetPanel[i] + new string(' ', spaces) + turnOrderUI[i]);
             }
             Console.WriteLine(new string(' ', spaces + _targetPanel.MaxWidth) + turnOrderUI[turnOrderUI.Count - 1]);
         }
@@ -353,44 +463,26 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         private void PrintUserPanels()
         {
-            var commandPanel = _commandPanel.Render(_defaultsHandler.CommandFocusNumber);
+            var commandPanel = _commandPanel.Render();
             var detailsPanel = StartRenderDetailsPanels();
 
-            // Contains names of actions or categories
-            List<string> offsetModifiedNames;
-            int offsetModifiedFocus = 0;
-            if (_defaultsHandler.IsInActionPanel)
+            IReadOnlyList<string> actionOrDetailsPanel;
+            if (_defaultsHandler.IsInActionPanel 
+                || _defaultsHandler.CommandFocusNumber == (int)Commands.Attack
+                || _defaultsHandler.IsInFormationPanel)
             {
-                offsetModifiedNames = new List<string>(_defaultsHandler.ActionPanelList.Select(item => item.GetDisplayName()));
-                offsetModifiedFocus = _defaultsHandler.ActionFocusNumber - _defaultsHandler.ActionPanelLineOffset * 2;
+                actionOrDetailsPanel = _actionPanel.Render();
             }
-            // If the focus is on the attack action, show the available attacks
-            else if ((Commands)_defaultsHandler.CommandFocusNumber == Commands.Attack)
-            {
-                offsetModifiedNames = new List<string>(_defaultsHandler.ActionPanelList.Select(item => item.GetDisplayName()));
-                offsetModifiedFocus = _defaultsHandler.ActionFocusNumber - _defaultsHandler.ActionPanelLineOffset * 2;
-            }
-            // In categories section
             else
             {
-                offsetModifiedNames = new List<string>(_defaultsHandler.ActionCategories.Select(array => array[0]));
-                offsetModifiedFocus = _defaultsHandler.CategoryFocusNumber - _defaultsHandler.CategoryLineOffset * 2;
+                actionOrDetailsPanel = _categoryPanel.Render();
             }
-            // Determines if there is an offset in the list; if so remove the offset items from the front of the list
-            if (offsetModifiedNames.Count > _actionPanel.MaxActionPanelItems + _defaultsHandler.ActionPanelLineOffset * 2)
-                offsetModifiedNames.RemoveRange(0, _defaultsHandler.ActionPanelLineOffset * 2);
-
-            var actionPanel = _actionPanel.Render(offsetModifiedNames, 
-                                                  _defaultsHandler.IsInActionPanel 
-                                                     || _defaultsHandler.IsInFormationPanel 
-                                                     || _defaultsHandler.IsInCategoryPanel,
-                                                  offsetModifiedFocus);
             
             var combatLogPanel = _combatLogPanel.Render();
 
             for (int i = 0; i < commandPanel.Count; i++)
             {
-                Console.WriteLine(commandPanel[i] + actionPanel[i] + detailsPanel[i] + combatLogPanel[i]);
+                Console.WriteLine(commandPanel[i] + actionOrDetailsPanel[i] + detailsPanel[i] + combatLogPanel[i]);
             }
         }
 
@@ -408,40 +500,25 @@ namespace TurnBasedRPG.UI.Combat
             // Display category information if in categories subpanel
             if (_defaultsHandler.IsInCategoryPanel)
             {
-                detailsPanel = _categoryDetailsPanel.RenderCategoryDetails(
-                                    _defaultsHandler.ActionCategories[_defaultsHandler.CategoryFocusNumber - 1]);
+                detailsPanel = _categoryDetailsPanel.Render();
             }
             // Display status details if currently in status panel
             else if (inStatusPanel)
             {
-                var data = _viewModelController.GetStatusViewData((Commands)_defaultsHandler.CommandFocusNumber,
-                                                                  _defaultsHandler.ActiveCategory,
-                                                                  _defaultsHandler.ActionFocusNumber - 1,
-                                                                  _currentStatusPanelIndex);
-
-                detailsPanel = _statusEffectsPanel.Render(data);
+                detailsPanel = _statusEffectsPanel.Render();
             }
             // Display action details if the current selection is an action
             else if ((_defaultsHandler.IsInActionPanel || _defaultsHandler.IsInFormationPanel) && !_defaultsHandler.IsInStatusCommand)
             {
-                var data = _viewModelController.GetActionViewData((Commands)_defaultsHandler.CommandFocusNumber, 
-                                                                  _defaultsHandler.ActiveCategory, 
-                                                                  _defaultsHandler.ActionFocusNumber - 1);
-
-                _canDisplayStatusPanel = data.StatusEffects.Any();
+                int statusCount = _defaultsHandler.ActionPanelList[_defaultsHandler.ActionFocusNumber - 1].GetStatusCount();
+                if (statusCount > 0)
+                    _canDisplayStatusPanel = true;
                 if (_canDisplayStatusPanel)
                 {
-                    _maxStatusPanels = data.StatusEffects.Count();
-                    _currentStatusPanelIndex = 0;
+                    _maxStatusPanels = statusCount;
+                    _statusEffectsPanel.FocusNumber = 1;
                 }
-
-
-                detailsPanel = _actionDetailsPanel.RenderActionDetails(
-                                                    _displayManager.GetActionFromCategory(
-                                                        (Commands)_defaultsHandler.CommandFocusNumber, 
-                                                        _defaultsHandler.ActiveCategory, 
-                                                        _defaultsHandler.ActionFocusNumber - 1),
-                                                    data);
+                detailsPanel = _actionDetailsPanel.Render();
             }
             else
             {
@@ -449,34 +526,6 @@ namespace TurnBasedRPG.UI.Combat
             }
 
             return detailsPanel;
-        }
-
-        /// <summary>
-        /// Returns a read-only list of string containing the target UI component.
-        /// </summary>
-        /// <returns>A read-only list of string containing the target UI component.</returns>
-        private IReadOnlyList<string> StartRenderTarget()
-        {
-            if (_defaultsHandler.IsInFormationPanel || !IsPlayerTurn)
-            {
-                IDisplayCharacter renderTarget = null;
-                // If there is a character in the player's default target position, render that target's details
-                if (_uiCharacterManager.Characters.Any(chr => chr.Position == _defaultsHandler.CurrentTargetPosition))
-                    renderTarget = _uiCharacterManager.GetCharacterFromPosition(_defaultsHandler.CurrentTargetPosition);
-                // Finds any character that is in the player's target list and render that target's details
-                else
-                {
-                    var targets = _defaultsHandler.CurrentTargetPositions;
-
-                    renderTarget = _uiCharacterManager.Characters.FirstOrDefault(chr => targets.Contains(chr.Position));
-                }
-                // If there are no characters that occupy the positions the player is targeting, render the active character's details
-                if (renderTarget == null) renderTarget = _uiCharacterManager.GetCharacterFromId(_defaultsHandler.ActiveCharacterId);
-
-                return _targetPanel.RenderTargetDetails(renderTarget);
-            }
-            else
-                return _targetPanel.RenderTargetDetails(_uiCharacterManager.GetCharacterFromId(_defaultsHandler.ActiveCharacterId));
         }
     }
 }

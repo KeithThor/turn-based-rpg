@@ -30,42 +30,26 @@ namespace TurnBasedRPG.UI.Combat
 
         public CombatUI(CombatController combatInstance,
                         UICharacterManager uiCharacterManager,
-                        GameUIConstants gameUIConstants)
+                        GameUIConstants gameUIConstants,
+                        UIContainer uiContainer,
+                        UserInput userInput,
+                        DefaultsHandler defaultsHandler,
+                        DisplayManager displayManager,
+                        CombatStateHandler combatStateHandler)
         {
             _combatInstance = combatInstance;
-            _displayManager = _combatInstance.DisplayManager;
-            _combatStateHandler = _combatInstance.CombatStateHandler;
+            _displayManager = displayManager;
+            _combatStateHandler = combatStateHandler;
+            _defaultsHandler = defaultsHandler;
 
             _uiCharacterManager = uiCharacterManager;
             _uiCharacterManager.Characters = _displayManager.GetDisplayCharacters();
             _uiCharacterManager.CurrentRoundOrderIds = _combatStateHandler.GetRoundOrderIds()[0];
             _uiCharacterManager.NextRoundOrderIds = _combatStateHandler.GetRoundOrderIds()[1];
 
-            _defaultsHandler = new DefaultsHandler(_combatStateHandler.GetPlayerCharacterIds())
-            {
-                ActiveCharacterId = _combatStateHandler.GetNextActivePlayerId()
-            };
+            _uiContainer = uiContainer;
 
-            _uiContainer = new UIContainer(new FormationPanel(),
-                                           new TargetPanel(),
-                                           new CommandPanel(),
-                                           new ActionPanel(),
-                                           new TurnOrderPanel(),
-                                           new ActionDetailsPanel(),
-                                           new CategoryDetailsPanel(),
-                                           new CombatLogPanel(),
-                                           new CharacterPanel(new StatsSubPanel(), new DamageTypesSubPanel(), new DamageTypesSubPanel(), new DamageTypesSubPanel(), new DamageTypesSubPanel(), new OffensiveSubPanel()),
-                                           new StatusEffectsPanel(),
-                                           _defaultsHandler,
-                                           _uiCharacterManager,
-                                           _combatInstance.ViewModelController,
-                                           _displayManager,
-                                           _combatStateHandler);
-
-            _userInput = new UserInput(_defaultsHandler,
-                                       _uiContainer,
-                                       _uiCharacterManager,
-                                       gameUIConstants);
+            _userInput = userInput;
 
             BindEvents();
             RefreshActionPanelList();
@@ -83,10 +67,10 @@ namespace TurnBasedRPG.UI.Combat
             _combatInstance.StartOfTurn += OnStartOfTurn;
             _combatInstance.StatusEffectsRemoved += _uiContainer.OnCombatLoggableEvent;
 
-            _userInput.ActionSelectedEvent += OnActionSelected;
-            _userInput.ActionStartedEvent += OnActionStarted;
-            _userInput.UpdateActionListEvent += OnUpdateActionList;
-            _userInput.UpdateCategoriesEvent += OnUpdateCategories;
+            _uiContainer.ActionSelectedEvent += OnActionSelected;
+            _uiContainer.ActionStartedEvent += OnActionStarted;
+            _uiContainer.UpdateActionListEvent += OnUpdateActionList;
+            _uiContainer.UpdateCategories += OnUpdateCategories;
 
             _combatInstance.EndOfTurn += EndOfTurnTriggered;
             _combatInstance.AIChoseTarget += OnAIChoseTarget;
@@ -101,6 +85,7 @@ namespace TurnBasedRPG.UI.Combat
         {
             _uiCharacterManager.CurrentRoundOrderIds = args.CurrentRoundOrderIds;
             _uiCharacterManager.NextRoundOrderIds = args.NextRoundOrderIds;
+            _defaultsHandler.IsInCommandPanel = true;
         }
 
         /// <summary>
@@ -116,6 +101,9 @@ namespace TurnBasedRPG.UI.Combat
             _defaultsHandler.IsInActionPanel = false;
             _defaultsHandler.IsInCategoryPanel = false;
             _defaultsHandler.IsInFormationPanel = false;
+            _defaultsHandler.IsInCharacterPanel = false;
+            _defaultsHandler.IsInCommandPanel = false;
+            _defaultsHandler.IsInStatusCommand = false;
             _defaultsHandler.CurrentTargetPositions = new List<int>();
 
             RefreshActionPanelList();
@@ -127,7 +115,7 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         private void RefreshActionPanelList()
         {
-            if (!_uiContainer.IsPlayerTurn)
+            if (!_combatStateHandler.IsPlayerTurn())
             {
                 _defaultsHandler.ActionPanelList = new List<IDisplayAction>();
                 _defaultsHandler.ActionPanelItemCount = 0;

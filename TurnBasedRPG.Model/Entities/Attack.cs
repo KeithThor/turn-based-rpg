@@ -36,5 +36,10 @@ namespace TurnBasedRPG.Model.Entities
         {
             return CenterOfTargetsPosition;
         }
+
+        public int GetStatusCount()
+        {
+            return BuffsToApply.Count();
+        }
     }
 }

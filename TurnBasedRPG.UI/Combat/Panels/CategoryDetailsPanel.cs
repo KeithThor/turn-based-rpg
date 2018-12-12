@@ -4,30 +4,35 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Shared;
+using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat.Panels
 {
-    public class CategoryDetailsPanel
+    public class CategoryDetailsPanel : IPanel
     {
         public int MaxWidth { get; set; }
         public int MaxHeight { get; set; }
 
-        public CategoryDetailsPanel()
+        public CategoryDetailsPanel(DefaultsHandler defaultsHandler)
         {
             MaxWidth = 55;
             MaxHeight = 16;
+            _defaultsHandler = defaultsHandler;
         }
 
         private string[] _cachedCategory = new string[] { "" };
         private IReadOnlyList<string> _cachedRender;
+        private readonly DefaultsHandler _defaultsHandler;
 
         /// <summary>
         /// Returns an details panel injected with a category name and it's description.
         /// </summary>
         /// <param name="category">A string array of 2 indeces, containing the category name and description.</param>
         /// <returns>A read-only list of string containing the details panel.</returns>
-        public IReadOnlyList<string> RenderCategoryDetails(string[] category)
+        public IReadOnlyList<string> Render()
         {
+            var category = _defaultsHandler.ActionCategories[_defaultsHandler.CategoryFocusNumber - 1];
+
             if (category == null) return RenderBlankPanel();
             if (category.SequenceEqual(_cachedCategory)) return _cachedRender;
             else _cachedCategory = category;

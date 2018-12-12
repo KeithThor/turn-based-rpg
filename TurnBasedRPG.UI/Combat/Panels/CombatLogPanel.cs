@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Shared;
+using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat.Panels
 {
     /// <summary>
     /// UI component responsible for rendering out a combat log panel that displays what happened in combat.
     /// </summary>
-    public class CombatLogPanel
+    public class CombatLogPanel : ICombatLogPanel
     {
         public int MaxHeight { get; set; }
         public int MaxWidth { get; set; }

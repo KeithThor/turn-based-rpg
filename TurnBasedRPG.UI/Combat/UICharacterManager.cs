@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Shared;
+using TurnBasedRPG.Shared.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat
 {
@@ -27,6 +28,15 @@ namespace TurnBasedRPG.UI.Combat
             if (target == null)
                 return null;
             return target;
+        }
+
+        /// <summary>
+        /// Retrieves all the characters currently in combat.
+        /// </summary>
+        /// <returns></returns>
+        public List<IDisplayCharacter> GetAllCharacters()
+        {
+            return new List<IDisplayCharacter>(Characters);
         }
 
         /// <summary>

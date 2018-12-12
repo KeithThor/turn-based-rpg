@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TurnBasedRPG.Shared.Combat;
 using TurnBasedRPG.Shared.Interfaces;
+using TurnBasedRPG.UI.Combat.EventArgs;
+using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat.Panels
 {
     // Handles the rendering of player and enemy formations in battle
-    public class FormationPanel
+    public class FormationPanel : IReceiveInputPanel
     {
         private const int _paddingLeft = 12;
         private const int _paddingMiddle = 18;
@@ -43,10 +46,21 @@ namespace TurnBasedRPG.UI.Combat.Panels
             }
         }
 
+        public bool IsActive
+        {
+            get { return _defaultsHandler.IsInFormationPanel; }
+            set { _defaultsHandler.IsInFormationPanel = value; }
+        }
+        public int FocusNumber { get; set; }
+
         /// <summary>
         /// The minimum possible height of the formation panel.
         /// </summary>
         public const int Min_Height = 18;
+        private readonly DefaultsHandler _defaultsHandler;
+        private readonly UICharacterManager _uiCharacterManager;
+
+        public event EventHandler<ActivePanelChangedEventArgs> ActivePanelChanged;
 
         private class CachedData
         {
@@ -63,18 +77,23 @@ namespace TurnBasedRPG.UI.Combat.Panels
             public int MaxHealth;
         }
 
-        public FormationPanel()
+        public FormationPanel(DefaultsHandler defaultsHandler,
+                              UICharacterManager uiCharacterManager)
         {
             TargetPositions = new List<int>();
             _characters = new List<IDisplayCharacter>();
             MaxWidth = 119;
             MaxHeight = 31;
+            _defaultsHandler = defaultsHandler;
+            _uiCharacterManager = uiCharacterManager;
         }
 
-        public IReadOnlyList<string> Render(IReadOnlyList<IDisplayCharacter> characters, 
-                                            int activeCharacterId,
-                                            IReadOnlyList<int> targets)
+        public IReadOnlyList<string> Render()
         {
+            var characters = _uiCharacterManager.GetAllCharacters();
+            int activeCharacterId = _defaultsHandler.ActiveCharacterId;
+            var targets = _defaultsHandler.CurrentTargetPositions;
+
             if (IsCachedData(characters, activeCharacterId, targets)) return _cachedRender;
             else
             {
@@ -416,6 +435,193 @@ namespace TurnBasedRPG.UI.Combat.Panels
                 }
             }
             return nameSB.ToString() + new string(' ', MaxWidth - nameSB.Length);
+        }
+
+        public void OnKeyPressed(object sender, KeyPressedEventArgs args)
+        {
+            if (IsActive)
+            {
+                switch (args.PressedKey.Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        OnUpArrowPressed();
+                        break;
+                    case ConsoleKey.DownArrow:
+                        OnDownArrowPressed();
+                        break;
+                    case ConsoleKey.LeftArrow:
+                        OnLeftArrowPressed();
+                        break;
+                    case ConsoleKey.RightArrow:
+                        OnRightArrowPressed();
+                        break;
+                    case ConsoleKey.Escape:
+                        ActivePanelChanged?.Invoke(this, new ActivePanelChangedEventArgs()
+                        {
+                            InActionPanel = true,
+                            InCategoryPanel = false,
+                            InCommandPanel = false,
+                            InFormationPanel = false
+                        });
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void OnUpArrowPressed()
+        {
+            bool isBlocked = IsUpArrowBlocked();
+
+            // If the player is in the formation panel and not in the top-most rows of the formations and upwards movement is not blocked
+            if (!isBlocked
+                && ((_defaultsHandler.CurrentTargetPosition > 3 && _defaultsHandler.CurrentTargetPosition <= 9)
+                   || _defaultsHandler.CurrentTargetPosition > 12))
+            {
+                ChangeFormationPanelFocus(-3);
+            }
+        }
+
+        private void OnDownArrowPressed()
+        {
+            // If the player is in the formation panel, check to see if downwards movement is blocked
+            bool isBlocked = IsDownArrowBlocked();
+            if (!isBlocked
+                && ((_defaultsHandler.CurrentTargetPosition <= 6 && _defaultsHandler.CurrentTargetPosition > 0)
+                    || (_defaultsHandler.CurrentTargetPosition <= 15 && _defaultsHandler.CurrentTargetPosition > 9)))
+            {
+                ChangeFormationPanelFocus(3);
+            }
+        }
+
+        private void OnRightArrowPressed()
+        {
+            bool isBlocked = IsRightArrowBlocked();
+
+            if (!isBlocked
+                && ((_defaultsHandler.CurrentTargetPosition % 3 != 0 && _defaultsHandler.CurrentTargetPosition >= 10)
+                    || _defaultsHandler.CurrentTargetPosition < 10))
+            {
+                // If the player is moving from the player's formation to the enemy's formation
+                if (_defaultsHandler.CurrentTargetPosition % 3 == 0 && _defaultsHandler.CurrentTargetPosition < 10)
+                    ChangeFormationPanelFocus(7);
+                else
+                    ChangeFormationPanelFocus(1);
+            }
+        }
+
+        private void OnLeftArrowPressed()
+        {
+            // If the player is in the formation panel, but not at the left-most column in the player's formation
+            if ((_defaultsHandler.CurrentTargetPosition % 3 != 1
+                    && _defaultsHandler.CurrentTargetPosition < 10)
+                    || _defaultsHandler.CurrentTargetPosition >= 10)
+            {
+                // If the player moves from the enemy's formation to the player's formation
+                if (_defaultsHandler.CurrentTargetPosition % 3 == 1 && _defaultsHandler.CurrentTargetPosition >= 10)
+                    ChangeFormationPanelFocus(-7);
+                else
+                    ChangeFormationPanelFocus(-1);
+            }
+        }
+        
+        /// <summary>
+        /// Checks to see if movement upward in the formation panel should be blocked based on the current position of the
+        /// player's target.
+        /// </summary>
+        /// <returns>Returns true if movement should be blocked.</returns>
+        private bool IsUpArrowBlocked()
+        {
+            bool isBlocked = !_defaultsHandler.ActiveAction.CanTargetThroughUnits;
+            // Action can only be blocked when not on the player's side of the field and not in the enemy's first column
+            isBlocked = isBlocked && _defaultsHandler.CurrentTargetPosition % 3 != 1 && _defaultsHandler.CurrentTargetPosition >= 10;
+            // If the target position is in the 3rd column, check if the 1st or 2nd column of the row is occupied, if so action is blocked
+            if (_defaultsHandler.CurrentTargetPosition % 3 == 0 && isBlocked)
+            {
+                if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition - 4, false))
+                    return true;
+                if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition - 5, false))
+                    return true;
+            }
+            else
+            {
+                // Action can only be blocked if there is a character in front of the spot the player is trying to reach
+                isBlocked = isBlocked
+                            && _uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition - 4, false);
+            }
+            return isBlocked;
+        }
+
+        /// <summary>
+        /// Returns true if an action cannot bypass a character blocking it's path downwards.
+        /// </summary>
+        /// <returns></returns>
+        private bool IsDownArrowBlocked()
+        {
+            bool isBlocked = !_defaultsHandler.ActiveAction.CanTargetThroughUnits;
+            // Action can only be blocked when not on the player's side of the field and not in the enemy's first column
+            isBlocked = isBlocked && _defaultsHandler.CurrentTargetPosition % 3 != 1 && _defaultsHandler.CurrentTargetPosition >= 10;
+            // If target position is on the last column, check for
+            if (_defaultsHandler.CurrentTargetPosition % 3 == 0 && isBlocked)
+            {
+                if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition + 2, false))
+                    isBlocked = false;
+
+                if (!isBlocked)
+                {
+                    if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition + 1, false))
+                        isBlocked = false;
+                }
+            }
+            else
+            {
+                var character = _uiCharacterManager.GetCharacterFromPosition(_defaultsHandler.CurrentTargetPosition + 2);
+                // Action can only be blocked if there is a character in front of the spot the player is trying to reach
+                isBlocked = isBlocked && !(character == null || character.CurrentHealth == 0);
+            }
+
+            return isBlocked;
+        }
+
+        /// <summary>
+        /// Returns true if an action cannot bypass a character blocking its path to the right.
+        /// </summary>
+        /// <returns></returns>
+        private bool IsRightArrowBlocked()
+        {
+            if (_defaultsHandler.ActiveAction.CanTargetThroughUnits) return false;
+
+            // Don't block any actions from the player's field
+            if (_defaultsHandler.CurrentTargetPosition <= 9) return false;
+
+            var character = _uiCharacterManager.GetCharacterFromPosition(_defaultsHandler.CurrentTargetPosition);
+            // If there is no character or a dead character in that position, the target is not blocked
+            if (character == null || character.CurrentHealth == 0) return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Changes the focus target in the formation panel.
+        /// </summary>
+        /// <param name="changeAmount">The amount to change the focus target by.</param>
+        private void ChangeFormationPanelFocus(int changeAmount)
+        {
+            if (_defaultsHandler.IsInFormationPanel && changeAmount != 0)
+            {
+                _defaultsHandler.CurrentTargetPosition += changeAmount;
+                if (_defaultsHandler.CurrentTargetPosition < 1) _defaultsHandler.CurrentTargetPosition = 1;
+                if (_defaultsHandler.CurrentTargetPosition > 18) _defaultsHandler.CurrentTargetPosition = 18;
+
+                var targetPositions = CombatTargeter.GetTranslatedTargetPositions(_defaultsHandler.ActiveAction.TargetPositions,
+                                                                                _defaultsHandler.ActiveAction.CenterOfTargets,
+                                                                                _defaultsHandler.ActiveAction.CanSwitchTargetPosition
+                                                                                    || RenderFocus,
+                                                                                _defaultsHandler.CurrentTargetPosition);
+
+                _defaultsHandler.CurrentTargetPositions = targetPositions;
+            }
         }
     }
 }

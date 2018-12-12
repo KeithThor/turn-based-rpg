@@ -12,7 +12,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
     /// <summary>
     /// Panel responsible for rendering the amount of armor a character has of all types.
     /// </summary>
-    public class DamageTypesSubPanel : IReceiveInputPanel
+    public class DamageTypesSubPanel
     {
         public bool IsActive { get; set; }
         public int FocusNumber { get; set; }

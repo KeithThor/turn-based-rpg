@@ -40,8 +40,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Combat\EventArgs\ActionChangedEventArgs.cs" />
     <Compile Include="Combat\EventArgs\ActivePanelChangedEventArgs.cs" />
+    <Compile Include="Combat\EventArgs\CategoryChangedEventArgs.cs" />
+    <Compile Include="Combat\EventArgs\CommandFocusChangedEventArgs.cs" />
+    <Compile Include="Combat\Interfaces\IActionPanel.cs" />
+    <Compile Include="Combat\Interfaces\ICategoryPanel.cs" />
+    <Compile Include="Combat\Interfaces\ICombatLogPanel.cs" />
+    <Compile Include="Combat\Interfaces\IPanel.cs" />
     <Compile Include="Combat\Panels\ActionDetailsPanel.cs" />
+    <Compile Include="Combat\Panels\CategoryPanel.cs" />
     <Compile Include="Combat\Panels\DamageTypesSubPanel.cs" />
     <Compile Include="Combat\Panels\CategoryDetailsPanel.cs" />
     <Compile Include="Combat\Panels\CombatLogPanel.cs" />

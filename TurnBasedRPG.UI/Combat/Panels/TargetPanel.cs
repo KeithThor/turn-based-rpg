@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TurnBasedRPG.Controller.Combat;
 using TurnBasedRPG.Shared.Interfaces;
+using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat.Panels
 {
@@ -11,7 +13,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
     /// UI component that is responsible for rendering a target's name and
     /// a health bar that shows a target's current health.
     /// </summary>
-    public class TargetPanel
+    public class TargetPanel : IPanel
     {
         private int _maxWidth = 42;
         /// <summary>
@@ -41,14 +43,24 @@ namespace TurnBasedRPG.UI.Combat.Panels
             }
         }
         public int MaxDetailsLength { get; set; } = 32;
+        public int MaxHeight { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public TargetPanel()
+        public TargetPanel(DefaultsHandler defaultsHandler,
+                           UICharacterManager uiCharacterManager,
+                           CombatStateHandler combatStateHandler)
         {
             _widthOfHealthBar = _maxWidth - 2;
+            _defaultsHandler = defaultsHandler;
+            _uiCharacterManager = uiCharacterManager;
+            _combatStateHandler = combatStateHandler;
         }
 
         private IReadOnlyList<string> _cachedRender;
         private CachedData _cachedData;
+        private readonly DefaultsHandler _defaultsHandler;
+        private readonly UICharacterManager _uiCharacterManager;
+        private readonly CombatStateHandler _combatStateHandler;
+
         private class CachedData
         {
             public int Id;
@@ -60,10 +72,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// Creates and returns a list of string that represents the targetUI component with a target's
         /// details and a healthbar.
         /// </summary>
-        /// <param name="target">The character whose details should be displayed.</param>
         /// <returns>A read-only list of string that represents the targetUI component.</returns>
-        public IReadOnlyList<string> RenderTargetDetails(IDisplayCharacter target)
+        public IReadOnlyList<string> Render()
         {
+            var target = GetTarget();
+
             if (IsCacheData(target)) return _cachedRender;
             else
             {
@@ -114,6 +127,30 @@ namespace TurnBasedRPG.UI.Combat.Panels
             if (character.MaxHealth != _cachedData.MaxHealth) return false;
 
             return true;
+        }
+
+        private IDisplayCharacter GetTarget()
+        {
+            if (_defaultsHandler.IsInFormationPanel || !_combatStateHandler.IsPlayerTurn())
+            {
+                IDisplayCharacter renderTarget = null;
+                // If there is a character in the player's default target position, render that target's details
+                if (_uiCharacterManager.Characters.Any(chr => chr.Position == _defaultsHandler.CurrentTargetPosition))
+                    renderTarget = _uiCharacterManager.GetCharacterFromPosition(_defaultsHandler.CurrentTargetPosition);
+                // Finds any character that is in the player's target list and render that target's details
+                else
+                {
+                    var targets = _defaultsHandler.CurrentTargetPositions;
+
+                    renderTarget = _uiCharacterManager.Characters.FirstOrDefault(chr => targets.Contains(chr.Position));
+                }
+                // If there are no characters that occupy the positions the player is targeting, render the active character's details
+                if (renderTarget == null) renderTarget = _uiCharacterManager.GetCharacterFromId(_defaultsHandler.ActiveCharacterId);
+
+                return renderTarget;
+            }
+            else
+                return _uiCharacterManager.GetCharacterFromId(_defaultsHandler.ActiveCharacterId);
         }
     }
 }

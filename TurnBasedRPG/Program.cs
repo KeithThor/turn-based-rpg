@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBasedRPG.Core;
 using TurnBasedRPG.Model.Repository;
+using static TurnBasedRPG.Bindings;
 
 namespace TurnBasedRPG
 {
@@ -19,7 +20,7 @@ namespace TurnBasedRPG
         {
             var kernel = new StandardKernel();
             kernel.Load(Assembly.GetExecutingAssembly());
-
+            ProcessingScope.Current = new ScopeObject();
             Game game = kernel.Get<Game>();
 
             game.Start();

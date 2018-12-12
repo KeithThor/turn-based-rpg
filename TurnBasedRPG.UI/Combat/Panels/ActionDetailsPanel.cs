@@ -3,27 +3,42 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TurnBasedRPG.Controller;
+using TurnBasedRPG.Controller.Combat;
 using TurnBasedRPG.Shared;
+using TurnBasedRPG.Shared.Enums;
 using TurnBasedRPG.Shared.Interfaces;
 using TurnBasedRPG.Shared.Viewmodel;
+using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat.Panels
 {
-    public class ActionDetailsPanel
+    public class ActionDetailsPanel : IPanel
     {
         public int MaxWidth { get; set; }
         public int MaxHeight { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsActive
+        {
+            get { return _defaultsHandler.IsInActionPanel; }
+        }
 
-        public ActionDetailsPanel()
+        public ActionDetailsPanel(ViewModelController viewModelController,
+                                  DisplayManager displayManager,
+                                  DefaultsHandler defaultsHandler)
         {
             MaxWidth = 55;
             MaxHeight = 16;
+            _viewModelController = viewModelController;
+            _displayManager = displayManager;
+            _defaultsHandler = defaultsHandler;
         }
 
         private int _cachedActionId = 0;
         private ActionData _cachedActionData;
         private IReadOnlyList<string> _cachedRender;
+        private readonly ViewModelController _viewModelController;
+        private readonly DisplayManager _displayManager;
+        private readonly DefaultsHandler _defaultsHandler;
 
         /// <summary>
         /// Returns a read-only list containing the information panel injected with data from the a
@@ -32,8 +47,16 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// <param name="action">The action to display in the information panel.</param>
         /// <param name="data">The data of the action to display.</param>
         /// <returns>A read-only list containing the information panel.</returns>
-        public IReadOnlyList<string> RenderActionDetails(IDisplayAction action, ActionData data)
+        public IReadOnlyList<string> Render()
         {
+            var action = _displayManager.GetActionFromCategory((Commands)_defaultsHandler.CommandFocusNumber,
+                                                               _defaultsHandler.ActiveCategory,
+                                                               _defaultsHandler.ActionFocusNumber - 1);
+
+            var data = _viewModelController.GetActionViewData((Commands)_defaultsHandler.CommandFocusNumber,
+                                                              _defaultsHandler.ActiveCategory,
+                                                              _defaultsHandler.ActionFocusNumber - 1);
+
             if (action == null) return RenderBlankPanel();
 
             // If data is the same as previous render, use cached render instead of rerendering

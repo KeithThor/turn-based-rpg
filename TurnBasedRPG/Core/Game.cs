@@ -12,16 +12,13 @@ namespace TurnBasedRPG.Core
     public class Game
     {
         public bool ShutdownTriggered { get; set; }
-        private GameUIConstants UIInstance { get; set; }
-        private CombatUI _combatUI;
+        private readonly GameUIConstants _gameUIConstants;
+        private readonly CombatUI _combatUI;
 
-        private List<Character> PlayerCharacters { get; set; }
-        private List<Character> EnemyCharacters { get; set; }
-
-        public Game(GameUIConstants uiInstance, CombatUI combatUI)
+        public Game(GameUIConstants gameUIConstants, CombatUI combatUI)
         {
             ShutdownTriggered = false;
-            UIInstance = uiInstance;
+            _gameUIConstants = gameUIConstants;
             _combatUI = combatUI;
             }
 

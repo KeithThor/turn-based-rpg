@@ -47,5 +47,10 @@ namespace TurnBasedRPG.Model.Entities
         {
             return Name;
         }
+
+        public int GetStatusCount()
+        {
+            return ItemSpell.BuffsToApply.Count();
+        }
     }
 }

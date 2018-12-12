@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TurnBasedRPG.Controller.Combat;
 using TurnBasedRPG.Shared.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat
@@ -13,8 +14,10 @@ namespace TurnBasedRPG.UI.Combat
     /// </summary>
     public class DefaultsHandler
     {
-        public DefaultsHandler(IEnumerable<int> playerCharacterIds)
+        public DefaultsHandler(CombatStateHandler combatStateHandler)
         {
+            var playerCharacterIds = combatStateHandler.GetPlayerCharacterIds();
+            ActiveCharacterId = combatStateHandler.GetNextActivePlayerId();
             _characterDefaults = new Dictionary<int, PlayerCharacterDefaults>();
             foreach (var characterId in playerCharacterIds)
             {
@@ -84,6 +87,8 @@ namespace TurnBasedRPG.UI.Combat
 
         // Keeps default settings for each individual character player so that on consecutive turns, a character retains its last used action
         private Dictionary<int, PlayerCharacterDefaults> _characterDefaults;
+
+        public bool IsInCommandPanel { get; set; }
 
         /// <summary>
         /// Gets or sets whether the player is in the action panel.
@@ -165,24 +170,22 @@ namespace TurnBasedRPG.UI.Combat
             set
             {
                 if (_characterDefaults.ContainsKey(ActiveCharacterId))
+                {
                     _characterDefaults[ActiveCharacterId].GetSubPanelDefaults().CategoryFocusNumber = value;
+                    ActionFocusNumber = 1;
+                }
             }
         }
 
         /// <summary>
-        /// Gets or sets the number of categories that exist in the active action type for the currently active character.
+        /// Gets the number of categories that exist in the active action type for the currently active character.
         /// </summary>
         public int CategoryItemCount
         {
             get
             {
                 if (!_characterDefaults.ContainsKey(ActiveCharacterId)) return 0;
-                return _characterDefaults[ActiveCharacterId].GetSubPanelDefaults().CategoryItemCount;
-            }
-            set
-            {
-                if (_characterDefaults.ContainsKey(ActiveCharacterId))
-                    _characterDefaults[ActiveCharacterId].GetSubPanelDefaults().CategoryItemCount = value;
+                return _characterDefaults[ActiveCharacterId].ActiveCategories[0].Count();
             }
         }
 
@@ -312,7 +315,6 @@ namespace TurnBasedRPG.UI.Combat
                 if (_characterDefaults.ContainsKey(ActiveCharacterId))
                 {
                     _characterDefaults[ActiveCharacterId].ActiveCategories = value;
-                    CategoryItemCount = ActionCategories.Count();
                 }
             }
         }

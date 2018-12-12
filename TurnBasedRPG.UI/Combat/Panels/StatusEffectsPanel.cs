@@ -3,23 +3,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TurnBasedRPG.Controller;
 using TurnBasedRPG.Shared;
+using TurnBasedRPG.Shared.Enums;
 using TurnBasedRPG.Shared.Viewmodel;
+using TurnBasedRPG.UI.Combat.EventArgs;
+using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat.Panels
 {
     /// <summary>
     /// Panel responsible for rendering details for a status effect
     /// </summary>
-    public class StatusEffectsPanel
+    public class StatusEffectsPanel : IReceiveInputPanel
     {
+        private readonly ViewModelController _viewModelController;
+        private readonly DefaultsHandler _defaultsHandler;
+
+        public event EventHandler<ActivePanelChangedEventArgs> ActivePanelChanged;
+
         public int MaxHeight { get; set; }
         public int MaxWidth { get; set; }
+        public bool IsActive { get; set; }
+        public int FocusNumber { get; set; }
+        private int _maxFocusNumber;
 
-        public StatusEffectsPanel()
+        public StatusEffectsPanel(ViewModelController viewModelController,
+                                  DefaultsHandler defaultsHandler)
         {
             MaxWidth = 55;
             MaxHeight = 16;
+            _viewModelController = viewModelController;
+            _defaultsHandler = defaultsHandler;
+            _maxFocusNumber = 1;
+            FocusNumber = 1;
         }
 
         /// <summary>
@@ -27,8 +44,18 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// </summary>
         /// <param name="data">The status data to use to fill the status effects panel.</param>
         /// <returns>A list of string containing the rendering of the status effects panel.</returns>
-        public IReadOnlyList<string> Render(StatusData data)
+        public IReadOnlyList<string> Render()
         {
+            var action = _viewModelController.GetActionViewData((Commands)_defaultsHandler.CommandFocusNumber,
+                                                                 _defaultsHandler.ActiveCategory,
+                                                                 _defaultsHandler.ActionFocusNumber - 1);
+            _maxFocusNumber = action.StatusEffects.Count();
+
+            var data = _viewModelController.GetStatusViewData((Commands)_defaultsHandler.CommandFocusNumber,
+                                                                  _defaultsHandler.ActiveCategory,
+                                                                  _defaultsHandler.ActionFocusNumber - 1,
+                                                                  FocusNumber - 1);
+
             var render = new List<string>();
 
             string navTriangle = "Tab ► ";
@@ -154,6 +181,31 @@ namespace TurnBasedRPG.UI.Combat.Panels
             render.Add("║" + new string(' ', MaxWidth - 2) + "║");
 
             return render;
+        }
+
+        public void OnKeyPressed(object sender, KeyPressedEventArgs args)
+        {
+            if (IsActive)
+            {
+                switch(args.PressedKey.Key)
+                {
+                    case ConsoleKey.Tab:
+                        SwitchFocus();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void SwitchFocus()
+        {
+            FocusNumber++;
+            if (FocusNumber > _maxFocusNumber)
+            {
+                FocusNumber = 1;
+                IsActive = false;
+            }
         }
     }
 }

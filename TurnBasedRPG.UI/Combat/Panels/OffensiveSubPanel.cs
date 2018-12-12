@@ -9,7 +9,7 @@ using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat.Panels
 {
-    public class OffensiveSubPanel : IReceiveInputPanel
+    public class OffensiveSubPanel
     {
         public bool IsActive { get; set; }
         public int FocusNumber { get; set; }
