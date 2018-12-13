@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TurnBasedRPG.Shared.Combat;
-using TurnBasedRPG.Shared.Enums;
 using TurnBasedRPG.UI.Combat.EventArgs;
+using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat
 {
@@ -14,14 +9,14 @@ namespace TurnBasedRPG.UI.Combat
     /// </summary>
     public class UserInput
     {
-        private readonly DefaultsHandler _defaultsHandler;
-        private readonly UIContainer _uiContainer;
-        private readonly UICharacterManager _uiCharacterManager;
+        private readonly IUIStateTracker _defaultsHandler;
+        private readonly IUIContainer _uiContainer;
+        private readonly IUICharacterManager _uiCharacterManager;
         private readonly GameUIConstants _gameUIConstants;
 
-        public UserInput(DefaultsHandler defaultsHandler,
-                         UIContainer uiContainer,
-                         UICharacterManager uiCharacterManager,
+        public UserInput(IUIStateTracker defaultsHandler,
+                         IUIContainer uiContainer,
+                         IUICharacterManager uiCharacterManager,
                          GameUIConstants gameUIConstants)
         {
             _defaultsHandler = defaultsHandler;
@@ -34,7 +29,7 @@ namespace TurnBasedRPG.UI.Combat
         
         private void BindEvents()
         {
-            _uiContainer.RegisterKeyPressEvent(ref KeyPressEvent);
+            KeyPressEvent += _uiContainer.OnKeyPressed;
         }
 
         /// <summary>

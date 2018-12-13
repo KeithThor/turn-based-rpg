@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TurnBasedRPG.Controller.Combat.Interfaces;
 using TurnBasedRPG.Controller.EventArgs;
 using TurnBasedRPG.Model.Entities;
 
@@ -11,34 +12,34 @@ namespace TurnBasedRPG.Controller.Combat
     /// <summary>
     /// Class responsible for handling the current state of combat.
     /// </summary>
-    public class CombatStateHandler
+    public class CombatStateHandler : IDisplayCombatState
     {
         /// <summary>
         /// Contains all characters currently in combat, including dead characters.
         /// </summary>
-        internal List<Character> AllCharacters;
+        internal List<Character> AllCharacters { get; private set; }
 
         /// <summary>
         /// Contains all player characters currently in combat, including dead characters.
         /// </summary>
-        internal List<Character> PlayerCharacters;
+        internal List<Character> PlayerCharacters { get; private set; }
 
         /// <summary>
         /// Contains all enemy ai characters currently in combat, including dead characters.
         /// </summary>
-        internal List<Character> EnemyCharacters;
+        internal List<Character> EnemyCharacters { get; private set; }
 
         /// <summary>
         /// Contains all the characters that still have a turn in the current round, sorted from characters performing their
         /// turns first to last.
         /// </summary>
-        internal List<Character> CurrentRoundOrder;
+        internal List<Character> CurrentRoundOrder { get; private set; }
 
         /// <summary>
         /// Contains all the characters that still have a turn in the next round, sorted from characters performing their
         /// turns first to last.
         /// </summary>
-        internal List<Character> NextRoundOrder;
+        internal List<Character> NextRoundOrder { get; private set; }
 
         /// <summary>
         /// The starting index of all characters waiting until the end of the round to act.
@@ -130,7 +131,7 @@ namespace TurnBasedRPG.Controller.Combat
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
-        public void OnCharacterSpeedChanged(object sender, CharacterSpeedChangedEventArgs args)
+        internal void OnCharacterSpeedChanged(object sender, CharacterSpeedChangedEventArgs args)
         {
             int speedChange = args.SpeedChange;
             ChangeRoundOrder(args.CharacterId, CurrentRoundOrder, speedChange);

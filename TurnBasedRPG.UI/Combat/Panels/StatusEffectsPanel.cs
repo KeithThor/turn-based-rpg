@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TurnBasedRPG.Controller;
+using TurnBasedRPG.Controller.Interfaces;
 using TurnBasedRPG.Shared;
 using TurnBasedRPG.Shared.Enums;
 using TurnBasedRPG.Shared.Viewmodel;
@@ -15,12 +13,10 @@ namespace TurnBasedRPG.UI.Combat.Panels
     /// <summary>
     /// Panel responsible for rendering details for a status effect
     /// </summary>
-    public class StatusEffectsPanel : IReceiveInputPanel
+    public class StatusEffectsPanel : IStatusEffectsPanel
     {
-        private readonly ViewModelController _viewModelController;
-        private readonly DefaultsHandler _defaultsHandler;
-
-        public event EventHandler<ActivePanelChangedEventArgs> ActivePanelChanged;
+        private readonly IViewModelController _viewModelController;
+        private readonly IUIStateTracker _defaultsHandler;
 
         public int MaxHeight { get; set; }
         public int MaxWidth { get; set; }
@@ -28,8 +24,8 @@ namespace TurnBasedRPG.UI.Combat.Panels
         public int FocusNumber { get; set; }
         private int _maxFocusNumber;
 
-        public StatusEffectsPanel(ViewModelController viewModelController,
-                                  DefaultsHandler defaultsHandler)
+        public StatusEffectsPanel(IViewModelController viewModelController,
+                                  IUIStateTracker defaultsHandler)
         {
             MaxWidth = 55;
             MaxHeight = 16;
@@ -183,6 +179,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return render;
         }
 
+        /// <summary>
+        /// Handles key press events if the panel is active.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         public void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
             if (IsActive)
@@ -198,6 +199,9 @@ namespace TurnBasedRPG.UI.Combat.Panels
             }
         }
 
+        /// <summary>
+        /// Handles switching focus number.
+        /// </summary>
         private void SwitchFocus()
         {
             FocusNumber++;

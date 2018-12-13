@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TurnBasedRPG.UI.Combat.EventArgs;
 using TurnBasedRPG.UI.Combat.Interfaces;
 
@@ -30,40 +28,54 @@ namespace TurnBasedRPG.UI.Combat.Panels
                     _maxWidth = value;
             }
         }
-        public int MaxActionNameLength { get; set; } = 20;
-        public int MaxHeight { get; set; } = 16;
+        public int MaxActionNameLength { get; set; }
+        public int MaxHeight { get; set; }
+        private readonly IUIStateTracker _defaultsHandler;
+        private int _lineOffset;
 
         public int MaxActionPanelItems
         {
             get { return MaxHeight - 2; }
         }
-        public int MaxActionsPerLine { get; set; } = 2;
+
+        /// <summary>
+        /// Gets or sets the maximum number of actions that can be rendered per line.
+        /// </summary>
+        public int MaxActionsPerLine { get; set; }
+
+        /// <summary>
+        /// Whether or not the panel is active. Controls if the panel should consume input and render focus triangles.
+        /// </summary>
         public bool IsActive
         {
             get { return _defaultsHandler.IsInActionPanel; }
             set { _defaultsHandler.IsInActionPanel = value; }
         }
+
+        /// <summary>
+        /// Represents the number one-based index of the action the player is currently focused on.
+        /// </summary>
         public int FocusNumber
         {
             get { return _defaultsHandler.ActionFocusNumber; }
             set { _defaultsHandler.ActionFocusNumber = value; }
         }
 
-        public ActionPanel(DefaultsHandler defaultsHandler)
+        public ActionPanel(IUIStateTracker defaultsHandler)
         {
             _defaultsHandler = defaultsHandler;
             _lineOffset = 0;
             FocusNumber = 1;
+            MaxHeight = 16;
+            MaxActionNameLength = 20;
+            MaxActionsPerLine = 2;
         }
 
+        // Cache variables
         private IReadOnlyList<string> _cachedNames = new List<string>();
         private bool _cachedFocus;
         private int _cachedFocusNumber;
         private IReadOnlyList<string> _cachedRender;
-        private readonly DefaultsHandler _defaultsHandler;
-        private int _lineOffset;
-
-        public event EventHandler<ActionChangedEventArgs> ActionChanged;
 
         /// <summary>
         /// Renders an action panel filled with the names of the available actions a character can take.
@@ -125,7 +137,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
         }
 
         /// <summary>
-        /// Renders a single  action name along with a focus triangle if it is focused by the player
+        /// Renders a single action name along with a focus triangle if it is focused by the player
         /// </summary>
         /// <param name="name">The name of the action to render.</param>
         /// <param name="isFocus">Whether or not this action is the focus.</param>
@@ -139,6 +151,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return focus + name + new string(' ', spaces);
         }
 
+        /// <summary>
+        /// Handles input whenever a key is pressed by the player and the panel is active.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         public void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
             if (IsActive)
@@ -175,10 +192,6 @@ namespace TurnBasedRPG.UI.Combat.Panels
                 {
                     _lineOffset--;
                 }
-                ActionChanged?.Invoke(this, new ActionChangedEventArgs()
-                {
-                    FocusNumber = FocusNumber
-                });
             }
         }
 
@@ -194,10 +207,6 @@ namespace TurnBasedRPG.UI.Combat.Panels
                 {
                     _lineOffset++;
                 }
-                ActionChanged?.Invoke(this, new ActionChangedEventArgs()
-                {
-                    FocusNumber = FocusNumber
-                });
             }
         }
 
@@ -209,10 +218,6 @@ namespace TurnBasedRPG.UI.Combat.Panels
             if (FocusNumber % 2 == 1 && FocusNumber <= _defaultsHandler.ActionPanelList.Count() - 1)
             {
                 FocusNumber++;
-                ActionChanged?.Invoke(this, new ActionChangedEventArgs()
-                {
-                    FocusNumber = FocusNumber
-                });
             }
         }
 
@@ -224,10 +229,6 @@ namespace TurnBasedRPG.UI.Combat.Panels
             if (FocusNumber % 2 == 0)
             {
                 FocusNumber--;
-                ActionChanged?.Invoke(this, new ActionChangedEventArgs()
-                {
-                    FocusNumber = FocusNumber
-                });
             }
         }
     }

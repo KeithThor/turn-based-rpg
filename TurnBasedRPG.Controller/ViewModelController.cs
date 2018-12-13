@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TurnBasedRPG.Controller.Combat;
+using TurnBasedRPG.Controller.Interfaces;
 using TurnBasedRPG.Model.Entities;
 using TurnBasedRPG.Shared;
 using TurnBasedRPG.Shared.Enums;
@@ -14,7 +12,7 @@ namespace TurnBasedRPG.Controller
     /// <summary>
     /// Controller responsible for constructing view model data.
     /// </summary>
-    public class ViewModelController
+    public class ViewModelController : IViewModelController
     {
         private readonly DisplayManager _displayManager;
         private readonly CombatStateHandler _combatStateHandler;

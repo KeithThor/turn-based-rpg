@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TurnBasedRPG.Controller.Combat.Interfaces;
 using TurnBasedRPG.Model.Entities;
 using TurnBasedRPG.Shared;
 using TurnBasedRPG.Shared.Enums;
@@ -13,7 +11,7 @@ namespace TurnBasedRPG.Controller.Combat
     /// <summary>
     /// Class responsible for handling the retrieval of display data.
     /// </summary>
-    public class DisplayManager
+    public class DisplayManager : IDisplayManager
     {
         private readonly CombatStateHandler _combatStateHandler;
         private readonly DisplayCharacterFactory _displayCharacterFactory;

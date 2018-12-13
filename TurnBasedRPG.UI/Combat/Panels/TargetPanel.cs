@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using TurnBasedRPG.Controller.Combat;
+using TurnBasedRPG.Controller.Combat.Interfaces;
 using TurnBasedRPG.Shared.Interfaces;
 using TurnBasedRPG.UI.Combat.Interfaces;
 
@@ -13,7 +11,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
     /// UI component that is responsible for rendering a target's name and
     /// a health bar that shows a target's current health.
     /// </summary>
-    public class TargetPanel : IPanel
+    public class TargetPanel : ITargetPanel
     {
         private int _maxWidth = 42;
         /// <summary>
@@ -43,11 +41,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
             }
         }
         public int MaxDetailsLength { get; set; } = 32;
-        public int MaxHeight { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public int MaxHeight { get; set; }
 
-        public TargetPanel(DefaultsHandler defaultsHandler,
-                           UICharacterManager uiCharacterManager,
-                           CombatStateHandler combatStateHandler)
+        public TargetPanel(IUIStateTracker defaultsHandler,
+                           IUICharacterManager uiCharacterManager,
+                           IDisplayCombatState combatStateHandler)
         {
             _widthOfHealthBar = _maxWidth - 2;
             _defaultsHandler = defaultsHandler;
@@ -57,9 +55,9 @@ namespace TurnBasedRPG.UI.Combat.Panels
 
         private IReadOnlyList<string> _cachedRender;
         private CachedData _cachedData;
-        private readonly DefaultsHandler _defaultsHandler;
-        private readonly UICharacterManager _uiCharacterManager;
-        private readonly CombatStateHandler _combatStateHandler;
+        private readonly IUIStateTracker _defaultsHandler;
+        private readonly IUICharacterManager _uiCharacterManager;
+        private readonly IDisplayCombatState _combatStateHandler;
 
         private class CachedData
         {
@@ -76,6 +74,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
         public IReadOnlyList<string> Render()
         {
             var target = GetTarget();
+            if (target == null) throw new System.NullReferenceException("No target to render in target panel!");
 
             if (IsCacheData(target)) return _cachedRender;
             else
@@ -129,6 +128,10 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return true;
         }
 
+        /// <summary>
+        /// Gets the target to render in the target panel depending on which panel is active and where the target position is.
+        /// </summary>
+        /// <returns></returns>
         private IDisplayCharacter GetTarget()
         {
             if (_defaultsHandler.IsInFormationPanel || !_combatStateHandler.IsPlayerTurn())

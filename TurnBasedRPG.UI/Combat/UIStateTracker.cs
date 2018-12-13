@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TurnBasedRPG.Controller.Combat;
 using TurnBasedRPG.Shared.Interfaces;
+using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat
 {
@@ -12,9 +11,9 @@ namespace TurnBasedRPG.UI.Combat
     /// Contains properties used to access information about previously used actions and positions
     /// of the player for each character.
     /// </summary>
-    public class DefaultsHandler
+    public class UIStateTracker : IUIStateTracker
     {
-        public DefaultsHandler(CombatStateHandler combatStateHandler)
+        public UIStateTracker(CombatStateHandler combatStateHandler)
         {
             var playerCharacterIds = combatStateHandler.GetPlayerCharacterIds();
             ActiveCharacterId = combatStateHandler.GetNextActivePlayerId();
@@ -110,25 +109,10 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         public bool IsInCharacterPanel { get; set; }
 
-        private bool isInFormationPanel;
-
         /// <summary>
         /// Gets or sets whether the player is in the formation panel.
         /// </summary>
-        public bool IsInFormationPanel
-        {
-            get { return isInFormationPanel; }
-            set
-            {
-                isInFormationPanel = value;
-                InFormationPanelChanged?.Invoke(this, new System.EventArgs());
-            }
-        }
-
-        /// <summary>
-        /// Called whenever the player enters or exits the formation panel.
-        /// </summary>
-        public EventHandler<System.EventArgs> InFormationPanelChanged;
+        public bool IsInFormationPanel { get; set; }
 
         /// <summary>
         /// Gets or sets the Id of the currently active character.

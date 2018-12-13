@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TurnBasedRPG.Shared.Interfaces;
 using TurnBasedRPG.UI.Combat.EventArgs;
 using TurnBasedRPG.UI.Combat.Interfaces;
@@ -12,7 +9,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
     /// <summary>
     /// Panel responsible for rendering the amount of stats a character has for all stats.
     /// </summary>
-    public class StatsSubPanel
+    public class StatsSubPanel : IStatsSubPanel
     {
         public bool IsActive { get; set; }
         public int FocusNumber { get; set; }

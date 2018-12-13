@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TurnBasedRPG.Shared.Interfaces;
 using TurnBasedRPG.UI.Combat.EventArgs;
 using TurnBasedRPG.UI.Combat.Interfaces;
@@ -12,7 +10,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
     /// <summary>
     /// Panel responsible for displaying character data in the UI.
     /// </summary>
-    public class CharacterPanel : IReceiveInputPanel
+    public class CharacterPanel : ICharacterPanel
     {
         /// <summary>
         /// The minimum possible height of the formation panel.
@@ -35,23 +33,23 @@ namespace TurnBasedRPG.UI.Combat.Panels
         public bool IsActive { get; set; }
         public int FocusNumber { get; set; }
 
-        private readonly StatsSubPanel _statsSubPanel;
-        private readonly DamageTypesSubPanel _armorSubPanel;
-        private readonly DamageTypesSubPanel _damageSubPanel;
-        private readonly DamageTypesSubPanel _resistanceSubPanel;
-        private readonly DamageTypesSubPanel _damagePercentSubPanel;
-        private readonly OffensiveSubPanel _offensiveSubPanel;
-        private readonly DefaultsHandler _defaultsHandler;
-        private readonly UICharacterManager _uiCharacterManager;
+        private readonly IStatsSubPanel _statsSubPanel;
+        private readonly IDamageTypesSubPanel _armorSubPanel;
+        private readonly IDamageTypesSubPanel _damageSubPanel;
+        private readonly IDamageTypesSubPanel _resistanceSubPanel;
+        private readonly IDamageTypesSubPanel _damagePercentSubPanel;
+        private readonly IOffensiveSubPanel _offensiveSubPanel;
+        private readonly IUIStateTracker _defaultsHandler;
+        private readonly IUICharacterManager _uiCharacterManager;
 
-        public CharacterPanel(StatsSubPanel statsSubPanel,
-                              DamageTypesSubPanel armorSubPanel,
-                              DamageTypesSubPanel damageSubPanel,
-                              DamageTypesSubPanel resistanceSubPanel,
-                              DamageTypesSubPanel damagePercentSubPanel,
-                              OffensiveSubPanel offensiveSubPanel,
-                              DefaultsHandler defaultsHandler,
-                              UICharacterManager uiCharacterManager)
+        public CharacterPanel(IStatsSubPanel statsSubPanel,
+                              IDamageTypesSubPanel armorSubPanel,
+                              IDamageTypesSubPanel damageSubPanel,
+                              IDamageTypesSubPanel resistanceSubPanel,
+                              IDamageTypesSubPanel damagePercentSubPanel,
+                              IOffensiveSubPanel offensiveSubPanel,
+                              IUIStateTracker defaultsHandler,
+                              IUICharacterManager uiCharacterManager)
         {
             MaxHeight = 31;
             MaxWidth = 40;
@@ -83,8 +81,6 @@ namespace TurnBasedRPG.UI.Combat.Panels
 
         private CachedCharacter _cachedCharacter;
         private IReadOnlyList<string> _cachedRender;
-
-        public event EventHandler<ActivePanelChangedEventArgs> ActivePanelChanged;
 
         /// <summary>
         /// Returns a details panel injected with the data from a character.

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TurnBasedRPG.UI.Combat.EventArgs;
 using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat.Panels
 {
+    /// <summary>
+    /// Panel responsible for rendering the names of all categories of all the spells and skills a character knows how to use.
+    /// </summary>
     public class CategoryPanel : ICategoryPanel
     {
         private int _maxWidth = 0;
@@ -30,6 +31,9 @@ namespace TurnBasedRPG.UI.Combat.Panels
         public int MaxNameLength { get; set; } = 20;
         public int MaxHeight { get; set; } = 16;
 
+        /// <summary>
+        /// The maximum number of categories that can exist in the panel at a time.
+        /// </summary>
         public int MaxItems
         {
             get { return MaxHeight - 2; }
@@ -40,7 +44,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
         private bool _cachedFocus;
         private int _cachedFocusNumber;
         private IReadOnlyList<string> _cachedRender;
-        private readonly DefaultsHandler _defaultsHandler;
+        private readonly IUIStateTracker _defaultsHandler;
 
         public bool IsActive
         {
@@ -58,17 +62,17 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// </summary>
         private int _lineOffset;
 
-        public event EventHandler<CategoryChangedEventArgs> CategoryChanged;
-        public event EventHandler<ActivePanelChangedEventArgs> ActivePanelChanged;
-
-        public CategoryPanel(DefaultsHandler defaultsHandler)
+        public CategoryPanel(IUIStateTracker defaultsHandler)
         {
             _defaultsHandler = defaultsHandler;
             _lineOffset = 0;
             FocusNumber = 1;
         }
 
-        // Renders an action panel along with action names
+        /// <summary>
+        /// Renders a category panel filled with all the categories of the skills and spells that a character knows how to use.
+        /// </summary>
+        /// <returns>A list of string containing the panel render.</returns>
         public IReadOnlyList<string> Render()
         {
             var categories = _defaultsHandler.ActionCategories.Select(items => items[0]).ToList();
@@ -96,7 +100,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return actionPanel;
         }
 
-        // Renders the max  actions per line along with a focus triangle if an action is focused by the player
+        /// <summary>
+        /// Renders the category names.
+        /// </summary>
+        /// <param name="categories">The names of the categories.</param>
+        /// <returns>A list of string containing the category names.</returns>
         private List<string> RenderCategories(IReadOnlyList<string> categories)
         {
             var actions = new List<string>();
@@ -120,7 +128,12 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return actions;
         }
 
-        // Renders a single  action name along with a focus triangle if it is focused by the player
+        /// <summary>
+        /// Renders a single category name along with a focus triangle if the category is currently focused by the player.
+        /// </summary>
+        /// <param name="name">The name of the category.</param>
+        /// <param name="isFocus">Whether or not this category is being focused by the player.</param>
+        /// <returns>A string containing the category name along with a focus triangle if the category is focused by the player.</returns>
         private string RenderCategoryName(string name, bool isFocus)
         {
             string focus = "  ";
@@ -130,6 +143,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return focus + name + new string(' ', spaces);
         }
 
+        /// <summary>
+        /// Handles key press events if this panel is active.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         public void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
             if (IsActive)
@@ -154,6 +172,10 @@ namespace TurnBasedRPG.UI.Combat.Panels
             }
         }
 
+        /// <summary>
+        /// Moves the focus upward if the focus is not at the top-most row of the panel. Scrolls the entire panel if
+        /// there are more categories than can fit on the category panel.
+        /// </summary>
         private void OnUpArrowPressed()
         {
             if (FocusNumber > MaxCategoriesPerLine)
@@ -163,13 +185,13 @@ namespace TurnBasedRPG.UI.Combat.Panels
                 {
                     _lineOffset--;
                 }
-                CategoryChanged?.Invoke(this, new CategoryChangedEventArgs()
-                {
-                    FocusNumber = FocusNumber
-                });
             }
         }
 
+        /// <summary>
+        /// Moves the focus downward if the focus is not at the bottom-most row of the panel. Scrolls the entire panel if
+        /// there are more categories than can fit on the category panel.
+        /// </summary>
         private void OnDownArrowPressed()
         {
             if (FocusNumber <= _defaultsHandler.ActionCategories.Count() - MaxCategoriesPerLine)
@@ -179,35 +201,29 @@ namespace TurnBasedRPG.UI.Combat.Panels
                 {
                     _lineOffset++;
                 }
-                CategoryChanged?.Invoke(this, new CategoryChangedEventArgs()
-                {
-                    FocusNumber = FocusNumber
-                });
             }
         }
 
+        /// <summary>
+        /// Moves the focus to the right if the focus is in the left column.
+        /// </summary>
         private void OnRightArrowPressed()
         {
             if (FocusNumber % 2 == 1 && FocusNumber <= _defaultsHandler.ActionCategories.Count() - 1)
             {
                 FocusNumber++;
-                CategoryChanged?.Invoke(this, new CategoryChangedEventArgs()
-                {
-                    FocusNumber = FocusNumber
-                });
             }
 
         }
 
+        /// <summary>
+        /// Moves the focus to the left if the focus is in the right column.
+        /// </summary>
         private void OnLeftArrowPressed()
         {
             if (FocusNumber % 2 == 0)
             {
                 FocusNumber--;
-                CategoryChanged?.Invoke(this, new CategoryChangedEventArgs()
-                {
-                    FocusNumber = FocusNumber
-                });
             }
         }
     }

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TurnBasedRPG.Controller;
-using TurnBasedRPG.Controller.Combat;
+using TurnBasedRPG.Controller.Combat.Interfaces;
+using TurnBasedRPG.Controller.Interfaces;
 using TurnBasedRPG.Shared;
 using TurnBasedRPG.Shared.Enums;
 using TurnBasedRPG.Shared.Interfaces;
@@ -13,18 +10,25 @@ using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat.Panels
 {
-    public class ActionDetailsPanel : IPanel
+    /// <summary>
+    /// Panel responsible for rendering an action's target and stat details.
+    /// </summary>
+    public class ActionDetailsPanel : IActionDetailsPanel
     {
         public int MaxWidth { get; set; }
         public int MaxHeight { get; set; }
+
+        /// <summary>
+        /// Gets whether this panel is active. Activity is linked with the ActionPanel.
+        /// </summary>
         public bool IsActive
         {
             get { return _defaultsHandler.IsInActionPanel; }
         }
 
-        public ActionDetailsPanel(ViewModelController viewModelController,
-                                  DisplayManager displayManager,
-                                  DefaultsHandler defaultsHandler)
+        public ActionDetailsPanel(IViewModelController viewModelController,
+                                  IDisplayManager displayManager,
+                                  IUIStateTracker defaultsHandler)
         {
             MaxWidth = 55;
             MaxHeight = 16;
@@ -36,17 +40,17 @@ namespace TurnBasedRPG.UI.Combat.Panels
         private int _cachedActionId = 0;
         private ActionData _cachedActionData;
         private IReadOnlyList<string> _cachedRender;
-        private readonly ViewModelController _viewModelController;
-        private readonly DisplayManager _displayManager;
-        private readonly DefaultsHandler _defaultsHandler;
+        private readonly IViewModelController _viewModelController;
+        private readonly IDisplayManager _displayManager;
+        private readonly IUIStateTracker _defaultsHandler;
 
         /// <summary>
-        /// Returns a read-only list containing the information panel injected with data from the a
+        /// Returns a read-only list containing the action details panel injected with data from the a
         /// provided action.
         /// </summary>
-        /// <param name="action">The action to display in the information panel.</param>
+        /// <param name="action">The action to display in the panel.</param>
         /// <param name="data">The data of the action to display.</param>
-        /// <returns>A read-only list containing the information panel.</returns>
+        /// <returns>A read-only list containing the panel.</returns>
         public IReadOnlyList<string> Render()
         {
             var action = _displayManager.GetActionFromCategory((Commands)_defaultsHandler.CommandFocusNumber,

@@ -2,51 +2,45 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using TurnBasedRPG.Controller;
-using TurnBasedRPG.Controller.Combat;
 using TurnBasedRPG.Controller.EventArgs;
 using TurnBasedRPG.Shared.Enums;
-using TurnBasedRPG.Shared.Interfaces;
 using TurnBasedRPG.UI.Combat.EventArgs;
-using TurnBasedRPG.UI.Combat.Panels;
+using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat
 {
     /// <summary>
     /// Class that contains all UI components and is responsible for rendering the entire UI output to the console.
     /// </summary>
-    public class UIContainer
+    public class UIContainer : IUIContainer
     {
-        private readonly FormationPanel _formationPanel;
-        private readonly TargetPanel _targetPanel;
-        private readonly CommandPanel _commandPanel;
-        private readonly ActionPanel _actionPanel;
-        private readonly TurnOrderPanel _turnOrderPanel;
-        private readonly ActionDetailsPanel _actionDetailsPanel;
-        private readonly DefaultsHandler _defaultsHandler;
-        private readonly UICharacterManager _uiCharacterManager;
-        private readonly CategoryDetailsPanel _categoryDetailsPanel;
-        private readonly CombatLogPanel _combatLogPanel;
-        private readonly CharacterPanel _characterPanel;
-        private readonly StatusEffectsPanel _statusEffectsPanel;
-        private readonly CategoryPanel _categoryPanel;
+        private readonly IFormationPanel _formationPanel;
+        private readonly ITargetPanel _targetPanel;
+        private readonly ICommandPanel _commandPanel;
+        private readonly IActionPanel _actionPanel;
+        private readonly ITurnOrderPanel _turnOrderPanel;
+        private readonly IActionDetailsPanel _actionDetailsPanel;
+        private readonly IUIStateTracker _defaultsHandler;
+        private readonly IUICharacterManager _uiCharacterManager;
+        private readonly ICategoryDetailsPanel _categoryDetailsPanel;
+        private readonly ICombatLogPanel _combatLogPanel;
+        private readonly ICharacterPanel _characterPanel;
+        private readonly IStatusEffectsPanel _statusEffectsPanel;
+        private readonly ICategoryPanel _categoryPanel;
 
-        public UIContainer(FormationPanel formationPanel,
-                           TargetPanel targetPanel,
-                           CommandPanel commandPanel,
-                           ActionPanel actionPanel,
-                           TurnOrderPanel turnOrderPanel,
-                           ActionDetailsPanel actionDetailsPanel,
-                           CategoryDetailsPanel categoryDetailsPanel,
-                           CombatLogPanel combatLogPanel,
-                           CharacterPanel characterPanel,
-                           StatusEffectsPanel statusEffectsPanel,
-                           CategoryPanel categoryPanel,
-                           DefaultsHandler defaultsHandler,
-                           UICharacterManager uiCharacterManager,
-                           ViewModelController viewModelController,
-                           DisplayManager displayManager,
-                           CombatStateHandler combatStateHandler)
+        public UIContainer(IFormationPanel formationPanel,
+                           ITargetPanel targetPanel,
+                           ICommandPanel commandPanel,
+                           IActionPanel actionPanel,
+                           ITurnOrderPanel turnOrderPanel,
+                           IActionDetailsPanel actionDetailsPanel,
+                           ICategoryDetailsPanel categoryDetailsPanel,
+                           ICombatLogPanel combatLogPanel,
+                           ICharacterPanel characterPanel,
+                           IStatusEffectsPanel statusEffectsPanel,
+                           ICategoryPanel categoryPanel,
+                           IUIStateTracker defaultsHandler,
+                           IUICharacterManager uiCharacterManager)
         {
             _formationPanel = formationPanel;
             _targetPanel = targetPanel;
@@ -70,7 +64,6 @@ namespace TurnBasedRPG.UI.Combat
 
         private void BindEvents()
         {
-            _defaultsHandler.InFormationPanelChanged += (obj, args) => RenderFormationTargets = _defaultsHandler.IsInFormationPanel;
             _commandPanel.CommandFocusChanged += OnCommandFocusChanged;
             KeyPressed += _commandPanel.OnKeyPressed;
             KeyPressed += _categoryPanel.OnKeyPressed;
@@ -103,16 +96,7 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         public event EventHandler<ActionStartedEventArgs> ActionStartedEvent;
 
-        /// <summary>
-        /// Assigns an event listener to the given eventhandler.
-        /// </summary>
-        /// <param name="eventHandler"></param>
-        public void RegisterKeyPressEvent(ref EventHandler<KeyPressedEventArgs> eventHandler)
-        {
-            eventHandler += OnKeyPressed;
-        }
-
-        private void OnKeyPressed(object sender, KeyPressedEventArgs args)
+        public void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
             KeyPressed?.Invoke(sender, args);
             switch (args.PressedKey.Key)
@@ -185,15 +169,6 @@ namespace TurnBasedRPG.UI.Combat
             });
         }
 
-        /// <summary>
-        /// Gets or sets whether or not formation targets should be rendered for the formation panel.
-        /// </summary>
-        public bool RenderFormationTargets
-        {
-            get { return _formationPanel.RenderFocus; }
-            set { _formationPanel.RenderFocus = value; }
-        }
-
         public bool IsUIUpdating { get; set; } = false;
         public bool IsUIUpdatingFinished { get; private set; } = false;
         public bool SkipUIUpdating { get; set; } = false;
@@ -234,7 +209,7 @@ namespace TurnBasedRPG.UI.Combat
         /// <param name="postCharactersChanged">Contains the heath values for the characters after the health change.</param>
         /// <param name="gradualChanges">The amount of health each character should have their health changed by per frame.</param>
         /// <param name="frameUpdates">The number of frames to update the health of the characters for.</param>
-        internal void UpdateHealthGradually(IReadOnlyDictionary<int, int> preCharactersChanged,
+        public void UpdateHealthGradually(IReadOnlyDictionary<int, int> preCharactersChanged,
                                            IReadOnlyDictionary<int, int> postCharactersChanged,
                                            IReadOnlyDictionary<int, float> gradualChanges,
                                            int frameUpdates)

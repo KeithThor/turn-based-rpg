@@ -1,29 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TurnBasedRPG.Model.Entities;
-using TurnBasedRPG.Shared.Enums;
-using TurnBasedRPG.Shared.Interfaces;
-using TurnBasedRPG.Shared.Viewmodel;
-using TurnBasedRPG.Controller.EventArgs;
-using TurnBasedRPG.Controller.AI.Interfaces;
 using TurnBasedRPG.Controller.AI;
-using TurnBasedRPG.Shared;
+using TurnBasedRPG.Controller.AI.Interfaces;
+using TurnBasedRPG.Controller.Combat.Interfaces;
+using TurnBasedRPG.Controller.EventArgs;
+using TurnBasedRPG.Controller.Interfaces;
+using TurnBasedRPG.Model.Entities;
 using TurnBasedRPG.Shared.Combat;
+using TurnBasedRPG.Shared.Enums;
 
 namespace TurnBasedRPG.Controller.Combat
 {
     /// <summary>
     /// Controller responsible for handling combat interactions.
     /// </summary>
-    public class CombatController
+    public class CombatController : ICombatController
     {
-        private readonly ActionController _actionController;
+        private readonly IActionController _actionController;
         private readonly ConsumablesHandler _consumablesHandler;
-        public readonly ViewModelController ViewModelController;
-        public readonly CombatStateHandler CombatStateHandler;
+        public readonly IViewModelController ViewModelController;
+        private readonly CombatStateHandler CombatStateHandler;
         public readonly DisplayManager DisplayManager;
         private readonly ICombatAI _combatAI;
         public int TurnCounter = 1;
@@ -78,18 +75,19 @@ namespace TurnBasedRPG.Controller.Combat
         /// </summary>
         public event EventHandler<CharacterSpeedChangedEventArgs> CharacterSpeedChanged;
 
-        public CombatController(ActionController actionController,
+        public CombatController(IActionController actionController,
                                 CombatStateHandler combatStateHandler,
+                                IViewModelController viewModelController,
+                                DisplayManager displayManager,
                                 ConsumablesHandler consumablesHandler,
                                 ICombatAI combatAI)
         {
             _actionController = actionController;
             CombatStateHandler = combatStateHandler;
             _consumablesHandler = consumablesHandler;
-            DisplayManager = new DisplayManager(CombatStateHandler);
-            ViewModelController = new ViewModelController(DisplayManager, CombatStateHandler);
+            DisplayManager = displayManager;
+            ViewModelController = viewModelController;
             _combatAI = combatAI;
-            _actionController.AllCharacters = CombatStateHandler.AllCharacters;
 
             BindEvents();
         }

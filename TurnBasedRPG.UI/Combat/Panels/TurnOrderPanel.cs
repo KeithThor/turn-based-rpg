@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using TurnBasedRPG.Controller.Combat;
+using TurnBasedRPG.Controller.Combat.Interfaces;
 using TurnBasedRPG.Shared.Interfaces;
+using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat.Panels
 {
-    // Handles the rendering of turn order boxes
-    public class TurnOrderPanel
+    /// <summary>
+    /// Panel responsible for rendering turn order boxes for the current and next round characters.
+    /// </summary>
+    public class TurnOrderPanel : ITurnOrderPanel
     {
         private int _maxWidth;
         public int MaxWidth
@@ -18,9 +19,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
             set { _maxWidth = value - (value - 1) % 3; }
         }
 
-        public TurnOrderPanel(DefaultsHandler defaultsHandler,
-                              CombatStateHandler combatStateHandler,
-                              UICharacterManager uiCharacterManager)
+        public int MaxHeight { get; set; }
+
+        public TurnOrderPanel(IUIStateTracker defaultsHandler,
+                              IDisplayCombatState combatStateHandler,
+                              IUICharacterManager uiCharacterManager)
         {
             MaxWidth = 51;
             _defaultsHandler = defaultsHandler;
@@ -30,9 +33,9 @@ namespace TurnBasedRPG.UI.Combat.Panels
 
         private IReadOnlyList<string> _cachedRender;
         private CachedData _cachedData;
-        private readonly DefaultsHandler _defaultsHandler;
-        private readonly CombatStateHandler _combatStateHandler;
-        private readonly UICharacterManager _uiCharacterManager;
+        private readonly IUIStateTracker _defaultsHandler;
+        private readonly IDisplayCombatState _combatStateHandler;
+        private readonly IUICharacterManager _uiCharacterManager;
 
         private class CachedData
         {
@@ -41,7 +44,10 @@ namespace TurnBasedRPG.UI.Combat.Panels
             public IReadOnlyList<int>[] CharacterIds;
         }
 
-        // Renders the turn order boxes at the top right of the screen. This gets rendered with the target details ui.
+        /// <summary>
+        /// Renders the turn order panel, filled with symbols from each character who will get a turn this round and the next.
+        /// </summary>
+        /// <returns>A list of string containing the rendered turn order panel.</returns>
         public IReadOnlyList<string> Render()
         {
             var turnOrderIds = _combatStateHandler.GetRoundOrderIds();
@@ -71,6 +77,13 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return turnOrder;
         }
 
+        /// <summary>
+        /// Determines if the data provided is the same as the previous render's data.
+        /// </summary>
+        /// <param name="renderTargets">Whether focus triangles should be rendered.</param>
+        /// <param name="targetPositions">The target positions for a player or ai's action.</param>
+        /// <param name="characters">The current and next round characters.</param>
+        /// <returns>True if the data provided is identical to the previous render's data.</returns>
         private bool IsCacheData(bool renderTargets,
                                  IReadOnlyList<int> targetPositions,
                                  IReadOnlyList<IDisplayCharacter>[] characters)
@@ -90,6 +103,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return true;
         }
 
+        /// <summary>
+        /// Renders the turn order boxes for this round and the next round characters.
+        /// </summary>
+        /// <param name="characters">The characters in this round and the next round.</param>
+        /// <returns>A list of string containing the rendered turn order boxes.</returns>
         private List<string> RenderTurnOrderBoxes(IReadOnlyList<IDisplayCharacter>[] characters)
         {
             var turnOrderParts = new List<string>();
@@ -145,7 +163,13 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return turnOrderParts;
         }
 
-        // Prints target triangles under a character's turn order box if it is selected by the player in the formation panel
+        /// <summary>
+        /// Renders focus triangles under the turn order boxes if the player or ai are targeting any characters.
+        /// </summary>
+        /// <param name="renderTargets">Whether or not to render focus triangles.</param>
+        /// <param name="targetPositions">The positions the player or ai are targeting.</param>
+        /// <param name="characters">The current and next round characters.</param>
+        /// <returns>A string containing focus triangles and spaces depending on who is being targeted.</returns>
         private string RenderFocusTargets(bool renderTargets, IReadOnlyList<int> targetPositions, IReadOnlyList<IDisplayCharacter>[] characters)
         {
             var currentTurnOrder = characters[0];
@@ -185,7 +209,12 @@ namespace TurnBasedRPG.UI.Combat.Panels
             }
         }
 
-        public int GetMaxBoxes(IReadOnlyList<IDisplayCharacter>[] characters)
+        /// <summary>
+        /// Gets the maximum number of turn order boxes that should be rendered onto the console for this round and the next.
+        /// </summary>
+        /// <param name="characters">The characters in this round and the next round.</param>
+        /// <returns></returns>
+        private int GetMaxBoxes(IReadOnlyList<IDisplayCharacter>[] characters)
         {
             var currentTurnOrder = characters[0];
             var nextTurnOrder = characters[1];

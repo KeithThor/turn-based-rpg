@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using TurnBasedRPG.Shared.Combat;
 using TurnBasedRPG.Shared.Interfaces;
 using TurnBasedRPG.UI.Combat.EventArgs;
@@ -10,17 +9,32 @@ using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat.Panels
 {
-    // Handles the rendering of player and enemy formations in battle
-    public class FormationPanel : IReceiveInputPanel
+    /// <summary>
+    /// Panel responsible for rendering in-combat formations and handling input within the panel.
+    /// </summary>
+    public class FormationPanel : IFormationPanel
     {
         private const int _paddingLeft = 12;
         private const int _paddingMiddle = 18;
         private const int _numberInRow = 3;
         private IReadOnlyList<IDisplayCharacter> _characters;
-        public bool RenderFocus { get; set; }
         private IReadOnlyList<int> TargetPositions;
         private CachedData _cachedData;
         private IReadOnlyList<string> _cachedRender;
+
+        /// <summary>
+        /// The minimum possible height of the formation panel.
+        /// </summary>
+        public const int Min_Height = 18;
+
+        /// <summary>
+        /// Forces the panel to render focus triangles.
+        /// </summary>
+        public bool RenderFocus
+        {
+            get { return _defaultsHandler.IsInFormationPanel; }
+            set { _defaultsHandler.IsInFormationPanel = value; }
+        }
 
         private bool AddRowSpaces { get { return MaxHeight >= Min_Height + 3; } }
         private bool AddHealthBarSpaces { get { return MaxHeight >= Min_Height + 6; } }
@@ -46,22 +60,27 @@ namespace TurnBasedRPG.UI.Combat.Panels
             }
         }
 
+        /// <summary>
+        /// Whether or not the formation panel is active and consuming input.
+        /// </summary>
         public bool IsActive
         {
             get { return _defaultsHandler.IsInFormationPanel; }
             set { _defaultsHandler.IsInFormationPanel = value; }
         }
-        public int FocusNumber { get; set; }
 
         /// <summary>
-        /// The minimum possible height of the formation panel.
+        /// A number from 1-18 that represents where on the formation panel the player has its cursor.
         /// </summary>
-        public const int Min_Height = 18;
-        private readonly DefaultsHandler _defaultsHandler;
-        private readonly UICharacterManager _uiCharacterManager;
+        public int FocusNumber { get; set; }
 
-        public event EventHandler<ActivePanelChangedEventArgs> ActivePanelChanged;
+        
+        private readonly IUIStateTracker _defaultsHandler;
+        private readonly IUICharacterManager _uiCharacterManager;
 
+        /// <summary>
+        /// Contains data regarding the last render.
+        /// </summary>
         private class CachedData
         {
             public int ActiveCharacterId;
@@ -70,6 +89,9 @@ namespace TurnBasedRPG.UI.Combat.Panels
             public bool RenderFocus;
         }
 
+        /// <summary>
+        /// A cached version of a formation panel rendered character.
+        /// </summary>
         private class CachedCharacter
         {
             public int Position;
@@ -77,8 +99,8 @@ namespace TurnBasedRPG.UI.Combat.Panels
             public int MaxHealth;
         }
 
-        public FormationPanel(DefaultsHandler defaultsHandler,
-                              UICharacterManager uiCharacterManager)
+        public FormationPanel(IUIStateTracker defaultsHandler,
+                              IUICharacterManager uiCharacterManager)
         {
             TargetPositions = new List<int>();
             _characters = new List<IDisplayCharacter>();
@@ -88,6 +110,10 @@ namespace TurnBasedRPG.UI.Combat.Panels
             _uiCharacterManager = uiCharacterManager;
         }
 
+        /// <summary>
+        /// Renders out the entire formation panel as a list of string.
+        /// </summary>
+        /// <returns>A list of string containing the formation panel render.</returns>
         public IReadOnlyList<string> Render()
         {
             var characters = _uiCharacterManager.GetAllCharacters();
@@ -225,7 +251,12 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return charInLine;
         }
 
-        // Render one row of formation boxes
+        /// <summary>
+        /// Renders one row of formation boxes, from the player's formation to the ai's formation.
+        /// </summary>
+        /// <param name="charactersToRender">A list of IDisplayCharacters containing the characters in one row.</param>
+        /// <param name="activeCharacterId">The id of the currently active character.</param>
+        /// <returns>A list of string containing the rendered row of formation boxes.</returns>
         private List<string> RenderFormations(IReadOnlyList<IDisplayCharacter> charactersToRender, int activeCharacterId)
         {
             if (AddHealthBarSpaces)
@@ -253,7 +284,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
             }
         }
 
-        // Renders one row of formation target triangles below the formation boxes
+        /// <summary>
+        /// Renders formation triangles for one row of the player and ai's formations.
+        /// </summary>
+        /// <param name="iterations">The current row this method is rendering formation triangles for.</param>
+        /// <returns>A string containing formation triangles or spaces for one row.</returns>
         private string RenderFormationTargets(int iterations)
         {
             if (TargetPositions.Count == 0)
@@ -286,7 +321,12 @@ namespace TurnBasedRPG.UI.Combat.Panels
             }
         }
 
-        // Render bottom part of formation boxes
+        /// <summary>
+        /// Renders the bottom square panels for a row of the player and ai's formations.
+        /// </summary>
+        /// <param name="charactersToRender">The characters in this row.</param>
+        /// <param name="activeCharacterID">The id of the active character.</param>
+        /// <returns>A string containing the bottom square panels rendered.</returns>
         private string RenderBottomPanel(IReadOnlyList<IDisplayCharacter> charactersToRender, int activeCharacterID)
         {
             var bottomPanelSB = new StringBuilder();
@@ -314,7 +354,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return bottomPanelSB.ToString() + new string(' ', MaxWidth - bottomPanelSB.Length);
         }
 
-        // Render healthbars under characters depending on their current health percentage
+        /// <summary>
+        /// Renders health bars for a row of the player and ai's formations.
+        /// </summary>
+        /// <param name="charactersToRender">The characters in this row.</param>
+        /// <returns>A string containing healthbars for the rendered row of characters.</returns>
         private string RenderHealthBars(IReadOnlyList<IDisplayCharacter> charactersToRender)
         {
             var healthBarSB = new StringBuilder();
@@ -354,7 +398,12 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return healthBarSB + new string(' ', MaxWidth - healthBarSB.Length);
         }
 
-        // Render middle part of formation boxes along with the symbols for each character
+        /// <summary>
+        /// Renders the middle part of the formation boxes along with the symbol of the character for each formation row.
+        /// </summary>
+        /// <param name="charactersToRender">The characters in the row.</param>
+        /// <param name="activeCharacterId">The active character's id.</param>
+        /// <returns>A string containing the render of the middle part of the formation boxes.</returns>
         private string RenderMiddlePanel(IReadOnlyList<IDisplayCharacter> charactersToRender, int activeCharacterId)
         {
             var middlePanelSB = new StringBuilder();
@@ -383,7 +432,12 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return middlePanelSB.ToString() + new string(' ', MaxWidth - middlePanelSB.Length);
         }
 
-        // Render top part of formation boxes
+        /// <summary>
+        /// Renders the top portion of the formation boxes for one row of the player and ai's formation.
+        /// </summary>
+        /// <param name="charactersToRender">The characters in the row.</param>
+        /// <param name="activeCharacterId">The id of the currently active character.</param>
+        /// <returns>A string containing the rendered top portion of the formation boxes for a row.</returns>
         private string RenderTopPanel(IReadOnlyList<IDisplayCharacter> charactersToRender, int activeCharacterId)
         {
             var topPanelSB = new StringBuilder();
@@ -411,7 +465,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return topPanelSB.ToString() + new string(' ', MaxWidth - topPanelSB.Length);
         }
         
-        // Render the names of up to 6 characters on one line in the formation, 3 from player's side and 3 from enemy's side
+        /// <summary>
+        /// Renders the names of the characters that exist on a row.
+        /// </summary>
+        /// <param name="charactersToRender">The characters currently in a row.</param>
+        /// <returns>A string containing the names of the characters that exist on a row.</returns>
         private string RenderFormationNames(IReadOnlyList<IDisplayCharacter> charactersToRender)
         {
             int maxNameLength = 14;
@@ -437,6 +495,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
             return nameSB.ToString() + new string(' ', MaxWidth - nameSB.Length);
         }
 
+        /// <summary>
+        /// Handles key press events if the panel is currently active.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         public void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
             if (IsActive)
@@ -456,13 +519,6 @@ namespace TurnBasedRPG.UI.Combat.Panels
                         OnRightArrowPressed();
                         break;
                     case ConsoleKey.Escape:
-                        ActivePanelChanged?.Invoke(this, new ActivePanelChangedEventArgs()
-                        {
-                            InActionPanel = true,
-                            InCategoryPanel = false,
-                            InCommandPanel = false,
-                            InFormationPanel = false
-                        });
                         break;
                     default:
                         break;
@@ -470,6 +526,9 @@ namespace TurnBasedRPG.UI.Combat.Panels
             }
         }
 
+        /// <summary>
+        /// If the up arrow is pressed, check if upwards movement is blocked. If it isn't, change the focus by -3.
+        /// </summary>
         private void OnUpArrowPressed()
         {
             bool isBlocked = IsUpArrowBlocked();
@@ -479,10 +538,13 @@ namespace TurnBasedRPG.UI.Combat.Panels
                 && ((_defaultsHandler.CurrentTargetPosition > 3 && _defaultsHandler.CurrentTargetPosition <= 9)
                    || _defaultsHandler.CurrentTargetPosition > 12))
             {
-                ChangeFormationPanelFocus(-3);
+                ChangeFocus(-3);
             }
         }
 
+        /// <summary>
+        /// If the down arrow is pressed, check if downwards movement is blocked. If it isn't change the focus by 3.
+        /// </summary>
         private void OnDownArrowPressed()
         {
             // If the player is in the formation panel, check to see if downwards movement is blocked
@@ -491,10 +553,14 @@ namespace TurnBasedRPG.UI.Combat.Panels
                 && ((_defaultsHandler.CurrentTargetPosition <= 6 && _defaultsHandler.CurrentTargetPosition > 0)
                     || (_defaultsHandler.CurrentTargetPosition <= 15 && _defaultsHandler.CurrentTargetPosition > 9)))
             {
-                ChangeFormationPanelFocus(3);
+                ChangeFocus(3);
             }
         }
 
+        /// <summary>
+        /// If the right arrow is pressed, check if rightwards movement is blocked. If it isn't change the focus by
+        /// 7 if at the right-most edge of the player's formation or 1 otherwise.
+        /// </summary>
         private void OnRightArrowPressed()
         {
             bool isBlocked = IsRightArrowBlocked();
@@ -505,12 +571,15 @@ namespace TurnBasedRPG.UI.Combat.Panels
             {
                 // If the player is moving from the player's formation to the enemy's formation
                 if (_defaultsHandler.CurrentTargetPosition % 3 == 0 && _defaultsHandler.CurrentTargetPosition < 10)
-                    ChangeFormationPanelFocus(7);
+                    ChangeFocus(7);
                 else
-                    ChangeFormationPanelFocus(1);
+                    ChangeFocus(1);
             }
         }
 
+        /// <summary>
+        /// If the left arrow is pressed, change the focus by -7 if at the left-most edge of the ai's formation or 1 otherwise.
+        /// </summary>
         private void OnLeftArrowPressed()
         {
             // If the player is in the formation panel, but not at the left-most column in the player's formation
@@ -520,9 +589,9 @@ namespace TurnBasedRPG.UI.Combat.Panels
             {
                 // If the player moves from the enemy's formation to the player's formation
                 if (_defaultsHandler.CurrentTargetPosition % 3 == 1 && _defaultsHandler.CurrentTargetPosition >= 10)
-                    ChangeFormationPanelFocus(-7);
+                    ChangeFocus(-7);
                 else
-                    ChangeFormationPanelFocus(-1);
+                    ChangeFocus(-1);
             }
         }
         
@@ -606,7 +675,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// Changes the focus target in the formation panel.
         /// </summary>
         /// <param name="changeAmount">The amount to change the focus target by.</param>
-        private void ChangeFormationPanelFocus(int changeAmount)
+        private void ChangeFocus(int changeAmount)
         {
             if (_defaultsHandler.IsInFormationPanel && changeAmount != 0)
             {

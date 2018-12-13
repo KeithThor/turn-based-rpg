@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TurnBasedRPG.Shared;
 using TurnBasedRPG.Shared.Interfaces;
+using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat
 {
     /// <summary>
     /// Class responsible for handling the UI version of characters in combat.
     /// </summary>
-    public class UICharacterManager
+    public class UICharacterManager : IUICharacterManager
     {
         public List<DisplayCharacter> Characters { get; set; } = new List<DisplayCharacter>();
         public IReadOnlyList<int> CurrentRoundOrderIds { get; set; }

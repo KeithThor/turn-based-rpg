@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TurnBasedRPG.Controller.Combat.Interfaces;
+using TurnBasedRPG.Controller.EventArgs;
 using TurnBasedRPG.Model.Entities;
 using TurnBasedRPG.Shared;
-using TurnBasedRPG.Controller.EventArgs;
 using TurnBasedRPG.Shared.Combat;
 
 namespace TurnBasedRPG.Controller.Combat
@@ -13,7 +12,7 @@ namespace TurnBasedRPG.Controller.Combat
     /// <summary>
     /// Responsible for keeping track of and maintaining status effects.
     /// </summary>
-    public class StatusController
+    public class StatusController : IStatusController
     {
         /// <summary>
         /// A wrapper class around a status effect that tracks the amount of turns remaining on a status effect
@@ -51,9 +50,13 @@ namespace TurnBasedRPG.Controller.Combat
 
         private Dictionary<Character, List<AppliedStatus>> _appliedStatuses = new Dictionary<Character, List<AppliedStatus>>();
         private Dictionary<Character, List<DelayedStatus>> _delayedStatuses = new Dictionary<Character, List<DelayedStatus>>();
-        private ThreatController _threatController;
+        private readonly ThreatController _threatController;
+        private readonly CombatStateHandler _combatStateHandler;
         private Random _random = new Random();
-        public IReadOnlyList<Character> AllCharacters { get; set; }
+        private IReadOnlyList<Character> AllCharacters
+        {
+            get { return _combatStateHandler.AllCharacters; }
+        }
 
         /// <summary>
         /// Event invoked whenever one or many characters die as a result of status effect damage.
@@ -80,9 +83,11 @@ namespace TurnBasedRPG.Controller.Combat
         /// </summary>
         public event EventHandler<CombatLoggableEventArgs> StatusEffectsRemoved;
         
-        public StatusController(ThreatController threatController)
+        public StatusController(ThreatController threatController,
+                                CombatStateHandler combatStateHandler)
         {
             _threatController = threatController;
+            _combatStateHandler = combatStateHandler;
         }
 
         /// <summary>

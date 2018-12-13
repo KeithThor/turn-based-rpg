@@ -7,8 +7,10 @@ using TurnBasedRPG.UI.Combat.EventArgs;
 
 namespace TurnBasedRPG.UI.Combat.Interfaces
 {
+    /// <summary>
+    /// Panel responsible for rendering actions for the player to interact with.
+    /// </summary>
     public interface IActionPanel : IReceiveInputPanel
     {
-        event EventHandler<ActionChangedEventArgs> ActionChanged;
     }
 }

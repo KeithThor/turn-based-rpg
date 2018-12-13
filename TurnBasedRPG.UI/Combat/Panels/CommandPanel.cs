@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TurnBasedRPG.Shared.Enums;
 using TurnBasedRPG.UI.Combat.EventArgs;
 using TurnBasedRPG.UI.Combat.Interfaces;
@@ -13,10 +10,10 @@ namespace TurnBasedRPG.UI.Combat.Panels
     /// Responsible for rendering the command panel for the UI, containing the commands a player can use such as
     /// Attack, Flee, and Spells.
     /// </summary>
-    public class CommandPanel : IReceiveInputPanel
+    public class CommandPanel : ICommandPanel
     {
         private const int _MaxNumOfCommands = 7;
-        private readonly DefaultsHandler _defaultsHandler;
+        private readonly IUIStateTracker _defaultsHandler;
 
         public int MaxWidth { get; set; }
         public int MaxHeight { get; set; }
@@ -45,7 +42,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
         private int _cachedFocus;
         private IReadOnlyList<string> _cachedRender;
 
-        public CommandPanel(DefaultsHandler defaultsHandler)
+        public CommandPanel(IUIStateTracker defaultsHandler)
         {
             _maxActionNameLength = 12;
             MaxHeight = 16;
@@ -54,25 +51,34 @@ namespace TurnBasedRPG.UI.Combat.Panels
             FocusNumber = 1;
         }
 
+        /// <summary>
+        /// Event invoked whenever the player changes the Command focus.
+        /// </summary>
         public event EventHandler<CommandFocusChangedEventArgs> CommandFocusChanged;
-        public event EventHandler<ActivePanelChangedEventArgs> ActivePanelChanged;
 
-        // Renders the action panel with the names of the actions as well as a focus triangle if an action is focused by the player
+        /// <summary>
+        /// Renders a command panel filled with the names of the commands a character can perform.
+        /// </summary>
+        /// <returns>A list of string containing the command panel render.</returns>
         public IReadOnlyList<string> Render()
         {
             if (_cachedFocus == FocusNumber) return _cachedRender;
             else _cachedFocus = FocusNumber;
 
-            _cachedRender = RenderActionPanel();
+            _cachedRender = RenderCommandPanel();
             return _cachedRender;
         }
 
-        private List<string> RenderActionPanel()
+        /// <summary>
+        /// Renders the names of all the commands a character can perform a long with a focus triangle depending on which command is focused.
+        /// </summary>
+        /// <returns></returns>
+        private List<string> RenderCommandPanel()
         {
-            var actionPanel = new List<string>();
+            var commandPanel = new List<string>();
             string actionName = "";
             
-            actionPanel.Add("╔" + new string('═', MaxWidth - 1));
+            commandPanel.Add("╔" + new string('═', MaxWidth - 1));
             for(int i = 1; i <= _MaxNumOfCommands; i++)
             {
                 string focus = FocusNumber == i ? "► " : "  ";
@@ -105,13 +111,18 @@ namespace TurnBasedRPG.UI.Combat.Panels
                         break;
                 }
                 int spaces = MaxWidth - actionName.Length - 5;
-                actionPanel.Add("║ " + focus + actionName + new string(' ', spaces) + "│");
-                actionPanel.Add("║ " + new string(' ', MaxWidth - 3) + "│");
+                commandPanel.Add("║ " + focus + actionName + new string(' ', spaces) + "│");
+                commandPanel.Add("║ " + new string(' ', MaxWidth - 3) + "│");
             }
-            actionPanel.Add("╚" + new string('═', MaxWidth - 1));
-            return actionPanel;
+            commandPanel.Add("╚" + new string('═', MaxWidth - 1));
+            return commandPanel;
         }
 
+        /// <summary>
+        /// Handles key press events if the command panel is focused.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         public void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
             if (IsActive)

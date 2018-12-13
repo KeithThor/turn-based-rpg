@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TurnBasedRPG.Controller.Combat.Interfaces;
 using TurnBasedRPG.Controller.EventArgs;
 using TurnBasedRPG.Model.Entities;
 using TurnBasedRPG.Shared;
@@ -13,7 +12,7 @@ namespace TurnBasedRPG.Controller.Combat
     /// <summary>
     /// Handles the activation and effects of a character action.
     /// </summary>
-    public class ActionController
+    public class ActionController : IActionController
     {
         /// <summary>
         /// A wrapper around the ActionBase class that represents an action with delayed effects, keeping track
@@ -32,19 +31,15 @@ namespace TurnBasedRPG.Controller.Combat
 
         private Dictionary<Character, List<DelayedAction>> _delayedActions = new Dictionary<Character, List<DelayedAction>>();
 
-        private CharacterController _characterController;
-        private StatusController StatusEffectController;
-        private ThreatController _threatController;
-        private IReadOnlyList<Character> _allCharacters;
+        private readonly CharacterController _characterController;
+        private readonly IStatusController _statusEffectController;
+        private readonly ThreatController _threatController;
+        private readonly CombatStateHandler _combatStateHandler;
         private Random _random;
-        public IReadOnlyList<Character> AllCharacters
+
+        private IReadOnlyList<Character> AllCharacters
         {
-            get { return _allCharacters; }
-            set
-            {
-                StatusEffectController.AllCharacters = value;
-                _allCharacters = value;
-            }
+            get { return _combatStateHandler.AllCharacters; }
         }
 
         /// <summary>
@@ -79,12 +74,14 @@ namespace TurnBasedRPG.Controller.Combat
         public event EventHandler<CombatLoggableEventArgs> StatusEffectsRemoved;
 
         public ActionController(CharacterController characterController,
-                                StatusController statusController,
-                                ThreatController threatController)
+                                IStatusController statusController,
+                                ThreatController threatController,
+                                CombatStateHandler combatStateHandler)
         {
             _characterController = characterController;
-            StatusEffectController = statusController;
+            _statusEffectController = statusController;
             _threatController = threatController;
+            _combatStateHandler = combatStateHandler;
             _random = new Random();
 
             BindEvents();
@@ -92,11 +89,11 @@ namespace TurnBasedRPG.Controller.Combat
 
         private void BindEvents()
         {
-            StatusEffectController.CharacterSpeedChanged += OnCharacterSpeedChanged;
-            StatusEffectController.CharactersDied += OnCharactersDying;
-            StatusEffectController.CharactersHealthChanged += OnCharactersHealthChanged;
-            StatusEffectController.StatusEffectApplied += OnStatusEffectApplied;
-            StatusEffectController.StatusEffectsRemoved += OnStatusEffectsRemoved;
+            _statusEffectController.CharacterSpeedChanged += OnCharacterSpeedChanged;
+            _statusEffectController.CharactersDied += OnCharactersDying;
+            _statusEffectController.CharactersHealthChanged += OnCharactersHealthChanged;
+            _statusEffectController.StatusEffectApplied += OnStatusEffectApplied;
+            _statusEffectController.StatusEffectsRemoved += OnStatusEffectsRemoved;
         }
 
         /// <summary>
@@ -190,7 +187,7 @@ namespace TurnBasedRPG.Controller.Combat
         /// <param name="character">The character whose turn is starting.</param>
         public void StartTurn(Character character)
         {
-            StatusEffectController.BeginStartTurn(character);
+            _statusEffectController.BeginStartTurn(character);
             if (_delayedActions.ContainsKey(character))
             {
                 var removeActions = new List<DelayedAction>();
@@ -208,7 +205,7 @@ namespace TurnBasedRPG.Controller.Combat
                     _delayedActions[character].Remove(action);
                 }
             }
-            StatusEffectController.FinishStartTurn(character);
+            _statusEffectController.FinishStartTurn(character);
         }
 
         /// <summary>
@@ -404,7 +401,7 @@ namespace TurnBasedRPG.Controller.Combat
             {
                 foreach (var status in action.BuffsToApply)
                 {
-                    StatusEffectController.ApplyStatus(actor, status, livingTargets);
+                    _statusEffectController.ApplyStatus(actor, status, livingTargets);
                 }
             }
         }
@@ -419,7 +416,7 @@ namespace TurnBasedRPG.Controller.Combat
         {
             foreach (var status in action.BuffsToApply)
             {
-                StatusEffectController.CreateDelayedStatus(actor, status, targets, action.Delay);
+                _statusEffectController.CreateDelayedStatus(actor, status, targets, action.Delay);
             }
         }
     }

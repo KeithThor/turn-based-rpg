@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TurnBasedRPG.Shared.Interfaces;
-using TurnBasedRPG.Shared.Enums;
-using TurnBasedRPG.Controller.Combat;
-using TurnBasedRPG.Controller.EventArgs;
+﻿using System.Collections.Generic;
 using System.Threading;
-using TurnBasedRPG.UI.Combat.EventArgs;
+using System.Threading.Tasks;
+using TurnBasedRPG.Controller.Combat.Interfaces;
+using TurnBasedRPG.Controller.EventArgs;
 using TurnBasedRPG.Shared.Combat;
-using TurnBasedRPG.UI.Combat.Panels;
+using TurnBasedRPG.Shared.Enums;
+using TurnBasedRPG.Shared.Interfaces;
+using TurnBasedRPG.UI.Combat.EventArgs;
+using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat
 {
@@ -20,24 +16,24 @@ namespace TurnBasedRPG.UI.Combat
     /// </summary>
     public class CombatUI
     {
-        private readonly CombatController _combatInstance;
-        private readonly UICharacterManager _uiCharacterManager;
-        private readonly DefaultsHandler _defaultsHandler;
-        private readonly UIContainer _uiContainer;
+        private readonly ICombatController _combatController;
+        private readonly IUICharacterManager _uiCharacterManager;
+        private readonly IUIStateTracker _defaultsHandler;
+        private readonly IUIContainer _uiContainer;
         private readonly UserInput _userInput;
-        private readonly DisplayManager _displayManager;
-        private readonly CombatStateHandler _combatStateHandler;
+        private readonly IDisplayManager _displayManager;
+        private readonly IDisplayCombatState _combatStateHandler;
 
-        public CombatUI(CombatController combatInstance,
-                        UICharacterManager uiCharacterManager,
+        public CombatUI(ICombatController combatController,
+                        IUICharacterManager uiCharacterManager,
                         GameUIConstants gameUIConstants,
-                        UIContainer uiContainer,
+                        IUIContainer uiContainer,
                         UserInput userInput,
-                        DefaultsHandler defaultsHandler,
-                        DisplayManager displayManager,
-                        CombatStateHandler combatStateHandler)
+                        IUIStateTracker defaultsHandler,
+                        IDisplayManager displayManager,
+                        IDisplayCombatState combatStateHandler)
         {
-            _combatInstance = combatInstance;
+            _combatController = combatController;
             _displayManager = displayManager;
             _combatStateHandler = combatStateHandler;
             _defaultsHandler = defaultsHandler;
@@ -57,23 +53,23 @@ namespace TurnBasedRPG.UI.Combat
         
         private void BindEvents()
         {
-            _combatInstance.CharactersHealthChanged += OnCharactersHealthChanged;
-            _combatInstance.CharactersHealthChanged += _uiContainer.OnCombatLoggableEvent;
-            _combatInstance.CharactersDied += _uiContainer.OnCombatLoggableEvent;
-            _combatInstance.StatusEffectApplied += _uiContainer.OnCombatLoggableEvent;
-            _combatInstance.StatusEffectApplied += OnStatusEffectApplied;
-            _combatInstance.DelayedActionBeginChannel += _uiContainer.OnCombatLoggableEvent;
-            _combatInstance.CharacterBeginWait += _uiContainer.OnCombatLoggableEvent;
-            _combatInstance.StartOfTurn += OnStartOfTurn;
-            _combatInstance.StatusEffectsRemoved += _uiContainer.OnCombatLoggableEvent;
+            _combatController.CharactersHealthChanged += OnCharactersHealthChanged;
+            _combatController.CharactersHealthChanged += _uiContainer.OnCombatLoggableEvent;
+            _combatController.CharactersDied += _uiContainer.OnCombatLoggableEvent;
+            _combatController.StatusEffectApplied += _uiContainer.OnCombatLoggableEvent;
+            _combatController.StatusEffectApplied += OnStatusEffectApplied;
+            _combatController.DelayedActionBeginChannel += _uiContainer.OnCombatLoggableEvent;
+            _combatController.CharacterBeginWait += _uiContainer.OnCombatLoggableEvent;
+            _combatController.StartOfTurn += OnStartOfTurn;
+            _combatController.StatusEffectsRemoved += _uiContainer.OnCombatLoggableEvent;
 
             _uiContainer.ActionSelectedEvent += OnActionSelected;
             _uiContainer.ActionStartedEvent += OnActionStarted;
             _uiContainer.UpdateActionListEvent += OnUpdateActionList;
             _uiContainer.UpdateCategories += OnUpdateCategories;
 
-            _combatInstance.EndOfTurn += EndOfTurnTriggered;
-            _combatInstance.AIChoseTarget += OnAIChoseTarget;
+            _combatController.EndOfTurn += EndOfTurnTriggered;
+            _combatController.AIChoseTarget += OnAIChoseTarget;
         }
 
         /// <summary>
@@ -150,7 +146,7 @@ namespace TurnBasedRPG.UI.Combat
                                                                      args.CategoryName,
                                                                      args.ActionFocusNumber - 1);
 
-            _defaultsHandler.ActiveAction = new DefaultsHandler.ActionStore()
+            _defaultsHandler.ActiveAction = new UIStateTracker.ActionStore()
             {
                 TargetPositions = activeAction.GetActionTargets(),
                 CenterOfTargets = activeAction.GetCenterOfTargetsPosition(),
@@ -187,10 +183,10 @@ namespace TurnBasedRPG.UI.Combat
         /// <param name="args"></param>
         private void OnActionStarted(object sender, ActionStartedEventArgs args)
         {
-            _combatInstance.StartAction(args.ActionType,
-                                        args.CategoryName,
-                                        args.ActionIndex,
-                                        args.TargetPosition);
+            _combatController.StartAction(args.ActionType,
+                                          args.CategoryName,
+                                          args.ActionIndex,
+                                          args.TargetPosition);
         }
 
         /// <summary>
@@ -259,7 +255,7 @@ namespace TurnBasedRPG.UI.Combat
             int msWait = 1000;
             int frames = 2;
             _defaultsHandler.CurrentTargetPositions = args.TargetPositions;
-            _uiContainer.RenderFormationTargets = true;
+            _defaultsHandler.IsInFormationPanel = true;
             _uiContainer.PrintUI(frames, msWait);
         }
 

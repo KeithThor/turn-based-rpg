@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TurnBasedRPG.Shared;
 using TurnBasedRPG.UI.Combat.Interfaces;
 
 namespace TurnBasedRPG.UI.Combat.Panels
 {
-    public class CategoryDetailsPanel : IPanel
+    /// <summary>
+    /// Panel responsible for rendering the name and description of the currently active category.
+    /// </summary>
+    public class CategoryDetailsPanel : ICategoryDetailsPanel
     {
         public int MaxWidth { get; set; }
         public int MaxHeight { get; set; }
 
-        public CategoryDetailsPanel(DefaultsHandler defaultsHandler)
+        public CategoryDetailsPanel(IUIStateTracker defaultsHandler)
         {
             MaxWidth = 55;
             MaxHeight = 16;
@@ -22,7 +22,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
 
         private string[] _cachedCategory = new string[] { "" };
         private IReadOnlyList<string> _cachedRender;
-        private readonly DefaultsHandler _defaultsHandler;
+        private readonly IUIStateTracker _defaultsHandler;
 
         /// <summary>
         /// Returns an details panel injected with a category name and it's description.
