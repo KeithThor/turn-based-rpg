@@ -244,12 +244,12 @@ namespace TurnBasedRPG.Controller.Combat
                     break;
                 case Commands.Items:
                     var item = DisplayManager.GetConsumablesFromCategory(category)[index];
-                    _consumablesHandler.UseConsumable(item, CombatStateHandler.CurrentRoundOrder[0]);
                     targets = CombatTargeter.GetTranslatedTargetPositions(item.ItemSpell.TargetPositions,
                                                                           item.ItemSpell.CenterOfTargetsPosition,
                                                                           item.ItemSpell.CanSwitchTargetPosition,
                                                                           targetPosition);
                     _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], item.ItemSpell, targets);
+                    _consumablesHandler.UseConsumable(item, CombatStateHandler.CurrentRoundOrder[0]);
                     break;
                 case Commands.Wait:
                     if (CombatStateHandler.CurrentRoundOrder.Count() == 1)

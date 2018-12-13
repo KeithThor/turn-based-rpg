@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TurnBasedRPG.Controller.Combat;
+using TurnBasedRPG.Controller.Combat.Interfaces;
 using TurnBasedRPG.Shared.Interfaces;
 using TurnBasedRPG.UI.Combat.Interfaces;
 
@@ -13,10 +14,13 @@ namespace TurnBasedRPG.UI.Combat
     /// </summary>
     public class UIStateTracker : IUIStateTracker
     {
-        public UIStateTracker(CombatStateHandler combatStateHandler)
+        private readonly IDisplayCombatState _combatStateHandler;
+
+        public UIStateTracker(IDisplayCombatState combatStateHandler)
         {
-            var playerCharacterIds = combatStateHandler.GetPlayerCharacterIds();
-            ActiveCharacterId = combatStateHandler.GetNextActivePlayerId();
+            _combatStateHandler = combatStateHandler;
+            var playerCharacterIds = _combatStateHandler.GetPlayerCharacterIds();
+            ActiveCharacterId = _combatStateHandler.GetNextActivePlayerId();
             _characterDefaults = new Dictionary<int, PlayerCharacterDefaults>();
             foreach (var characterId in playerCharacterIds)
             {
@@ -334,5 +338,10 @@ namespace TurnBasedRPG.UI.Combat
                 }
             }
         }
+
+        /// <summary>
+        /// Gets whether or not it is the player's turn.
+        /// </summary>
+        public bool IsPlayerTurn { get { return _combatStateHandler.IsPlayerTurn(); } }
     }
 }

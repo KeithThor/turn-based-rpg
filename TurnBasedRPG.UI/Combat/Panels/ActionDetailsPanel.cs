@@ -53,6 +53,8 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// <returns>A read-only list containing the panel.</returns>
         public IReadOnlyList<string> Render()
         {
+            if (!_defaultsHandler.IsPlayerTurn) return RenderBlankPanel();
+
             var action = _displayManager.GetActionFromCategory((Commands)_defaultsHandler.CommandFocusNumber,
                                                                _defaultsHandler.ActiveCategory,
                                                                _defaultsHandler.ActionFocusNumber - 1);

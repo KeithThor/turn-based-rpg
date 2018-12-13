@@ -79,6 +79,11 @@ namespace TurnBasedRPG.UI.Combat.Interfaces
         IReadOnlyList<int> CurrentTargetPositions { get; set; }
 
         /// <summary>
+        /// Gets whether or not it is the player's turn.
+        /// </summary>
+        bool IsPlayerTurn { get; }
+
+        /// <summary>
         /// Whether or not the player is in the action panel.
         /// </summary>
         bool IsInActionPanel { get; set; }

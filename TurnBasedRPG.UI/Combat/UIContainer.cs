@@ -20,7 +20,7 @@ namespace TurnBasedRPG.UI.Combat
         private readonly IActionPanel _actionPanel;
         private readonly ITurnOrderPanel _turnOrderPanel;
         private readonly IActionDetailsPanel _actionDetailsPanel;
-        private readonly IUIStateTracker _defaultsHandler;
+        private readonly IUIStateTracker _uiStateTracker;
         private readonly IUICharacterManager _uiCharacterManager;
         private readonly ICategoryDetailsPanel _categoryDetailsPanel;
         private readonly ICombatLogPanel _combatLogPanel;
@@ -39,7 +39,7 @@ namespace TurnBasedRPG.UI.Combat
                            ICharacterPanel characterPanel,
                            IStatusEffectsPanel statusEffectsPanel,
                            ICategoryPanel categoryPanel,
-                           IUIStateTracker defaultsHandler,
+                           IUIStateTracker uiStateTracker,
                            IUICharacterManager uiCharacterManager)
         {
             _formationPanel = formationPanel;
@@ -54,7 +54,7 @@ namespace TurnBasedRPG.UI.Combat
             _statusEffectsPanel = statusEffectsPanel;
             _categoryPanel = categoryPanel;
             _characterPanel.MaxHeight = _formationPanel.MaxHeight;
-            _defaultsHandler = defaultsHandler;
+            _uiStateTracker = uiStateTracker;
             _uiCharacterManager = uiCharacterManager;
 
             _commandPanel.IsActive = true;
@@ -162,7 +162,7 @@ namespace TurnBasedRPG.UI.Combat
 
         public void OnCommandFocusChanged(object sender, CommandFocusChangedEventArgs args)
         {
-            _defaultsHandler.CommandFocusNumber = (int)args.NewCommand;
+            _uiStateTracker.CommandFocusNumber = (int)args.NewCommand;
             UpdateCategories?.Invoke(this, new UpdateCategoriesEventArgs()
             {
                 CommandFocus = args.NewCommand
@@ -259,45 +259,45 @@ namespace TurnBasedRPG.UI.Combat
         private void EnterKeyPressed()
         {
             // If the player is in the command panel
-            if (!_defaultsHandler.IsInActionPanel
-                && !_defaultsHandler.IsInFormationPanel
-                && !_defaultsHandler.IsInCategoryPanel)
+            if (!_uiStateTracker.IsInActionPanel
+                && !_uiStateTracker.IsInFormationPanel
+                && !_uiStateTracker.IsInCategoryPanel)
             {
-                switch ((Commands)_defaultsHandler.CommandFocusNumber)
+                switch ((Commands)_uiStateTracker.CommandFocusNumber)
                 {
                     case Commands.Attack:
-                        _defaultsHandler.IsInActionPanel = true;
-                        _defaultsHandler.IsInCommandPanel = false;
+                        _uiStateTracker.IsInActionPanel = true;
+                        _uiStateTracker.IsInCommandPanel = false;
                         UpdateActionListEvent?.Invoke(this, new UpdateActionListEventArgs()
                         {
-                            CommandFocus = (Commands)_defaultsHandler.CommandFocusNumber,
-                            CategoryName = _defaultsHandler.ActiveCategory
+                            CommandFocus = (Commands)_uiStateTracker.CommandFocusNumber,
+                            CategoryName = _uiStateTracker.ActiveCategory
                         });
                         break;
                     case Commands.Spells:
                     case Commands.Skills:
                     case Commands.Items:
-                        if (_defaultsHandler.CategoryItemCount > 0)
+                        if (_uiStateTracker.CategoryItemCount > 0)
                         {
-                            _defaultsHandler.IsInCategoryPanel = true;
-                            _defaultsHandler.IsInCommandPanel = false;
+                            _uiStateTracker.IsInCategoryPanel = true;
+                            _uiStateTracker.IsInCommandPanel = false;
                         }
                         break;
                     case Commands.Status:
-                        _defaultsHandler.IsInFormationPanel = true;
-                        _defaultsHandler.IsInCommandPanel = false;
-                        int? position = _uiCharacterManager.GetPositionOfCharacter(_defaultsHandler.ActiveCharacterId);
+                        _uiStateTracker.IsInFormationPanel = true;
+                        _uiStateTracker.IsInCommandPanel = false;
+                        int? position = _uiCharacterManager.GetPositionOfCharacter(_uiStateTracker.ActiveCharacterId);
 
                         if (position == null) throw new Exception("Active character was not found in UICharacterManager.");
                         else
                         {
-                            _defaultsHandler.CurrentTargetPosition = position.GetValueOrDefault();
-                            _defaultsHandler.CurrentTargetPositions = new List<int>() { position.GetValueOrDefault() };
-                            _defaultsHandler.ActiveAction.CanSwitchTargetPosition = true;
-                            _defaultsHandler.ActiveAction.CanTargetThroughUnits = true;
-                            _defaultsHandler.ActiveAction.CenterOfTargets = 5;
-                            _defaultsHandler.ActiveAction.TargetPositions = new List<int>() { 5 };
-                            _defaultsHandler.IsInStatusCommand = true;
+                            _uiStateTracker.CurrentTargetPosition = position.GetValueOrDefault();
+                            _uiStateTracker.CurrentTargetPositions = new List<int>() { position.GetValueOrDefault() };
+                            _uiStateTracker.ActiveAction.CanSwitchTargetPosition = true;
+                            _uiStateTracker.ActiveAction.CanTargetThroughUnits = true;
+                            _uiStateTracker.ActiveAction.CenterOfTargets = 5;
+                            _uiStateTracker.ActiveAction.TargetPositions = new List<int>() { 5 };
+                            _uiStateTracker.IsInStatusCommand = true;
                         }
                         break;
                     case Commands.Wait:
@@ -312,58 +312,58 @@ namespace TurnBasedRPG.UI.Combat
                 }
             }
             // If the player is in the formation panel, start an action
-            else if (_defaultsHandler.IsInFormationPanel && !_defaultsHandler.IsInStatusCommand)
+            else if (_uiStateTracker.IsInFormationPanel && !_uiStateTracker.IsInStatusCommand)
             {
-                var target = _defaultsHandler.CurrentTargetPosition;
+                var target = _uiStateTracker.CurrentTargetPosition;
 
                 ActionStartedEvent?.Invoke(this, new ActionStartedEventArgs()
                 {
-                    ActionType = (Commands)_defaultsHandler.CommandFocusNumber,
-                    CategoryName = _defaultsHandler.ActiveCategory,
-                    ActionIndex = _defaultsHandler.ActionFocusNumber - 1,
+                    ActionType = (Commands)_uiStateTracker.CommandFocusNumber,
+                    CategoryName = _uiStateTracker.ActiveCategory,
+                    ActionIndex = _uiStateTracker.ActionFocusNumber - 1,
                     TargetPosition = target
                 });
             }
-            else if (_defaultsHandler.IsInStatusCommand)
+            else if (_uiStateTracker.IsInStatusCommand)
             {
-                if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition))
+                if (_uiCharacterManager.CharacterInPositionExists(_uiStateTracker.CurrentTargetPosition))
                 {
-                    _defaultsHandler.IsInCharacterPanel = true;
+                    _uiStateTracker.IsInCharacterPanel = true;
                 }
             }
             // If the player is in the action panel, switch to the formation panel
-            else if (_defaultsHandler.IsInActionPanel)
+            else if (_uiStateTracker.IsInActionPanel)
             {
-                switch ((Commands)_defaultsHandler.CommandFocusNumber)
+                switch ((Commands)_uiStateTracker.CommandFocusNumber)
                 {
                     case Commands.Attack:
                     case Commands.Spells:
                     case Commands.Skills:
                     case Commands.Items:
-                        _defaultsHandler.IsInFormationPanel = true;
-                        _defaultsHandler.IsInActionPanel = false;
+                        _uiStateTracker.IsInFormationPanel = true;
+                        _uiStateTracker.IsInActionPanel = false;
                         ActionSelectedEvent?.Invoke(this, new ActionSelectedEventArgs()
                         {
-                            CommandFocus = (Commands)_defaultsHandler.CommandFocusNumber,
-                            CategoryName = _defaultsHandler.ActiveCategory,
-                            ActionFocusNumber = _defaultsHandler.ActionFocusNumber
+                            CommandFocus = (Commands)_uiStateTracker.CommandFocusNumber,
+                            CategoryName = _uiStateTracker.ActiveCategory,
+                            ActionFocusNumber = _uiStateTracker.ActionFocusNumber
                         });
                         break;
                     default:
                         break;
                 }
             }
-            else if (_defaultsHandler.IsInCategoryPanel)
+            else if (_uiStateTracker.IsInCategoryPanel)
             {
                 // Get all spells or skills in category
                 UpdateActionListEvent?.Invoke(this, new UpdateActionListEventArgs()
                 {
-                    CommandFocus = (Commands)_defaultsHandler.CommandFocusNumber,
-                    CategoryName = _defaultsHandler.ActiveCategory
+                    CommandFocus = (Commands)_uiStateTracker.CommandFocusNumber,
+                    CategoryName = _uiStateTracker.ActiveCategory
                 });
 
-                _defaultsHandler.IsInActionPanel = true;
-                _defaultsHandler.IsInCategoryPanel = false;
+                _uiStateTracker.IsInActionPanel = true;
+                _uiStateTracker.IsInCategoryPanel = false;
             }
         }
 
@@ -372,31 +372,31 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         private void EscapeKeyPressed()
         {
-            if (_defaultsHandler.IsInFormationPanel && !_defaultsHandler.IsInStatusCommand)
+            if (_uiStateTracker.IsInFormationPanel && !_uiStateTracker.IsInStatusCommand)
             {
-                _defaultsHandler.IsInFormationPanel = false;
-                _defaultsHandler.IsInActionPanel = true;
+                _uiStateTracker.IsInFormationPanel = false;
+                _uiStateTracker.IsInActionPanel = true;
             }
-            else if (_defaultsHandler.IsInStatusCommand)
+            else if (_uiStateTracker.IsInStatusCommand)
             {
-                _defaultsHandler.IsInStatusCommand = false;
-                _defaultsHandler.IsInFormationPanel = false;
-                _defaultsHandler.IsInCommandPanel = true;
+                _uiStateTracker.IsInStatusCommand = false;
+                _uiStateTracker.IsInFormationPanel = false;
+                _uiStateTracker.IsInCommandPanel = true;
             }
-            else if (_defaultsHandler.IsInActionPanel && (Commands)_defaultsHandler.CommandFocusNumber != Commands.Attack)
+            else if (_uiStateTracker.IsInActionPanel && (Commands)_uiStateTracker.CommandFocusNumber != Commands.Attack)
             {
-                _defaultsHandler.IsInActionPanel = false;
-                _defaultsHandler.IsInCategoryPanel = true;
+                _uiStateTracker.IsInActionPanel = false;
+                _uiStateTracker.IsInCategoryPanel = true;
             }
-            else if (_defaultsHandler.IsInActionPanel && (Commands)_defaultsHandler.CommandFocusNumber == Commands.Attack)
+            else if (_uiStateTracker.IsInActionPanel && (Commands)_uiStateTracker.CommandFocusNumber == Commands.Attack)
             {
-                _defaultsHandler.IsInActionPanel = false;
-                _defaultsHandler.IsInCommandPanel = true;
+                _uiStateTracker.IsInActionPanel = false;
+                _uiStateTracker.IsInCommandPanel = true;
             }
             else
             {
-                _defaultsHandler.IsInCategoryPanel = false;
-                _defaultsHandler.IsInCommandPanel = true;
+                _uiStateTracker.IsInCategoryPanel = false;
+                _uiStateTracker.IsInCommandPanel = true;
             }
         }
 
@@ -442,9 +442,9 @@ namespace TurnBasedRPG.UI.Combat
             var detailsPanel = StartRenderDetailsPanels();
 
             IReadOnlyList<string> actionOrDetailsPanel;
-            if (_defaultsHandler.IsInActionPanel 
-                || _defaultsHandler.CommandFocusNumber == (int)Commands.Attack
-                || _defaultsHandler.IsInFormationPanel)
+            if (_uiStateTracker.IsInActionPanel 
+                || _uiStateTracker.CommandFocusNumber == (int)Commands.Attack
+                || _uiStateTracker.IsInFormationPanel)
             {
                 actionOrDetailsPanel = _actionPanel.Render();
             }
@@ -470,10 +470,10 @@ namespace TurnBasedRPG.UI.Combat
         {
             IReadOnlyList<string> detailsPanel;
 
-            bool inStatusPanel = _defaultsHandler.IsInActionPanel && IsStatusPanelActive && _canDisplayStatusPanel;
+            bool inStatusPanel = _uiStateTracker.IsInActionPanel && IsStatusPanelActive && _canDisplayStatusPanel;
 
             // Display category information if in categories subpanel
-            if (_defaultsHandler.IsInCategoryPanel)
+            if (_uiStateTracker.IsInCategoryPanel)
             {
                 detailsPanel = _categoryDetailsPanel.Render();
             }
@@ -483,16 +483,21 @@ namespace TurnBasedRPG.UI.Combat
                 detailsPanel = _statusEffectsPanel.Render();
             }
             // Display action details if the current selection is an action
-            else if ((_defaultsHandler.IsInActionPanel || _defaultsHandler.IsInFormationPanel) && !_defaultsHandler.IsInStatusCommand)
+            else if ((_uiStateTracker.IsInActionPanel || _uiStateTracker.IsInFormationPanel) && !_uiStateTracker.IsInStatusCommand)
             {
-                int statusCount = _defaultsHandler.ActionPanelList[_defaultsHandler.ActionFocusNumber - 1].GetStatusCount();
-                if (statusCount > 0)
-                    _canDisplayStatusPanel = true;
-                if (_canDisplayStatusPanel)
+                var actionList = _uiStateTracker.ActionPanelList;
+                if (actionList != null && actionList.Count() > 0)
                 {
-                    _maxStatusPanels = statusCount;
-                    _statusEffectsPanel.FocusNumber = 1;
+                    int statusCount = actionList[_uiStateTracker.ActionFocusNumber - 1].GetStatusCount();
+                    if (statusCount > 0)
+                        _canDisplayStatusPanel = true;
+                    if (_canDisplayStatusPanel)
+                    {
+                        _maxStatusPanels = statusCount;
+                        _statusEffectsPanel.FocusNumber = 1;
+                    }
                 }
+                
                 detailsPanel = _actionDetailsPanel.Render();
             }
             else
