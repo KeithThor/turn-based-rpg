@@ -531,6 +531,9 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// </summary>
         private void OnUpArrowPressed()
         {
+            if (!_defaultsHandler.ActiveAction.CanSwitchTargetPosition)
+                return;
+
             bool isBlocked = IsUpArrowBlocked();
 
             // If the player is in the formation panel and not in the top-most rows of the formations and upwards movement is not blocked
@@ -547,6 +550,9 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// </summary>
         private void OnDownArrowPressed()
         {
+            if (!_defaultsHandler.ActiveAction.CanSwitchTargetPosition)
+                return;
+
             // If the player is in the formation panel, check to see if downwards movement is blocked
             bool isBlocked = IsDownArrowBlocked();
             if (!isBlocked
@@ -563,6 +569,9 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// </summary>
         private void OnRightArrowPressed()
         {
+            if (!_defaultsHandler.ActiveAction.CanSwitchTargetPosition)
+                return;
+
             bool isBlocked = IsRightArrowBlocked();
 
             if (!isBlocked
@@ -582,6 +591,8 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// </summary>
         private void OnLeftArrowPressed()
         {
+            if (!_defaultsHandler.ActiveAction.CanSwitchTargetPosition)
+                return;
             // If the player is in the formation panel, but not at the left-most column in the player's formation
             if ((_defaultsHandler.CurrentTargetPosition % 3 != 1
                     && _defaultsHandler.CurrentTargetPosition < 10)
