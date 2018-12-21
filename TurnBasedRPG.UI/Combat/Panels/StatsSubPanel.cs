@@ -15,16 +15,33 @@ namespace TurnBasedRPG.UI.Combat.Panels
         public int FocusNumber { get; set; }
         public int MaxHeight { get; set; }
         public int MaxWidth { get; set; }
+        private const int MaxStatTypes = 5;
 
         public StatsSubPanel()
         {
             MaxHeight = 7;
             MaxWidth = 18;
+            FocusNumber = 1;
         }
 
         public void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
-            throw new NotImplementedException();
+            if (IsActive && !args.Handled)
+            {
+                switch (args.PressedKey.Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        args.Handled = true;
+                        OnUpArrowPressed();
+                        break;
+                    case ConsoleKey.DownArrow:
+                        args.Handled = true;
+                        OnDownArrowPressed();
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         /// <summary>
@@ -37,11 +54,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
             var render = new List<string>();
             
             render.Add(" _Stats_" + new string(' ', MaxWidth - 8));
-            render.Add(GetStatDisplay("Strength", character.CurrentStats.Strength.ToString()));
-            render.Add(GetStatDisplay("Stamina", character.CurrentStats.Stamina.ToString()));
-            render.Add(GetStatDisplay("Intellect", character.CurrentStats.Intellect.ToString()));
-            render.Add(GetStatDisplay("Agility", character.CurrentStats.Agility.ToString()));
-            render.Add(GetStatDisplay("Speed", character.CurrentStats.Speed.ToString()));
+            render.Add(GetStatDisplay("Strength", character.CurrentStats.Strength.ToString(), 1));
+            render.Add(GetStatDisplay("Stamina", character.CurrentStats.Stamina.ToString(), 2));
+            render.Add(GetStatDisplay("Intellect", character.CurrentStats.Intellect.ToString(), 3));
+            render.Add(GetStatDisplay("Agility", character.CurrentStats.Agility.ToString(), 4));
+            render.Add(GetStatDisplay("Speed", character.CurrentStats.Speed.ToString(), 5));
             render.Add(new string(' ', MaxWidth));
 
             return render;
@@ -53,13 +70,27 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// <param name="statName">The name of the stat to display.</param>
         /// <param name="statAmount">The amount of the stat.</param>
         /// <returns>Contains the display details for a single stat.</returns>
-        private string GetStatDisplay(string statName, string statAmount)
+        private string GetStatDisplay(string statName, string statAmount, int index)
         {
             string focus = "";
-            if (IsActive) focus = "►";
+            if (IsActive && index == FocusNumber) focus = "►";
             int length = statName.Length + statAmount.Length + focus.Length + 2;
 
             return focus + statName + ": " + statAmount + new string(' ', MaxWidth - length);
+        }
+
+        private void OnUpArrowPressed()
+        {
+            FocusNumber--;
+            if (FocusNumber < 1)
+                FocusNumber = MaxStatTypes;
+        }
+
+        private void OnDownArrowPressed()
+        {
+            FocusNumber++;
+            if (FocusNumber > MaxStatTypes)
+                FocusNumber = 1;
         }
     }
 }

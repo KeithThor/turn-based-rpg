@@ -15,10 +15,12 @@ namespace TurnBasedRPG.UI.Combat.Panels
         public int FocusNumber { get; set; }
         public int MaxHeight { get; set; }
         public int MaxWidth { get; set; }
+        private const int MaxOffensiveStatTypes = 6;
 
         public OffensiveSubPanel()
         {
             MaxWidth = 18;
+            FocusNumber = 1;
         }
 
         /// <summary>
@@ -28,7 +30,22 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// <param name="args"></param>
         public void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
-            throw new NotImplementedException();
+            if (IsActive && !args.Handled)
+            {
+                switch (args.PressedKey.Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        OnUpArrowPressed();
+                        args.Handled = true;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        OnDownArrowPressed();
+                        args.Handled = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         /// <summary>
@@ -41,12 +58,12 @@ namespace TurnBasedRPG.UI.Combat.Panels
             var render = new List<string>();
 
             render.Add(" _Offensive_" + new string(' ', MaxWidth - 12));
-            render.Add(RenderStatPercentage("Crit Chance", character.CritChance));
-            render.Add(RenderStatPercentage("Crit Damage", character.CritMultiplier));
-            render.Add(RenderStat("Extra Threat", character.Threat, true));
-            render.Add(RenderStatPercentage("Threat %", character.ThreatMultiplier, true));
-            render.Add(RenderStat("Spell Damage", character.SpellDamageModifier, true));
-            render.Add(RenderStatPercentage("Spell %", character.SpellDamagePercentageModifier, true));
+            render.Add(RenderStatPercentage("Crit Chance", character.CritChance, 1));
+            render.Add(RenderStatPercentage("Crit Damage", character.CritMultiplier, 2));
+            render.Add(RenderStat("Extra Threat", character.Threat, 3, true));
+            render.Add(RenderStatPercentage("Threat %", character.ThreatMultiplier, 4, true));
+            render.Add(RenderStat("Spell Damage", character.SpellDamageModifier, 5, true));
+            render.Add(RenderStatPercentage("Spell %", character.SpellDamagePercentageModifier, 6, true));
 
             return render;
         }
@@ -58,16 +75,20 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// <param name="statAmount">The amount of the stat the character has.</param>
         /// <param name="includeSign">Whether or not to include a + sign in the case that the amount is positive.</param>
         /// <returns>A string containing the rendered stat and stat amount as well as the optional sign.</returns>
-        private string RenderStat(string statName, int statAmount, bool includeSign = false)
+        private string RenderStat(string statName, int statAmount, int index, bool includeSign = false)
         {
             string sign = "";
+            string focus = "";
+
             if (includeSign)
             {
                 if (statAmount > 0) sign = "+";
                 else if (statAmount < 0) sign = "";
             }
+            if (FocusNumber == index && IsActive)
+                focus = "►";
 
-            string render = $"{statName}: {sign}{statAmount}";
+            string render = $"{focus}{statName}: {sign}{statAmount}";
             render += new string(' ', MaxWidth - render.Length);
 
             return render;
@@ -80,19 +101,36 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// <param name="percentAmount">The amount of the stat in percentage that the character has.</param>
         /// <param name="includeSign">Whether or not to include a + sign in the case that the amount is positive.</param>
         /// <returns>A string containing the rendered stat and stat amount as a percentage as well as the optional sign.</returns>
-        private string RenderStatPercentage(string statName, int percentAmount, bool includeSign = false)
+        private string RenderStatPercentage(string statName, int percentAmount, int index, bool includeSign = false)
         {
             string sign = "";
+            string focus = "";
             if (includeSign)
             {
                 if (percentAmount > 0) sign = "+";
                 else if (percentAmount < 0) sign = "-";
             }
+            if (FocusNumber == index && IsActive)
+                focus = "►";
 
-            string render = $"{statName}: {sign}{percentAmount}%";
+            string render = $"{focus}{statName}: {sign}{percentAmount}%";
             render += new string(' ', MaxWidth - render.Length);
 
             return render;
+        }
+
+        private void OnUpArrowPressed()
+        {
+            FocusNumber--;
+            if (FocusNumber < 1)
+                FocusNumber = MaxOffensiveStatTypes;
+        }
+
+        private void OnDownArrowPressed()
+        {
+            FocusNumber++;
+            if (FocusNumber > MaxOffensiveStatTypes)
+                FocusNumber = 1;
         }
     }
 }

@@ -125,8 +125,9 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// <param name="args"></param>
         public void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
-            if (IsActive)
+            if (IsActive && !args.Handled)
             {
+                args.Handled = true;
                 if (args.PressedKey.Key == ConsoleKey.UpArrow)
                 {
                     FocusNumber = ((Commands)FocusNumber == Commands.Attack) ? (int)Commands.Run : --FocusNumber;
@@ -142,6 +143,10 @@ namespace TurnBasedRPG.UI.Combat.Panels
                     {
                         NewCommand = (Commands)FocusNumber
                     });
+                }
+                else
+                {
+                    args.Handled = false;
                 }
             }
         }

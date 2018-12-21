@@ -158,8 +158,9 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// <param name="args"></param>
         public void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
-            if (IsActive)
+            if (IsActive && !args.Handled)
             {
+                args.Handled = true;
                 switch (args.PressedKey.Key)
                 {
                     case ConsoleKey.UpArrow:
@@ -175,6 +176,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
                         OnRightArrowPressed();
                         break;
                     default:
+                        args.Handled = false;
                         break;
                 }
             }

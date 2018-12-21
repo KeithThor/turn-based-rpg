@@ -186,12 +186,13 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// <param name="args"></param>
         public void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
-            if (IsActive)
+            if (IsActive && !args.Handled)
             {
                 switch(args.PressedKey.Key)
                 {
                     case ConsoleKey.Tab:
                         SwitchFocus();
+                        args.Handled = true;
                         break;
                     default:
                         break;

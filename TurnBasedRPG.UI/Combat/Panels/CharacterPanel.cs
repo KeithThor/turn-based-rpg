@@ -30,7 +30,13 @@ namespace TurnBasedRPG.UI.Combat.Panels
             }
         }
 
-        public bool IsActive { get; set; }
+        public bool IsActive
+        {
+            get { return _uiStateTracker.IsInCharacterPanel; }
+            set { _uiStateTracker.IsInCharacterPanel = value; }
+        }
+
+        public bool IsSubPanelActive { get; set; }
         public int FocusNumber { get; set; }
 
         private readonly IStatsSubPanel _statsSubPanel;
@@ -39,7 +45,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
         private readonly IDamageTypesSubPanel _resistanceSubPanel;
         private readonly IDamageTypesSubPanel _damagePercentSubPanel;
         private readonly IOffensiveSubPanel _offensiveSubPanel;
-        private readonly IUIStateTracker _defaultsHandler;
+        private readonly IUIStateTracker _uiStateTracker;
         private readonly IUICharacterManager _uiCharacterManager;
 
         public CharacterPanel(IStatsSubPanel statsSubPanel,
@@ -48,12 +54,13 @@ namespace TurnBasedRPG.UI.Combat.Panels
                               IDamageTypesSubPanel resistanceSubPanel,
                               IDamageTypesSubPanel damagePercentSubPanel,
                               IOffensiveSubPanel offensiveSubPanel,
-                              IUIStateTracker defaultsHandler,
+                              IUIStateTracker uiStateTracker,
                               IUICharacterManager uiCharacterManager)
         {
             MaxHeight = 31;
             MaxWidth = 40;
             MinPrimaryBlockSize = 6;
+            FocusNumber = 1;
             _statsSubPanel = statsSubPanel;
             _armorSubPanel = armorSubPanel;
             // All panels on the right side must have max size deducted by 1 to make room for space seperator
@@ -67,9 +74,22 @@ namespace TurnBasedRPG.UI.Combat.Panels
             _damagePercentSubPanel = damagePercentSubPanel;
             _damagePercentSubPanel.PanelName = "Bonus Damage";
             _offensiveSubPanel = offensiveSubPanel;
-            _defaultsHandler = defaultsHandler;
+            _uiStateTracker = uiStateTracker;
             _uiCharacterManager = uiCharacterManager;
             _offensiveSubPanel.MaxWidth--;
+            IsSubPanelActive = false;
+
+            BindEvents();
+        }
+
+        private void BindEvents()
+        {
+            KeyPressed += _statsSubPanel.OnKeyPressed;
+            KeyPressed += _offensiveSubPanel.OnKeyPressed;
+            KeyPressed += _damageSubPanel.OnKeyPressed;
+            KeyPressed += _armorSubPanel.OnKeyPressed;
+            KeyPressed += _damagePercentSubPanel.OnKeyPressed;
+            KeyPressed += _resistanceSubPanel.OnKeyPressed;
         }
 
         private struct CachedCharacter
@@ -82,6 +102,8 @@ namespace TurnBasedRPG.UI.Combat.Panels
         private CachedCharacter _cachedCharacter;
         private IReadOnlyList<string> _cachedRender;
 
+        public event EventHandler<KeyPressedEventArgs> KeyPressed;
+
         /// <summary>
         /// Returns a details panel injected with the data from a character.
         /// </summary>
@@ -91,7 +113,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
         {
             IDisplayCharacter focusedTarget;
             IReadOnlyList<IDisplayCharacter> otherTargets = new List<IDisplayCharacter>();
-            var targets = _defaultsHandler.CurrentTargetPositions;
+            var targets = _uiStateTracker.CurrentTargetPositions;
 
             // If there are no characters within any of our target positions, return the current turn character
             if (!targets.Any(targetPosition =>
@@ -100,10 +122,10 @@ namespace TurnBasedRPG.UI.Combat.Panels
                 focusedTarget = _uiCharacterManager.GetCurrentTurnCharacter();
             }
             // If our main target position is occupied, display that target
-            else if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition)
-                     && targets.Contains(_defaultsHandler.CurrentTargetPosition))
+            else if (_uiCharacterManager.CharacterInPositionExists(_uiStateTracker.CurrentTargetPosition)
+                     && targets.Contains(_uiStateTracker.CurrentTargetPosition))
             {
-                focusedTarget = _uiCharacterManager.GetCharacterFromPosition(_defaultsHandler.CurrentTargetPosition);
+                focusedTarget = _uiCharacterManager.GetCharacterFromPosition(_uiStateTracker.CurrentTargetPosition);
                 otherTargets = _uiCharacterManager.GetCharactersFromPositions(targets);
             }
             // If our main target position isn't occupied, display any target that occupies a spot in our target list
@@ -226,16 +248,18 @@ namespace TurnBasedRPG.UI.Combat.Panels
         }
 
         /// <summary>
-        /// 
+        /// Renders a resource name along with the resource's current amount and max amount.
         /// </summary>
-        /// <param name="character"></param>
-        /// <returns></returns>
+        /// <param name="resourceName">The name of the resource.</param>
+        /// <param name="resourceAmount1">The current amount of the resource.</param>
+        /// <param name="resourceAmount2">The maximum amount of the resource.</param>
+        /// <returns>A string containing the resource name and the amount of that resource.</returns>
         private string RenderResource(string resourceName, int resourceAmount1, int resourceAmount2)
         {
-            string health = $"║ {resourceName}: {resourceAmount1}/{resourceAmount2}";
-            int spaces = MaxWidth - health.Length - 1;
-            health += new string(' ', spaces) + "║";
-            return health;
+            string resource = $"║ {resourceName}: {resourceAmount1}/{resourceAmount2}";
+            int spaces = MaxWidth - resource.Length - 1;
+            resource += new string(' ', spaces) + "║";
+            return resource;
         }
         
         /// <summary>
@@ -274,10 +298,19 @@ namespace TurnBasedRPG.UI.Combat.Panels
             var damageRender = _damageSubPanel.Render(character.DamageModifier);
             var damagePercentRender = _damagePercentSubPanel.Render(character.DamagePercentageModifier);
 
+
+            int index = 1;
             // Render stats and offensive panels
             for (int i = 0; i < statsRender.Count(); i++)
             {
-                subPanels.Add("║ " + statsRender[i] + " " + offensiveRender[i] + " ║");
+                if (i == 0 && IsActive)
+                {
+                    subPanels.Add("║" + GetFocus(index) + statsRender[i] + GetFocus(++index) + offensiveRender[i] + " ║");
+                }
+                else
+                {
+                    subPanels.Add("║ " + statsRender[i] + " " + offensiveRender[i] + " ║");
+                }
             }
 
             subPanels.Add(RenderEmptyLine());
@@ -285,7 +318,14 @@ namespace TurnBasedRPG.UI.Combat.Panels
             // Render damage and armor panels
             for (int i = 0; i < statsRender.Count(); i++)
             {
-                subPanels.Add("║ " + damageRender[i] + " " + armorRender[i] + " ║");
+                if (i == 0 && IsActive)
+                {
+                    subPanels.Add("║" + GetFocus(++index) + damageRender[i] + GetFocus(++index) + armorRender[i] + " ║");
+                }
+                else
+                {
+                    subPanels.Add("║ " + damageRender[i] + " " + armorRender[i] + " ║");
+                }
             }
 
             subPanels.Add(RenderEmptyLine());
@@ -293,10 +333,28 @@ namespace TurnBasedRPG.UI.Combat.Panels
             // Render damage percent and resistance panels
             for (int i = 0; i < offensiveRender.Count(); i++)
             {
-                subPanels.Add("║ " + damagePercentRender[i] + " " + resistanceRender[i] + " ║");
+                if (i == 0 && IsActive)
+                {
+                    subPanels.Add("║" + GetFocus(++index) + damagePercentRender[i] + GetFocus(++index) + resistanceRender[i] + " ║");
+                }
+                else
+                {
+                    subPanels.Add("║ " + damagePercentRender[i] + " " + resistanceRender[i] + " ║");
+                }
             }
             
             return subPanels;
+        }
+
+        /// <summary>
+        /// Given an index, returns a focus triangle if the index matches the Focus Number, else returns an empty space.
+        /// </summary>
+        /// <param name="index">The index of the panel.</param>
+        /// <returns>A string containing a focus triangle or a space.</returns>
+        private string GetFocus(int index)
+        {
+            if (FocusNumber == index) return "►";
+            return " ";
         }
 
         /// <summary>
@@ -324,7 +382,130 @@ namespace TurnBasedRPG.UI.Combat.Panels
 
         public void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
-            throw new NotImplementedException();
+            KeyPressed?.Invoke(sender, args);
+
+            if (IsActive && !args.Handled)
+            {
+                args.Handled = true;
+                switch(args.PressedKey.Key)
+                {
+                    case ConsoleKey.LeftArrow:
+                        OnLeftArrowPressed();
+                        break;
+                    case ConsoleKey.RightArrow:
+                        OnRightArrowPressed();
+                        break;
+                    case ConsoleKey.UpArrow:
+                        OnUpArrowPressed();
+                        break;
+                    case ConsoleKey.DownArrow:
+                        OnDownArrowPressed();
+                        break;
+                    case ConsoleKey.Enter:
+                        OnEnterPressed();
+                        break;
+                    case ConsoleKey.Escape:
+                        if (IsSubPanelActive)
+                            DeactivateSubpanel();
+                        else
+                            args.Handled = false;
+                        break;
+                    default:
+                        args.Handled = false;
+                        break;
+                }
+            }
+        }
+
+        private void OnLeftArrowPressed()
+        {
+            if (FocusNumber % 2 == 0 && !IsSubPanelActive)
+            {
+                FocusNumber--;
+            }
+        }
+
+        private void OnRightArrowPressed()
+        {
+            if (FocusNumber % 2 == 1 && !IsSubPanelActive)
+            {
+                FocusNumber++;
+            }
+        }
+
+        private void OnUpArrowPressed()
+        {
+            if (FocusNumber > 2 && !IsSubPanelActive)
+            {
+                FocusNumber -= 2;
+            }
+        }
+
+        private void OnDownArrowPressed()
+        {
+            if (FocusNumber < 5 && !IsSubPanelActive)
+            {
+                FocusNumber += 2;
+            }
+        }
+
+        private void OnEnterPressed()
+        {
+            if (!IsSubPanelActive)
+            {
+                IsSubPanelActive = true;
+                switch (FocusNumber)
+                {
+                    case 1:
+                        _statsSubPanel.IsActive = true;
+                        break;
+                    case 2:
+                        _offensiveSubPanel.IsActive = true;
+                        break;
+                    case 3:
+                        _damageSubPanel.IsActive = true;
+                        break;
+                    case 4:
+                        _armorSubPanel.IsActive = true;
+                        break;
+                    case 5:
+                        _damagePercentSubPanel.IsActive = true;
+                        break;
+                    case 6:
+                        _resistanceSubPanel.IsActive = true;
+                        break;
+                    default:
+                        throw new Exception("Focus number not within accepted range in CharacterPanel!");
+                }
+            }
+        }
+
+        private void DeactivateSubpanel()
+        {
+            IsSubPanelActive = false;
+            switch (FocusNumber)
+            {
+                case 1:
+                    _statsSubPanel.IsActive = false;
+                    break;
+                case 2:
+                    _offensiveSubPanel.IsActive = false;
+                    break;
+                case 3:
+                    _damageSubPanel.IsActive = false;
+                    break;
+                case 4:
+                    _armorSubPanel.IsActive = false;
+                    break;
+                case 5:
+                    _damagePercentSubPanel.IsActive = false;
+                    break;
+                case 6:
+                    _resistanceSubPanel.IsActive = false;
+                    break;
+                default:
+                    throw new Exception("Focus number not within accepted range in CharacterPanel!");
+            }
         }
     }
 }

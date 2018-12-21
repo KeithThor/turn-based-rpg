@@ -16,16 +16,33 @@ namespace TurnBasedRPG.UI.Combat.Panels
         public int MaxWidth { get; set; }
         public int MaxHeight { get; set; }
         public string PanelName { get; set; }
+        private const int MaxDamageTypes = 6;
 
         public DamageTypesSubPanel()
         {
             MaxWidth = 18;
             MaxHeight = 7;
+            FocusNumber = 1;
         }
 
         public virtual void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
-            throw new NotImplementedException();
+            if (IsActive && !args.Handled)
+            {
+                switch (args.PressedKey.Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        OnUpArrowPressed();
+                        args.Handled = true;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        OnDownArrowPressed();
+                        args.Handled = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         /// <summary>
@@ -39,12 +56,12 @@ namespace TurnBasedRPG.UI.Combat.Panels
             var render = new List<string>();
 
             render.Add($" _{PanelName}_" + new string(' ', MaxWidth - PanelName.Length - 3));
-            render.Add(RenderArmor("Physical", damageTypes.Physical.ToString()));
-            render.Add(RenderArmor("Fire", damageTypes.Fire.ToString()));
-            render.Add(RenderArmor("Frost", damageTypes.Frost.ToString()));
-            render.Add(RenderArmor("Lightning", damageTypes.Lightning.ToString()));
-            render.Add(RenderArmor("Shadow", damageTypes.Shadow.ToString()));
-            render.Add(RenderArmor("Light", damageTypes.Light.ToString()));
+            render.Add(RenderArmor("Physical", damageTypes.Physical.ToString(), 1));
+            render.Add(RenderArmor("Fire", damageTypes.Fire.ToString(), 2));
+            render.Add(RenderArmor("Frost", damageTypes.Frost.ToString(), 3));
+            render.Add(RenderArmor("Lightning", damageTypes.Lightning.ToString(), 4));
+            render.Add(RenderArmor("Shadow", damageTypes.Shadow.ToString(), 5));
+            render.Add(RenderArmor("Light", damageTypes.Light.ToString(), 6));
 
             return render;
         }
@@ -55,13 +72,27 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// <param name="typeName">The type of damage type to render.</param>
         /// <param name="amount">The amount of damage type a character has of a type.</param>
         /// <returns>A string containing the amount of a type of damage type a character has.</returns>
-        private string RenderArmor(string typeName, string amount)
+        private string RenderArmor(string typeName, string amount, int index)
         {
             string focus = "";
-            if (IsActive) focus = "►";
+            if (IsActive && FocusNumber == index) focus = "►";
             int length = typeName.Length + amount.Length + focus.Length + 2;
 
             return focus + typeName + $": {amount}" + new string(' ', MaxWidth - length);
+        }
+
+        private void OnUpArrowPressed()
+        {
+            FocusNumber--;
+            if (FocusNumber < 1)
+                FocusNumber = MaxDamageTypes;
+        }
+
+        private void OnDownArrowPressed()
+        {
+            FocusNumber++;
+            if (FocusNumber > MaxDamageTypes)
+                FocusNumber = 1;
         }
     }
 }

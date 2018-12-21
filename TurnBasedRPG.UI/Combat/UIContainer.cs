@@ -69,6 +69,7 @@ namespace TurnBasedRPG.UI.Combat
             KeyPressed += _categoryPanel.OnKeyPressed;
             KeyPressed += _actionPanel.OnKeyPressed;
             KeyPressed += _formationPanel.OnKeyPressed;
+            KeyPressed += _characterPanel.OnKeyPressed;
         }
 
         /// <summary>
@@ -99,28 +100,33 @@ namespace TurnBasedRPG.UI.Combat
         public void OnKeyPressed(object sender, KeyPressedEventArgs args)
         {
             KeyPressed?.Invoke(sender, args);
-            switch (args.PressedKey.Key)
+            if (!args.Handled)
             {
-                case ConsoleKey.Tab:
-                    if (_actionDetailsPanel.IsActive && _canDisplayStatusPanel)
-                        ToggleStatusPanel();
-                    break;
-                case ConsoleKey.LeftArrow:
-                case ConsoleKey.RightArrow:
-                case ConsoleKey.UpArrow:
-                case ConsoleKey.DownArrow:
-                    _canDisplayStatusPanel = false;
-                    IsStatusPanelActive = false;
-                    break;
-                case ConsoleKey.Enter:
-                    EnterKeyPressed();
-                    break;
-                case ConsoleKey.Escape:
-                    EscapeKeyPressed();
-                    break;
-                default:
-                    break;
+                switch (args.PressedKey.Key)
+                {
+                    case ConsoleKey.Tab:
+                        if (_actionDetailsPanel.IsActive && _canDisplayStatusPanel)
+                            ToggleStatusPanel();
+                        break;
+                    case ConsoleKey.LeftArrow:
+                    case ConsoleKey.RightArrow:
+                    case ConsoleKey.UpArrow:
+                    case ConsoleKey.DownArrow:
+                        _canDisplayStatusPanel = false;
+                        IsStatusPanelActive = false;
+                        break;
+                    case ConsoleKey.Enter:
+                        EnterKeyPressed();
+                        break;
+                    case ConsoleKey.Escape:
+                        EscapeKeyPressed();
+                        break;
+                    default:
+                        break;
+                }
+                args.Handled = true;
             }
+            
             PrintUI();
         }
 
@@ -261,7 +267,8 @@ namespace TurnBasedRPG.UI.Combat
             // If the player is in the command panel
             if (!_uiStateTracker.IsInActionPanel
                 && !_uiStateTracker.IsInFormationPanel
-                && !_uiStateTracker.IsInCategoryPanel)
+                && !_uiStateTracker.IsInCategoryPanel
+                && !_uiStateTracker.IsInCharacterPanel)
             {
                 switch ((Commands)_uiStateTracker.CommandFocusNumber)
                 {
@@ -286,6 +293,7 @@ namespace TurnBasedRPG.UI.Combat
                     case Commands.Status:
                         _uiStateTracker.IsInFormationPanel = true;
                         _uiStateTracker.IsInCommandPanel = false;
+                        _uiStateTracker.IsInStatusCommand = true;
                         int? position = _uiCharacterManager.GetPositionOfCharacter(_uiStateTracker.ActiveCharacterId);
 
                         if (position == null) throw new Exception("Active character was not found in UICharacterManager.");
@@ -324,11 +332,12 @@ namespace TurnBasedRPG.UI.Combat
                     TargetPosition = target
                 });
             }
-            else if (_uiStateTracker.IsInStatusCommand)
+            else if (_uiStateTracker.IsInStatusCommand && !_uiStateTracker.IsInCharacterPanel)
             {
                 if (_uiCharacterManager.CharacterInPositionExists(_uiStateTracker.CurrentTargetPosition))
                 {
                     _uiStateTracker.IsInCharacterPanel = true;
+                    _uiStateTracker.IsInFormationPanel = false;
                 }
             }
             // If the player is in the action panel, switch to the formation panel
@@ -376,6 +385,11 @@ namespace TurnBasedRPG.UI.Combat
             {
                 _uiStateTracker.IsInFormationPanel = false;
                 _uiStateTracker.IsInActionPanel = true;
+            }
+            else if (_uiStateTracker.IsInCharacterPanel)
+            {
+                _uiStateTracker.IsInCharacterPanel = false;
+                _uiStateTracker.IsInFormationPanel = true;
             }
             else if (_uiStateTracker.IsInStatusCommand)
             {
@@ -442,9 +456,10 @@ namespace TurnBasedRPG.UI.Combat
             var detailsPanel = StartRenderDetailsPanels();
 
             IReadOnlyList<string> actionOrDetailsPanel;
-            if (_uiStateTracker.IsInActionPanel 
+            if ((_uiStateTracker.IsInActionPanel 
                 || _uiStateTracker.CommandFocusNumber == (int)Commands.Attack
                 || _uiStateTracker.IsInFormationPanel)
+                    && !_uiStateTracker.IsInStatusCommand)
             {
                 actionOrDetailsPanel = _actionPanel.Render();
             }

@@ -9,5 +9,6 @@ namespace TurnBasedRPG.UI.Combat.EventArgs
     public class KeyPressedEventArgs: System.EventArgs
     {
         public ConsoleKeyInfo PressedKey { get; set; }
+        public bool Handled { get; set; } = false;
     }
 }
