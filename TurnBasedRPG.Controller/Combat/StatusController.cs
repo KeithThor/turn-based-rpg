@@ -394,7 +394,12 @@ namespace TurnBasedRPG.Controller.Combat
             {
                 character.CurrentHealth = 0;
                 RemoveAllStatuses(character);
-                CharactersDied?.Invoke(this, new CharactersDiedEventArgs() { DyingCharacters = new List<Character>() { character } });
+                var characters = new List<Character>() { character };
+                CharactersDied?.Invoke(this, new CharactersDiedEventArgs()
+                {
+                    DyingCharacters = characters,
+                    LogMessage = CombatMessenger.GetCharactersDiedMessage(characters.Select(chr => chr.Name).ToList())
+                });
             }
         }
 
