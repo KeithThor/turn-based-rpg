@@ -42,6 +42,7 @@ namespace TurnBasedRPG
             Bind<IRepository<Spell>>().To<SpellRepository>();
             Bind<IRepository<StatusEffect>>().To<StatusEffectRepository>();
             Bind<IRepository<Weapon>>().To<WeaponRepository>();
+            Bind<IRepository<StatDescription>>().To<StatDescriptionRepository>();
 
             // AI
             Bind<ICombatAI>().To<BasicCombatAI>();
@@ -58,6 +59,7 @@ namespace TurnBasedRPG
             Bind<IFormationPanel>().To<FormationPanel>();
             Bind<IOffensiveSubPanel>().To<OffensiveSubPanel>();
             Bind<IStatsSubPanel>().To<StatsSubPanel>();
+            Bind<IStatsDetailsPanel>().To<StatsDetailsPanel>();
             Bind<IStatusEffectsPanel>().To<StatusEffectsPanel>();
             Bind<ITargetPanel>().To<TargetPanel>();
             Bind<ITurnOrderPanel>().To<TurnOrderPanel>();
@@ -65,6 +67,7 @@ namespace TurnBasedRPG
             Bind<IViewModelController>().To<ViewModelController>();
             Bind<IActionController>().To<ActionController>();
             Bind<IStatusController>().To<StatusController>();
+            Bind<IStatDescriptionController>().To<StatDescriptionController>();
 
             // Scopings
             Bind<GameUIConstants>().ToSelf().InSingletonScope();

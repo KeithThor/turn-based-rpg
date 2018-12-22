@@ -26,6 +26,7 @@ namespace TurnBasedRPG.UI.Combat
         private readonly ICombatLogPanel _combatLogPanel;
         private readonly ICharacterPanel _characterPanel;
         private readonly IStatusEffectsPanel _statusEffectsPanel;
+        private readonly IStatsDetailsPanel _statsDetailsPanel;
         private readonly ICategoryPanel _categoryPanel;
 
         public UIContainer(IFormationPanel formationPanel,
@@ -38,6 +39,7 @@ namespace TurnBasedRPG.UI.Combat
                            ICombatLogPanel combatLogPanel,
                            ICharacterPanel characterPanel,
                            IStatusEffectsPanel statusEffectsPanel,
+                           IStatsDetailsPanel statsDetailsPanel,
                            ICategoryPanel categoryPanel,
                            IUIStateTracker uiStateTracker,
                            IUICharacterManager uiCharacterManager)
@@ -52,6 +54,7 @@ namespace TurnBasedRPG.UI.Combat
             _combatLogPanel = combatLogPanel;
             _characterPanel = characterPanel;
             _statusEffectsPanel = statusEffectsPanel;
+            _statsDetailsPanel = statsDetailsPanel;
             _categoryPanel = categoryPanel;
             _characterPanel.MaxHeight = _formationPanel.MaxHeight;
             _uiStateTracker = uiStateTracker;
@@ -70,6 +73,9 @@ namespace TurnBasedRPG.UI.Combat
             KeyPressed += _actionPanel.OnKeyPressed;
             KeyPressed += _formationPanel.OnKeyPressed;
             KeyPressed += _characterPanel.OnKeyPressed;
+            _characterPanel.FocusChanged += _statsDetailsPanel.OnCharacterPanelFocusChanged;
+            _characterPanel.SubPanelActivenessChanged += _statsDetailsPanel.OnSubPanelActivenessChanged;
+            _characterPanel.SubPanelFocusChanged += _statsDetailsPanel.OnSubPanelFocusChanged;
         }
 
         /// <summary>
@@ -514,6 +520,10 @@ namespace TurnBasedRPG.UI.Combat
                 }
                 
                 detailsPanel = _actionDetailsPanel.Render();
+            }
+            else if (_uiStateTracker.IsInCharacterPanel)
+            {
+                detailsPanel = _statsDetailsPanel.Render();
             }
             else
             {

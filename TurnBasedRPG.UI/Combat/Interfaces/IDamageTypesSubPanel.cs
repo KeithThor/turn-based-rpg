@@ -23,6 +23,11 @@ namespace TurnBasedRPG.UI.Combat.Interfaces
         int MaxHeight { get; set; }
 
         /// <summary>
+        /// Event called whenever the focus changes on this panel.
+        /// </summary>
+        event EventHandler<FocusChangedEventArgs> FocusChanged;
+
+        /// <summary>
         /// Renders the panel using the amount of elemental stats provided.
         /// </summary>
         /// <param name="damageTypes">The amount of elemental stats a character or item possesses.</param>

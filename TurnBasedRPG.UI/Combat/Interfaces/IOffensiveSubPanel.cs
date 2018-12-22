@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TurnBasedRPG.Shared.Interfaces;
 using TurnBasedRPG.UI.Combat.EventArgs;
 
@@ -13,6 +14,11 @@ namespace TurnBasedRPG.UI.Combat.Interfaces
         bool IsActive { get; set; }
         int MaxHeight { get; set; }
         int MaxWidth { get; set; }
+
+        /// <summary>
+        /// Event called whenever the focus changes on this panel.
+        /// </summary>
+        event EventHandler<FocusChangedEventArgs> FocusChanged;
 
         /// <summary>
         /// Handles key pressed events.

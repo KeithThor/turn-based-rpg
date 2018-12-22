@@ -69,8 +69,10 @@
     <Compile Include="EventArgs\CombatLoggableEventArgs.cs" />
     <Compile Include="EventArgs\StatusEffectAppliedEventArgs.cs" />
     <Compile Include="Interfaces\IViewModelController.cs" />
+    <Compile Include="Interfaces\IStatDescriptionController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Combat\StatusController.cs" />
+    <Compile Include="StatDescriptionController.cs" />
     <Compile Include="ViewModelController.cs" />
   </ItemGroup>
   <ItemGroup>

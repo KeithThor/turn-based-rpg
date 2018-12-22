@@ -41,9 +41,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Combat\EventArgs\ActionChangedEventArgs.cs" />
+    <Compile Include="Combat\EventArgs\ActivenessChangedEventArgs.cs" />
     <Compile Include="Combat\EventArgs\ActivePanelChangedEventArgs.cs" />
     <Compile Include="Combat\EventArgs\CategoryChangedEventArgs.cs" />
     <Compile Include="Combat\EventArgs\CommandFocusChangedEventArgs.cs" />
+    <Compile Include="Combat\EventArgs\FocusChangedEventArgs.cs" />
     <Compile Include="Combat\Interfaces\IUIStateTracker.cs" />
     <Compile Include="Combat\Interfaces\IActionDetailsPanel.cs" />
     <Compile Include="Combat\Interfaces\IActionPanel.cs" />
@@ -65,6 +67,8 @@
     <Compile Include="Combat\Panels\DamageTypesSubPanel.cs" />
     <Compile Include="Combat\Panels\CategoryDetailsPanel.cs" />
     <Compile Include="Combat\Panels\CombatLogPanel.cs" />
+    <Compile Include="Combat\Interfaces\IStatsDetailsPanel.cs" />
+    <Compile Include="Combat\Panels\StatsDetailsPanel.cs" />
     <Compile Include="Combat\UIStateTracker.cs" />
     <Compile Include="Combat\Panels\CharacterPanel.cs" />
     <Compile Include="Combat\EventArgs\ActionSelectedEventArgs.cs" />

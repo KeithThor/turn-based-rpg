@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TurnBasedRPG.UI.Combat.EventArgs;
 
 namespace TurnBasedRPG.UI.Combat.Interfaces
@@ -12,6 +8,24 @@ namespace TurnBasedRPG.UI.Combat.Interfaces
     /// </summary>
     public interface ICharacterPanel : IReceiveInputPanel
     {
+        /// <summary>
+        /// Event called whenever the player presses a key.
+        /// </summary>
         event EventHandler<KeyPressedEventArgs> KeyPressed;
+
+        /// <summary>
+        /// Event called whenever the Focus for this panel is changed.
+        /// </summary>
+        event EventHandler<FocusChangedEventArgs> FocusChanged;
+
+        /// <summary>
+        /// Event called whenever the Focus for one of this panel's subpanels is changed.
+        /// </summary>
+        event EventHandler<FocusChangedEventArgs> SubPanelFocusChanged;
+
+        /// <summary>
+        /// Event called whenever a subpanel has it's IsActive property toggled.
+        /// </summary>
+        event EventHandler<ActivenessChangedEventArgs> SubPanelActivenessChanged;
     }
 }

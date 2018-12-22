@@ -52,6 +52,7 @@
     <Compile Include="Entities\Item.cs" />
     <Compile Include="Entities\Skill.cs" />
     <Compile Include="Entities\Spell.cs" />
+    <Compile Include="Entities\StatDescription.cs" />
     <Compile Include="Entities\StatusEffect.cs" />
     <Compile Include="Entities\Weapon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Repository\Interfaces\IRepository.cs" />
     <Compile Include="Repository\ItemRepository.cs" />
     <Compile Include="Repository\SpellRepository.cs" />
+    <Compile Include="Repository\StatDescriptionRepository.cs" />
     <Compile Include="Repository\StatusEffectRepository.cs" />
     <Compile Include="Repository\WeaponRepository.cs" />
   </ItemGroup>

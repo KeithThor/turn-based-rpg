@@ -90,6 +90,12 @@ namespace TurnBasedRPG.UI.Combat.Panels
             KeyPressed += _armorSubPanel.OnKeyPressed;
             KeyPressed += _damagePercentSubPanel.OnKeyPressed;
             KeyPressed += _resistanceSubPanel.OnKeyPressed;
+            _statsSubPanel.FocusChanged += OnSubPanelFocusChanged;
+            _offensiveSubPanel.FocusChanged += OnSubPanelFocusChanged;
+            _damageSubPanel.FocusChanged += OnSubPanelFocusChanged;
+            _armorSubPanel.FocusChanged += OnSubPanelFocusChanged;
+            _damagePercentSubPanel.FocusChanged += OnSubPanelFocusChanged;
+            _resistanceSubPanel.FocusChanged += OnSubPanelFocusChanged;
         }
 
         private struct CachedCharacter
@@ -102,7 +108,30 @@ namespace TurnBasedRPG.UI.Combat.Panels
         private CachedCharacter _cachedCharacter;
         private IReadOnlyList<string> _cachedRender;
 
+        /// <summary>
+        /// Event called whenever a key is pressed by the player.
+        /// </summary>
         public event EventHandler<KeyPressedEventArgs> KeyPressed;
+
+        /// <summary>
+        /// Event called whenever the Focus for this panel is changed.
+        /// </summary>
+        public event EventHandler<FocusChangedEventArgs> FocusChanged;
+
+        /// <summary>
+        /// Event called whenever the Focus for one of this panel's subpanels is changed.
+        /// </summary>
+        public event EventHandler<FocusChangedEventArgs> SubPanelFocusChanged;
+
+        /// <summary>
+        /// Event called whenever a subpanel has it's IsActive property toggled.
+        /// </summary>
+        public event EventHandler<ActivenessChangedEventArgs> SubPanelActivenessChanged;
+
+        private void OnSubPanelFocusChanged(object sender, FocusChangedEventArgs args)
+        {
+            SubPanelFocusChanged?.Invoke(sender, args);
+        }
 
         /// <summary>
         /// Returns a details panel injected with the data from a character.
@@ -422,6 +451,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
             if (FocusNumber % 2 == 0 && !IsSubPanelActive)
             {
                 FocusNumber--;
+                FocusChanged?.Invoke(this, new FocusChangedEventArgs() { NewFocus = FocusNumber });
             }
         }
 
@@ -430,6 +460,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
             if (FocusNumber % 2 == 1 && !IsSubPanelActive)
             {
                 FocusNumber++;
+                FocusChanged?.Invoke(this, new FocusChangedEventArgs() { NewFocus = FocusNumber });
             }
         }
 
@@ -438,6 +469,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
             if (FocusNumber > 2 && !IsSubPanelActive)
             {
                 FocusNumber -= 2;
+                FocusChanged?.Invoke(this, new FocusChangedEventArgs() { NewFocus = FocusNumber });
             }
         }
 
@@ -446,6 +478,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
             if (FocusNumber < 5 && !IsSubPanelActive)
             {
                 FocusNumber += 2;
+                FocusChanged?.Invoke(this, new FocusChangedEventArgs() { NewFocus = FocusNumber });
             }
         }
 
@@ -477,6 +510,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
                     default:
                         throw new Exception("Focus number not within accepted range in CharacterPanel!");
                 }
+                SubPanelActivenessChanged?.Invoke(this, new ActivenessChangedEventArgs() { IsActive = IsSubPanelActive });
             }
         }
 
@@ -506,6 +540,7 @@ namespace TurnBasedRPG.UI.Combat.Panels
                 default:
                     throw new Exception("Focus number not within accepted range in CharacterPanel!");
             }
+            SubPanelActivenessChanged?.Invoke(this, new ActivenessChangedEventArgs() { IsActive = IsSubPanelActive });
         }
     }
 }

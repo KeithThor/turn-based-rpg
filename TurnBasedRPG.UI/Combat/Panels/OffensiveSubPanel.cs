@@ -24,6 +24,11 @@ namespace TurnBasedRPG.UI.Combat.Panels
         }
 
         /// <summary>
+        /// Event called whenever the focus changes on this panel.
+        /// </summary>
+        public event EventHandler<FocusChangedEventArgs> FocusChanged;
+
+        /// <summary>
         /// Handles key press events if this sub panel is active.
         /// </summary>
         /// <param name="sender"></param>
@@ -124,6 +129,8 @@ namespace TurnBasedRPG.UI.Combat.Panels
             FocusNumber--;
             if (FocusNumber < 1)
                 FocusNumber = MaxOffensiveStatTypes;
+
+            FocusChanged?.Invoke(this, new FocusChangedEventArgs() { NewFocus = FocusNumber });
         }
 
         private void OnDownArrowPressed()
@@ -131,6 +138,8 @@ namespace TurnBasedRPG.UI.Combat.Panels
             FocusNumber++;
             if (FocusNumber > MaxOffensiveStatTypes)
                 FocusNumber = 1;
+
+            FocusChanged?.Invoke(this, new FocusChangedEventArgs() { NewFocus = FocusNumber });
         }
     }
 }
