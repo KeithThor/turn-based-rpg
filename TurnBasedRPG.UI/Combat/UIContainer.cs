@@ -108,6 +108,7 @@ namespace TurnBasedRPG.UI.Combat
             KeyPressed?.Invoke(sender, args);
             if (!args.Handled)
             {
+                args.Handled = true;
                 switch (args.PressedKey.Key)
                 {
                     case ConsoleKey.Tab:
@@ -128,12 +129,13 @@ namespace TurnBasedRPG.UI.Combat
                         EscapeKeyPressed();
                         break;
                     default:
+                        args.Handled = false;
                         break;
                 }
-                args.Handled = true;
             }
             
-            PrintUI();
+            if (args.Handled)
+                PrintUI();
         }
 
         /// <summary>
@@ -391,6 +393,7 @@ namespace TurnBasedRPG.UI.Combat
             {
                 _uiStateTracker.IsInFormationPanel = false;
                 _uiStateTracker.IsInActionPanel = true;
+                _uiStateTracker.CurrentTargetPositions = new List<int>();
             }
             else if (_uiStateTracker.IsInCharacterPanel)
             {
