@@ -162,7 +162,7 @@ namespace TurnBasedRPG.UI.Combat
             get
             {
                 if (!_characterDefaults.ContainsKey(ActiveCharacterId)) return 0;
-                return _characterDefaults[ActiveCharacterId].ActiveCategories[0].Count();
+                return _characterDefaults[ActiveCharacterId].ActiveCategories.Count();
             }
         }
 
