@@ -93,6 +93,7 @@
     <Compile Include="Combat\Panels\ActionPanel.cs" />
     <Compile Include="Combat\Panels\TargetPanel.cs" />
     <Compile Include="Combat\Panels\TurnOrderPanel.cs" />
+    <Compile Include="ScreenBuffer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TurnBasedRPG.Controller\TurnBasedRPG.Controller.csproj">

@@ -22,6 +22,7 @@ namespace TurnBasedRPG.UI.Combat
         private readonly IActionDetailsPanel _actionDetailsPanel;
         private readonly IUIStateTracker _uiStateTracker;
         private readonly IUICharacterManager _uiCharacterManager;
+        private readonly ScreenBuffer _screenBuffer;
         private readonly ICategoryDetailsPanel _categoryDetailsPanel;
         private readonly ICombatLogPanel _combatLogPanel;
         private readonly ICharacterPanel _characterPanel;
@@ -42,7 +43,8 @@ namespace TurnBasedRPG.UI.Combat
                            IStatsDetailsPanel statsDetailsPanel,
                            ICategoryPanel categoryPanel,
                            IUIStateTracker uiStateTracker,
-                           IUICharacterManager uiCharacterManager)
+                           IUICharacterManager uiCharacterManager,
+                           ScreenBuffer screenBuffer)
         {
             _formationPanel = formationPanel;
             _targetPanel = targetPanel;
@@ -59,7 +61,7 @@ namespace TurnBasedRPG.UI.Combat
             _characterPanel.MaxHeight = _formationPanel.MaxHeight;
             _uiStateTracker = uiStateTracker;
             _uiCharacterManager = uiCharacterManager;
-
+            _screenBuffer = screenBuffer;
             _commandPanel.IsActive = true;
 
             BindEvents();
@@ -195,10 +197,10 @@ namespace TurnBasedRPG.UI.Combat
         /// </summary>
         public void PrintUI()
         {
-            Console.Clear();
             PrintTargetAndTurnOrder();
             PrintFormationsAndCharacterPanel();
             PrintUserPanels();
+            _screenBuffer.DrawScreen();
         }
 
         /// <summary>
@@ -434,7 +436,7 @@ namespace TurnBasedRPG.UI.Combat
 
             for (int i = 0; i < formations.Count(); i++)
             {
-                Console.WriteLine(formations[i] + characterPanel[i]);
+                _screenBuffer.AddToBuffer(formations[i] + characterPanel[i]);
             }
         }
 
@@ -451,9 +453,9 @@ namespace TurnBasedRPG.UI.Combat
 
             for (int i = 0; i < targetPanel.Count; i++)
             {
-                Console.WriteLine(targetPanel[i] + new string(' ', spaces) + turnOrderUI[i]);
+                _screenBuffer.AddToBuffer(targetPanel[i] + new string(' ', spaces) + turnOrderUI[i]);
             }
-            Console.WriteLine(new string(' ', spaces + _targetPanel.MaxWidth) + turnOrderUI[turnOrderUI.Count - 1]);
+            _screenBuffer.AddToBuffer(new string(' ', spaces + _targetPanel.MaxWidth) + turnOrderUI[turnOrderUI.Count - 1]);
         }
 
         /// <summary>
@@ -481,7 +483,7 @@ namespace TurnBasedRPG.UI.Combat
 
             for (int i = 0; i < commandPanel.Count; i++)
             {
-                Console.WriteLine(commandPanel[i] + actionOrDetailsPanel[i] + detailsPanel[i] + combatLogPanel[i]);
+                _screenBuffer.AddToBuffer(commandPanel[i] + actionOrDetailsPanel[i] + detailsPanel[i] + combatLogPanel[i]);
             }
         }
 
