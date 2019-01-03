@@ -228,28 +228,40 @@ namespace TurnBasedRPG.Controller.Combat
             {
                 case Commands.Attack:
                     action = DisplayManager.GetActionsFromCategory<Attack>(commandType, category)[index];
-                    targets = CombatTargeter.GetTranslatedTargetPositions(action.TargetPositions,
+                    isInvalidAction = !IsValidTarget(action, targetPosition);
+                    if (!isInvalidAction)
+                    {
+                        targets = CombatTargeter.GetTranslatedTargetPositions(action.TargetPositions,
                                                                           action.CenterOfTargetsPosition,
                                                                           action.CanSwitchTargetPosition,
                                                                           targetPosition);
-                    _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], action, targets);
+                        _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], action, targets);
+                    }
                     break;
                 case Commands.Spells:
                     action = DisplayManager.GetActionsFromCategory<Spell>(commandType, category)[index];
-                    targets = CombatTargeter.GetTranslatedTargetPositions(action.TargetPositions,
+                    isInvalidAction = !IsValidTarget(action, targetPosition);
+                    if (!isInvalidAction)
+                    {
+                        targets = CombatTargeter.GetTranslatedTargetPositions(action.TargetPositions,
                                                                           action.CenterOfTargetsPosition,
                                                                           action.CanSwitchTargetPosition,
                                                                           targetPosition);
-                    _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], action, targets);
+                        _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], action, targets);
+                    }
                     break;
                 case Commands.Items:
                     var item = DisplayManager.GetConsumablesFromCategory(category)[index];
-                    targets = CombatTargeter.GetTranslatedTargetPositions(item.ItemSpell.TargetPositions,
+                    isInvalidAction = !IsValidTarget(item.ItemSpell, targetPosition);
+                    if (!isInvalidAction)
+                    {
+                        targets = CombatTargeter.GetTranslatedTargetPositions(item.ItemSpell.TargetPositions,
                                                                           item.ItemSpell.CenterOfTargetsPosition,
                                                                           item.ItemSpell.CanSwitchTargetPosition,
                                                                           targetPosition);
-                    _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], item.ItemSpell, targets);
-                    _consumablesHandler.UseConsumable(item, CombatStateHandler.CurrentRoundOrder[0]);
+                        _actionController.StartAction(CombatStateHandler.CurrentRoundOrder[0], item.ItemSpell, targets);
+                        _consumablesHandler.UseConsumable(item, CombatStateHandler.CurrentRoundOrder[0]);
+                    }
                     break;
                 case Commands.Wait:
                     if (CombatStateHandler.CurrentRoundOrder.Count() == 1)
@@ -270,6 +282,57 @@ namespace TurnBasedRPG.Controller.Combat
             
             if (!isInvalidAction)
                 EndTurn();
+        }
+
+        /// <summary>
+        /// Checks and returns whether or not an action can be used at a target position.
+        /// </summary>
+        /// <param name="action">The action used by a character.</param>
+        /// <param name="targetPosition">The center target position of the action being used.</param>
+        /// <returns>Whether or not an action can be used at a target position.</returns>
+        private bool IsValidTarget(ActionBase action, int targetPosition)
+        {
+            if (!action.CanSwitchTargetPosition && action.CenterOfTargetsPosition != targetPosition)
+                return false;
+            if (action.CanResurrect)
+            {
+                if (!action.CanTargetThroughUnits && targetPosition > 10)
+                {
+                    // If target position is last column, check both the middle and front column for a target
+                    if (targetPosition % 3 == 0 && CombatStateHandler.IsPositionOccupied(targetPosition - 2))
+                    {
+                        return false;
+                    }
+                    if (targetPosition % 3 != 1 && CombatStateHandler.IsPositionOccupied(targetPosition - 1))
+                        return false;
+                }
+                var targets = CombatTargeter.GetTranslatedTargetPositions(action.TargetPositions,
+                                                                          action.CenterOfTargetsPosition,
+                                                                          action.CanSwitchTargetPosition,
+                                                                          targetPosition);
+
+                return CombatStateHandler.AllCharacters.Where(chr => chr.CurrentHealth <= 0 && targets.Contains(chr.Position)).Any();
+            }
+            else
+            {
+                if (!action.CanTargetThroughUnits && targetPosition > 10)
+                {
+                    // If target position is last column, check both the middle and front column for a target
+                    if (targetPosition % 3 == 0 && CombatStateHandler.IsPositionOccupied(targetPosition - 2, false))
+                    {
+                        return false;
+                    }
+                    if (targetPosition % 3 != 1 && CombatStateHandler.IsPositionOccupied(targetPosition - 1, false))
+                        return false;
+                }
+
+                var targets = CombatTargeter.GetTranslatedTargetPositions(action.TargetPositions,
+                                                                          action.CenterOfTargetsPosition,
+                                                                          action.CanSwitchTargetPosition,
+                                                                          targetPosition);
+
+                return CombatStateHandler.AllCharacters.Where(chr => chr.CurrentHealth > 0 && targets.Contains(chr.Position)).Any();
+            }
         }
     }
 }

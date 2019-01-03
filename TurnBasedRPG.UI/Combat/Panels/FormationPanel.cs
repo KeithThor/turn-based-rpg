@@ -613,24 +613,26 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// <returns>Returns true if movement should be blocked.</returns>
         private bool IsUpArrowBlocked()
         {
-            bool isBlocked = !_defaultsHandler.ActiveAction.CanTargetThroughUnits;
+            if (_defaultsHandler.ActiveAction.CanTargetThroughUnits)
+                return false;
+            if (!_defaultsHandler.ActiveAction.CanSwitchTargetPosition)
+                return true;
             // Action can only be blocked when not on the player's side of the field and not in the enemy's first column
-            isBlocked = isBlocked && _defaultsHandler.CurrentTargetPosition % 3 != 1 && _defaultsHandler.CurrentTargetPosition >= 10;
-            // If the target position is in the 3rd column, check if the 1st or 2nd column of the row is occupied, if so action is blocked
-            if (_defaultsHandler.CurrentTargetPosition % 3 == 0 && isBlocked)
+            if (_defaultsHandler.CurrentTargetPosition % 3 != 1 && _defaultsHandler.CurrentTargetPosition >= 10)
             {
-                if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition - 4, false))
+                // If the target position is in the 3rd column, check if the 1st or 2nd column of the row is occupied, if so action is blocked
+                if (_defaultsHandler.CurrentTargetPosition % 3 == 0
+                    && _uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition - 5, false))
+                {
                     return true;
-                if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition - 5, false))
+                }
+                else if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition - 4, false))
                     return true;
+                else
+                    return false;
             }
             else
-            {
-                // Action can only be blocked if there is a character in front of the spot the player is trying to reach
-                isBlocked = isBlocked
-                            && _uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition - 4, false);
-            }
-            return isBlocked;
+                return false;
         }
 
         /// <summary>
@@ -639,29 +641,28 @@ namespace TurnBasedRPG.UI.Combat.Panels
         /// <returns></returns>
         private bool IsDownArrowBlocked()
         {
-            bool isBlocked = !_defaultsHandler.ActiveAction.CanTargetThroughUnits;
+            if (_defaultsHandler.ActiveAction.CanTargetThroughUnits)
+                return false;
+            if (!_defaultsHandler.ActiveAction.CanSwitchTargetPosition)
+                return true;
             // Action can only be blocked when not on the player's side of the field and not in the enemy's first column
-            isBlocked = isBlocked && _defaultsHandler.CurrentTargetPosition % 3 != 1 && _defaultsHandler.CurrentTargetPosition >= 10;
-            // If target position is on the last column, check for
-            if (_defaultsHandler.CurrentTargetPosition % 3 == 0 && isBlocked)
+            if (_defaultsHandler.CurrentTargetPosition % 3 != 1 && _defaultsHandler.CurrentTargetPosition >= 10)
             {
-                if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition + 2, false))
-                    isBlocked = false;
-
-                if (!isBlocked)
+                // If target position is on the last column, check for first column in next row
+                if (_defaultsHandler.CurrentTargetPosition % 3 == 0
+                    && _uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition + 1, false))
                 {
-                    if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition + 1, false))
-                        isBlocked = false;
+                    return true;
                 }
+                else if (_uiCharacterManager.CharacterInPositionExists(_defaultsHandler.CurrentTargetPosition + 2, false))
+                    return true;
+                else
+                    return false;
             }
             else
             {
-                var character = _uiCharacterManager.GetCharacterFromPosition(_defaultsHandler.CurrentTargetPosition + 2);
-                // Action can only be blocked if there is a character in front of the spot the player is trying to reach
-                isBlocked = isBlocked && !(character == null || character.CurrentHealth == 0);
+                return false;
             }
-
-            return isBlocked;
         }
 
         /// <summary>
