@@ -48,8 +48,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Combat\ActionPanelTest.cs" />
-    <Compile Include="Combat\FormationPanelTest.cs" />
+    <Compile Include="Combat\Mocks\MockUIStateTracker.cs" />
+    <Compile Include="Combat\Panels\CommandPanelTest.cs" />
+    <Compile Include="Combat\Panels\FormationPanelTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

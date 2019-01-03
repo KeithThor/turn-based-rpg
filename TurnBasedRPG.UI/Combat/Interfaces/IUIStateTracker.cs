@@ -4,6 +4,17 @@ using TurnBasedRPG.Shared.Interfaces;
 namespace TurnBasedRPG.UI.Combat.Interfaces
 {
     /// <summary>
+    /// Stores information about the currently cached action.
+    /// </summary>
+    public class ActionStore
+    {
+        public IReadOnlyList<int> TargetPositions { get; set; }
+        public int CenterOfTargets { get; set; }
+        public bool CanSwitchTargetPosition { get; set; }
+        public bool CanTargetThroughUnits { get; set; }
+    }
+
+    /// <summary>
     /// Class that keeps track of the state of the UI.
     /// </summary>
     public interface IUIStateTracker
@@ -36,7 +47,7 @@ namespace TurnBasedRPG.UI.Combat.Interfaces
         /// <summary>
         /// Contains data about the currently selected action.
         /// </summary>
-        UIStateTracker.ActionStore ActiveAction { get; set; }
+        ActionStore ActiveAction { get; set; }
 
         /// <summary>
         /// The name of the currently active category.

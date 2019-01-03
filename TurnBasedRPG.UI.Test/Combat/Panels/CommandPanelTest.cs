@@ -1,8 +1,7 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TurnBasedRPG.Shared.Enums;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using TurnBasedRPG.UI.Combat.Panels;
+using TurnBasedRPG.UI.Test.Combat.Mocks;
 
 namespace TurnBasedRPG.UI.Test.Combat
 {
@@ -12,8 +11,12 @@ namespace TurnBasedRPG.UI.Test.Combat
         [TestMethod]
         public void Render_WithAttackFocus_RendersCorrectly()
         {
-            int focus = (int)Commands.Attack;
-            CommandPanel actionPanel = new CommandPanel();
+            var mockUIStateTracker = new MockUIStateTracker
+            {
+                CommandFocusNumber = 1
+            };
+            var commandPanel = new CommandPanel(mockUIStateTracker);
+
             List<string> expected = new List<string>()
             {
                 "╔════════════════",
@@ -34,7 +37,7 @@ namespace TurnBasedRPG.UI.Test.Combat
                 "╚════════════════"
             };
 
-            var actual = actionPanel.Render(focus);
+            var actual = commandPanel.Render();
             var actualAsList = new List<string>(actual);
 
             CollectionAssert.AreEqual(expected, actualAsList);
@@ -43,8 +46,10 @@ namespace TurnBasedRPG.UI.Test.Combat
         [TestMethod]
         public void Render_WithSkillsFocus_RendersCorrectly()
         {
-            int focus = (int)Commands.Skills;
-            CommandPanel actionPanel = new CommandPanel();
+            var mockUIStateTracker = new MockUIStateTracker();
+            var commandPanel = new CommandPanel(mockUIStateTracker);
+            commandPanel.FocusNumber = 3;
+
             List<string> expected = new List<string>()
             {
                 "╔════════════════",
@@ -65,7 +70,7 @@ namespace TurnBasedRPG.UI.Test.Combat
                 "╚════════════════"
             };
 
-            var actual = actionPanel.Render(focus);
+            var actual = commandPanel.Render();
             var actualAsList = new List<string>(actual);
 
             CollectionAssert.AreEqual(expected, actualAsList);
@@ -74,8 +79,11 @@ namespace TurnBasedRPG.UI.Test.Combat
         [TestMethod]
         public void Render_WithAttackFocusAndDifferentWidth_RendersCorrectly()
         {
-            int focus = (int)Commands.Attack;
-            CommandPanel actionPanel = new CommandPanel
+            var mockUIStateTracker = new MockUIStateTracker
+            {
+                CommandFocusNumber = 1
+            };
+            var commandPanel = new CommandPanel(mockUIStateTracker)
             {
                 MaxWidth = 20
             };
@@ -99,7 +107,7 @@ namespace TurnBasedRPG.UI.Test.Combat
                 "╚═══════════════════"
             };
 
-            var actual = actionPanel.Render(focus);
+            var actual = commandPanel.Render();
             var actualAsList = new List<string>(actual);
 
             CollectionAssert.AreEqual(expected, actualAsList);

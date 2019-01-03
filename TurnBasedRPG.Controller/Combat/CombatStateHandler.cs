@@ -60,24 +60,18 @@ namespace TurnBasedRPG.Controller.Combat
             // Create debug data
             PlayerCharacters = new List<Character>()
             {
-                _characterFactory.Create(1),
-                _characterFactory.Create(2)
+                _characterFactory.Create(1, 3),
+                _characterFactory.Create(2, 9)
             };
-            PlayerCharacters[0].Position = 3;
-            PlayerCharacters[1].Position = 9;
             EnemyCharacters = new List<Character>()
             {
-                _characterFactory.Create(4),
-                _characterFactory.Create(3),
-                _characterFactory.Create(3),
-                _characterFactory.Create(3),
-                _characterFactory.Create(3),
+                _characterFactory.Create(4, 14),
+                _characterFactory.Create(3, 13),
+                _characterFactory.Create(3, 15),
+                _characterFactory.Create(3, 12),
+                _characterFactory.Create(3, 17),
             };
-            EnemyCharacters[0].Position = 14;
-            EnemyCharacters[1].Position = 13;
-            EnemyCharacters[2].Position = 15;
-            EnemyCharacters[3].Position = 12;
-            EnemyCharacters[4].Position = 17;
+
             AllCharacters = new List<Character>(PlayerCharacters);
             AllCharacters.AddRange(EnemyCharacters);
 

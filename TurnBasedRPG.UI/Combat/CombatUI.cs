@@ -146,7 +146,7 @@ namespace TurnBasedRPG.UI.Combat
                                                                      args.CategoryName,
                                                                      args.ActionFocusNumber - 1);
 
-            _defaultsHandler.ActiveAction = new UIStateTracker.ActionStore()
+            _defaultsHandler.ActiveAction = new ActionStore()
             {
                 TargetPositions = activeAction.GetActionTargets(),
                 CenterOfTargets = activeAction.GetCenterOfTargetsPosition(),

@@ -77,17 +77,6 @@ namespace TurnBasedRPG.UI.Combat
             }
         }
 
-        /// <summary>
-        /// Stores information about the currently cached action.
-        /// </summary>
-        public class ActionStore
-        {
-            public IReadOnlyList<int> TargetPositions { get; set; }
-            public int CenterOfTargets { get; set; }
-            public bool CanSwitchTargetPosition { get; set; }
-            public bool CanTargetThroughUnits { get; set; }
-        }
-
         // Keeps default settings for each individual character player so that on consecutive turns, a character retains its last used action
         private Dictionary<int, PlayerCharacterDefaults> _characterDefaults;
 

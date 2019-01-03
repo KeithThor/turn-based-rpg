@@ -34,17 +34,19 @@ namespace TurnBasedRPG.Controller
         }
 
         /// <summary>
-        /// Creates a new character using the character template of the provided Id.
+        /// Creates a new character and occupy a position using the character template of the provided Id.
         /// </summary>
         /// <param name="characterId">Id of the character template to use to create this character.</param>
+        /// <param name="position">The new position of the character to create.</param>
         /// <returns></returns>
-        public Character Create(int characterId)
+        public Character Create(int characterId, int position)
         {
             var character = new Character();
             var cBase = _characterRepo.GetAll().First(chr => chr.Id == characterId);
 
             character.Id = _currentId;
             _currentId++;
+            character.Position = position;
             character.BaseId = cBase.Id;
             character.Name = cBase.Name;
             character.Symbol = cBase.Symbol;
